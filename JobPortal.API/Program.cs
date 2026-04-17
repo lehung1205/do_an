@@ -1,4 +1,6 @@
 using JobPortal.API.Data;
+using JobPortal.API.Repositories;
+using JobPortal.API.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,7 +10,6 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         builder.Configuration.GetConnectionString("DefaultConnection"),
         ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection"))
     ));
-
 // // Identity
 // builder.Services.AddIdentity<User, IdentityRole>()
 //     .AddEntityFrameworkStores<AppDbContext>()
@@ -42,9 +43,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 //         };
 //     });
 
-// // Services
-// builder.Services.AddScoped<IJobService, JobService>();
-// builder.Services.AddScoped<IJobRepository, JobRepository>();
+// Services
+builder.Services.AddScoped<IJobRepository, JobRepository>();
+builder.Services.AddScoped<IJobService, JobService>();
 // builder.Services.AddScoped<ChatBotService>();
 builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddSignalR();
@@ -70,6 +71,23 @@ var app = builder.Build();
 app.UseCors("AllowRazor");
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Seed data
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    context.Database.EnsureCreated();
+    if (!context.Jobs.Any())
+    {
+        context.Jobs.AddRange(
+            new JobPortal.API.Models.Job { Title = "Software Engineer", Company = "Google", Location = "Mountain View, CA", Salary = 150000, Description = "Full stack developer" },
+            new JobPortal.API.Models.Job { Title = "Data Scientist", Company = "Facebook", Location = "Menlo Park, CA", Salary = 160000, Description = "Machine learning expert" },
+            new JobPortal.API.Models.Job { Title = "Product Manager", Company = "Amazon", Location = "Seattle, WA", Salary = 140000, Description = "Product owner" }
+        );
+        context.SaveChanges();
+    }
+}
+
 app.MapControllers();
 // app.MapHub<ChatHub>("/hubs/chat");
 

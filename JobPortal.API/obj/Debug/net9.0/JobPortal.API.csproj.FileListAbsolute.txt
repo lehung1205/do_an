@@ -120,3 +120,4 @@ D:\ĐATN\JobPortal\JobPortal.API\obj\Debug\net9.0\refint\JobPortal.API.dll
 D:\ĐATN\JobPortal\JobPortal.API\obj\Debug\net9.0\JobPortal.API.pdb
 D:\ĐATN\JobPortal\JobPortal.API\obj\Debug\net9.0\JobPortal.API.genruntimeconfig.cache
 D:\ĐATN\JobPortal\JobPortal.API\obj\Debug\net9.0\ref\JobPortal.API.dll
+D:\ĐATN\JobPortal\JobPortal.API\obj\Debug\net9.0\JobPortal.API.sourcelink.json

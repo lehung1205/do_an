@@ -1,0 +1,16 @@
+@page
+@model IndexModel
+
+<h2>Danh sách việc làm</h2>
+
+@foreach (var job in Model.Jobs)
+{
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5>@job.Title</h5>
+            <p>@job.Company — @job.Location</p>
+            <a asp-page="/Jobs/Detail" asp-route-id="@job.Id"
+               class="btn btn-primary">Xem chi tiết</a>
+        </div>
+    </div>
+}

@@ -1,3 +1,5 @@
+using JobPortal.Web.Dtos;
+using JobPortal.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -5,15 +7,13 @@ namespace JobPortal.Web.Pages;
 
 public class IndexModel : PageModel
 {
-    private readonly ILogger<IndexModel> _logger;
+    private readonly ApiService _api;
+    public List<JobDto> Jobs { get; set; } = new();
 
-    public IndexModel(ILogger<IndexModel> logger)
+    public IndexModel(ApiService api) => _api = api;
+
+    public async Task OnGetAsync()
     {
-        _logger = logger;
-    }
-
-    public void OnGet()
-    {
-
+        Jobs = await _api.GetAsync<List<JobDto>>("/api/jobs") ?? new();
     }
 }

@@ -1,0 +1,77 @@
+# Build results
+bin/
+obj/
+out/
+
+# User-specific files
+*.user
+*.userosscache
+*.suo
+*.userprefs
+
+# Visual Studio
+.vs/
+.vscode/
+*.sln.docstates
+
+# Rider / JetBrains
+.idea/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# ASP.NET Core
+appsettings.Development.json
+appsettings.*.json
+!appsettings.json
+
+# Secrets
+secrets.json
+
+# EF Core migrations snapshot (optional)
+# Migrations/
+
+# NuGet
+*.nupkg
+*.snupkg
+packages/
+
+# Node (nếu có frontend thêm sau)
+node_modules/
+
+# Publish output
+publish/
+
+# Docker
+*.dockerignore
+
+# Coverage
+coverage/
+*.coverage
+*.coveragexml
+
+# Temp
+*.tmp
+*.temp
+
+# Database
+*.mdf
+*.ldf
+*.sqlite
+*.db
+
+# Logs folder
+logs/
+
+# Resharper
+_ReSharper*/
+*.DotSettings.user
+
+# Backup & cache
+*.bak
+*.cache
+*.swp

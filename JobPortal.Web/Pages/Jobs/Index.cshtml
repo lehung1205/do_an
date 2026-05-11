@@ -1,5 +1,5 @@
 @page
-@model IndexModel
+@model JobPortal.Web.Pages.Jobs.IndexModel
 
 <h2>Danh sách việc làm</h2>
 
@@ -7,9 +7,9 @@
 {
     <div class="card mb-3">
         <div class="card-body">
-            <h5>@job.Title</h5>
-            <p>@job.Company — @job.Location</p>
-            <a asp-page="/Jobs/Detail" asp-route-id="@job.Id"
+            <h5>@job.tieu_de</h5>
+            <p>@job.dia_diem — Mã NTD: @job.id_tuyen_dung</p>
+            <a asp-page="/Jobs/Detail" asp-route-id="@job.id_cong_viec"
                class="btn btn-primary">Xem chi tiết</a>
         </div>
     </div>

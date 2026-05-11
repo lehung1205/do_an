@@ -1,9 +1,16 @@
 namespace JobPortal.Web.Services;
 using System.Net.Http.Headers;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 public class ApiService
 {
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true,
+        PropertyNamingPolicy = null
+    };
+
     private readonly IHttpClientFactory _factory;
     private readonly IHttpContextAccessor _accessor;
 
@@ -36,17 +43,17 @@ public class ApiService
     {
         var res = await CreateClient().GetAsync(endpoint);
         if (!res.IsSuccessStatusCode) return default;
-        return await res.Content.ReadFromJsonAsync<T>();
+        return await res.Content.ReadFromJsonAsync<T>(JsonOptions);
     }
 
     public async Task<HttpResponseMessage> PostAsync<T>(string endpoint, T data)
     {
-        return await CreateClient().PostAsJsonAsync(endpoint, data);
+        return await CreateClient().PostAsJsonAsync(endpoint, data, JsonOptions);
     }
 
     public async Task<HttpResponseMessage> PutAsync<T>(string endpoint, T data)
     {
-        return await CreateClient().PutAsJsonAsync(endpoint, data);
+        return await CreateClient().PutAsJsonAsync(endpoint, data, JsonOptions);
     }
 
     public async Task<HttpResponseMessage> DeleteAsync(string endpoint)

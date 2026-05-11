@@ -4,9 +4,9 @@ namespace JobPortal.API.Services;
 
 public interface IJobService
 {
-    Task<IEnumerable<JobDto>> GetAllJobsAsync();
-    Task<JobDto?> GetJobByIdAsync(int id);
-    Task<JobDto> CreateJobAsync(JobDto jobDto);
-    Task UpdateJobAsync(int id, JobDto jobDto);
-    Task DeleteJobAsync(int id);
+    Task<IEnumerable<CongViecDto>> GetAllJobsAsync();
+    Task<CongViecDto?> GetJobByIdAsync(long id);
+    Task<CongViecDto> CreateJobAsync(CongViecDto jobDto);
+    Task UpdateJobAsync(long id, CongViecDto jobDto);
+    Task DeleteJobAsync(long id);
 }

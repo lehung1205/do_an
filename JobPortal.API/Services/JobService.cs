@@ -7,47 +7,45 @@ namespace JobPortal.API.Services;
 
 public class JobService : IJobService
 {
-    private readonly IJobRepository _jobRepository;
+    private readonly ICongViecRepository _repository;
     private readonly IMapper _mapper;
 
-    public JobService(IJobRepository jobRepository, IMapper mapper)
+    public JobService(ICongViecRepository repository, IMapper mapper)
     {
-        _jobRepository = jobRepository;
+        _repository = repository;
         _mapper = mapper;
     }
 
-    public async Task<IEnumerable<JobDto>> GetAllJobsAsync()
+    public async Task<IEnumerable<CongViecDto>> GetAllJobsAsync()
     {
-        var jobs = await _jobRepository.GetAllAsync();
-        return _mapper.Map<IEnumerable<JobDto>>(jobs);
+        var list = await _repository.GetAllAsync();
+        return _mapper.Map<IEnumerable<CongViecDto>>(list);
     }
 
-    public async Task<JobDto?> GetJobByIdAsync(int id)
+    public async Task<CongViecDto?> GetJobByIdAsync(long id)
     {
-        var job = await _jobRepository.GetByIdAsync(id);
-        return _mapper.Map<JobDto>(job);
+        var entity = await _repository.GetByIdAsync(id);
+        return _mapper.Map<CongViecDto>(entity);
     }
 
-    public async Task<JobDto> CreateJobAsync(JobDto jobDto)
+    public async Task<CongViecDto> CreateJobAsync(CongViecDto jobDto)
     {
-        var job = _mapper.Map<Job>(jobDto);
-        await _jobRepository.AddAsync(job);
-        return _mapper.Map<JobDto>(job);
+        var entity = _mapper.Map<CongViec>(jobDto);
+        await _repository.AddAsync(entity);
+        return _mapper.Map<CongViecDto>(entity);
     }
 
-    public async Task UpdateJobAsync(int id, JobDto jobDto)
+    public async Task UpdateJobAsync(long id, CongViecDto jobDto)
     {
-        var existingJob = await _jobRepository.GetByIdAsync(id);
-        if (existingJob != null)
-        {
-            _mapper.Map(jobDto, existingJob);
-            existingJob.Id = id; // Ensure ID doesn't change
-            await _jobRepository.UpdateAsync(existingJob);
-        }
+        var existing = await _repository.GetByIdAsync(id);
+        if (existing == null) return;
+        _mapper.Map(jobDto, existing);
+        existing.IdCongViec = id;
+        await _repository.UpdateAsync(existing);
     }
 
-    public async Task DeleteJobAsync(int id)
+    public async Task DeleteJobAsync(long id)
     {
-        await _jobRepository.DeleteAsync(id);
+        await _repository.DeleteAsync(id);
     }
 }

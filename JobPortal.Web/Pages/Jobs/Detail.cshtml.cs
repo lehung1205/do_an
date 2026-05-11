@@ -14,11 +14,11 @@ public class DetailModel : PageModel
         _api = api;
     }
 
-    public JobDto Job { get; set; } = null!;
+    public CongViecDto Job { get; set; } = null!;
 
-    public async Task<IActionResult> OnGetAsync(int id)
+    public async Task<IActionResult> OnGetAsync(long id)
     {
-        var job = await _api.GetAsync<JobDto>($"/api/jobs/{id}");
+        var job = await _api.GetAsync<CongViecDto>($"/api/jobs/{id}");
         if (job == null)
         {
             return NotFound();

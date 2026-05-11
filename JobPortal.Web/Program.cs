@@ -19,8 +19,6 @@ builder.Services.AddSession(options =>
 });
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ApiService>();
-builder.Services.AddRazorPages();
-
 
 var app = builder.Build();
 

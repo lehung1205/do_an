@@ -44,7 +44,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 //     });
 
 // Services
-builder.Services.AddScoped<IJobRepository, JobRepository>();
+builder.Services.AddScoped<ICongViecRepository, CongViecRepository>();
 builder.Services.AddScoped<IJobService, JobService>();
 // builder.Services.AddScoped<ChatBotService>();
 builder.Services.AddAutoMapper(typeof(Program));
@@ -60,7 +60,11 @@ builder.Services.AddCors(options =>
               .AllowCredentials()); // cần cho SignalR
 });
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(o =>
+    {
+        o.JsonSerializerOptions.PropertyNamingPolicy = null;
+    });
 builder.Services.AddEndpointsApiExplorer();
 // builder.Services.AddSwaggerGen();
 
@@ -72,18 +76,55 @@ app.UseCors("AllowRazor");
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Seed data
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    context.Database.EnsureCreated();
-    if (!context.Jobs.Any())
+    context.Database.Migrate();
+    if (!context.CongViecs.Any())
     {
-        context.Jobs.AddRange(
-            new JobPortal.API.Models.Job { Title = "Software Engineer", Company = "Google", Location = "Mountain View, CA", Salary = 150000, Description = "Full stack developer" },
-            new JobPortal.API.Models.Job { Title = "Data Scientist", Company = "Facebook", Location = "Menlo Park, CA", Salary = 160000, Description = "Machine learning expert" },
-            new JobPortal.API.Models.Job { Title = "Product Manager", Company = "Amazon", Location = "Seattle, WA", Salary = 140000, Description = "Product owner" }
-        );
+        var danhMuc = new JobPortal.API.Models.DanhMuc { Ten = "Công nghệ thông tin" };
+        context.DanhMucs.Add(danhMuc);
+        context.SaveChanges();
+
+        var ntd = new JobPortal.API.Models.NhaTuyenDung
+        {
+            Ten = "Công ty mẫu",
+            Email = "contact@mau.vn",
+            MatKhau = "changeme",
+            TrangThai = "hoat_dong",
+            SoLuotBaiDang = 10
+        };
+        context.NhaTuyenDungs.Add(ntd);
+        context.SaveChanges();
+
+        var now = DateTime.UtcNow;
+        context.CongViecs.AddRange(
+            new JobPortal.API.Models.CongViec
+            {
+                IdTuyenDung = ntd.IdTuyenDung,
+                IdDanhMuc = danhMuc.IdDanhMuc,
+                TieuDe = "Lập trình viên Backend",
+                MoTa = "Phát triển API, làm việc với .NET và MySQL.",
+                MucLuong = 25_000_000,
+                DiaDiem = "TP.HCM",
+                TrangThaiBaiDang = "dang_tuyen",
+                NgayBatDau = now,
+                NgayKetThuc = now.AddMonths(3),
+                NgayHetHan = now.AddMonths(2)
+            },
+            new JobPortal.API.Models.CongViec
+            {
+                IdTuyenDung = ntd.IdTuyenDung,
+                IdDanhMuc = danhMuc.IdDanhMuc,
+                TieuDe = "Kỹ sư dữ liệu",
+                MoTa = "Phân tích dữ liệu, xây dựng mô hình ML.",
+                MucLuong = 30_000_000,
+                DiaDiem = "Hà Nội",
+                TrangThaiBaiDang = "dang_tuyen",
+                NgayBatDau = now,
+                NgayKetThuc = now.AddMonths(3),
+                NgayHetHan = now.AddMonths(2)
+            });
         context.SaveChanges();
     }
 }

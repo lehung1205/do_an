@@ -1,7 +1,7 @@
-@page "{id:int}"
+@page "{id:long}"
 @model JobPortal.Web.Pages.Jobs.DetailModel
 @{
-    ViewData["Title"] = Model.Job.Title;
+    ViewData["Title"] = Model.Job.tieu_de;
 }
 
 <div class="container mt-5">
@@ -18,22 +18,22 @@
                 <div class="card-body p-4">
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div>
-                            <h1 class="h2 mb-1">@Model.Job.Title</h1>
-                            <p class="text-primary h5 mb-0">@Model.Job.Company</p>
+                            <h1 class="h2 mb-1">@Model.Job.tieu_de</h1>
+                            <p class="text-primary h5 mb-0">Nhà tuyển dụng #@Model.Job.id_tuyen_dung</p>
                         </div>
-                        <span class="badge bg-success p-2">Đang tuyển</span>
+                        <span class="badge bg-success p-2">@Model.Job.trang_thai_bai_dang</span>
                     </div>
 
                     <div class="d-flex flex-wrap gap-3 mb-4 text-muted">
-                        <span><i class="bi bi-geo-alt"></i> @Model.Job.Location</span>
-                        <span><i class="bi bi-currency-dollar"></i> @Model.Job.Salary.ToString("N0") VNĐ</span>
+                        <span><i class="bi bi-geo-alt"></i> @Model.Job.dia_diem</span>
+                        <span><i class="bi bi-currency-dollar"></i> @Model.Job.muc_luong.ToString("N0") VNĐ</span>
                     </div>
 
                     <hr />
 
                     <div class="job-description mt-4">
                         <h4 class="mb-3">Mô tả công việc</h4>
-                        <div style="white-space: pre-wrap;">@Model.Job.Description</div>
+                        <div style="white-space: pre-wrap;">@Model.Job.mo_ta</div>
                     </div>
 
                     <div class="mt-5">
@@ -48,9 +48,10 @@
                 <div class="card-body">
                     <h5 class="card-title mb-3">Thông tin tóm tắt</h5>
                     <ul class="list-unstyled mb-0">
-                        <li class="mb-2"><strong>Mức lương:</strong> @Model.Job.Salary.ToString("N0") VNĐ</li>
-                        <li class="mb-2"><strong>Công ty:</strong> @Model.Job.Company</li>
-                        <li class="mb-2"><strong>Địa điểm:</strong> @Model.Job.Location</li>
+                        <li class="mb-2"><strong>Mức lương:</strong> @Model.Job.muc_luong.ToString("N0") VNĐ</li>
+                        <li class="mb-2"><strong>Mã nhà tuyển dụng:</strong> @Model.Job.id_tuyen_dung</li>
+                        <li class="mb-2"><strong>Địa điểm:</strong> @Model.Job.dia_diem</li>
+                        <li class="mb-2"><strong>Hết hạn:</strong> @Model.Job.ngay_het_han.ToString("dd/MM/yyyy")</li>
                     </ul>
                 </div>
             </div>

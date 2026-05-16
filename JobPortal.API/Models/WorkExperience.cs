@@ -1,0 +1,22 @@
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace JobPortal.API.Models;
+
+[Table("work_experiences")]
+public class WorkExperience
+{
+    [Key]
+    [Column("id")]
+    public long Id { get; set; }
+
+    [Column("application_id")]
+    public long ApplicationId { get; set; }
+
+    [ForeignKey(nameof(ApplicationId))]
+    public Application Application { get; set; } = null!;
+
+    [Column("status")]
+    [MaxLength(32)]
+    public string Status { get; set; } = null!;
+}

@@ -22,224 +22,371 @@ namespace JobPortal.API.Migrations
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
-            modelBuilder.Entity("JobPortal.API.Models.CongViec", b =>
+            modelBuilder.Entity("JobPortal.API.Models.Admin", b =>
                 {
-                    b.Property<long>("IdCongViec")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasColumnName("id_cong_viec");
+                        .HasColumnName("id");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("IdCongViec"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<string>("DiaDiem")
+                    b.Property<string>("AccountNumber")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("account_number");
+
+                    b.Property<string>("BankName")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("bank_name");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)")
-                        .HasColumnName("dia_diem");
+                        .HasColumnName("email");
 
-                    b.Property<long>("IdDanhMuc")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id_danh_muc");
-
-                    b.Property<long>("IdTuyenDung")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id_tuyen_dung");
-
-                    b.Property<string>("MoTa")
+                    b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("mo_ta");
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("name");
 
-                    b.Property<int>("MucLuong")
-                        .HasColumnType("int")
-                        .HasColumnName("muc_luong");
-
-                    b.Property<DateTime>("NgayBatDau")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("ngay_bat_dau");
-
-                    b.Property<DateTime>("NgayHetHan")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("ngay_het_han");
-
-                    b.Property<DateTime>("NgayKetThuc")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("ngay_ket_thuc");
-
-                    b.Property<string>("TieuDe")
+                    b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("varchar(500)")
-                        .HasColumnName("tieu_de");
+                        .HasColumnName("password_hash");
 
-                    b.Property<string>("TrangThaiBaiDang")
+                    b.Property<string>("Phone")
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)")
+                        .HasColumnName("phone");
+
+                    b.Property<string>("Role")
                         .IsRequired()
                         .HasMaxLength(32)
                         .HasColumnType("varchar(32)")
-                        .HasColumnName("trang_thai_bai_dang");
+                        .HasColumnName("role");
 
-                    b.HasKey("IdCongViec");
-
-                    b.HasIndex("IdDanhMuc");
-
-                    b.HasIndex("IdTuyenDung");
-
-                    b.ToTable("cong_viec");
-                });
-
-            modelBuilder.Entity("JobPortal.API.Models.DanhGia", b =>
-                {
-                    b.Property<long>("IdDanhGia")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id_danh_gia");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("IdDanhGia"));
-
-                    b.Property<string>("BinhLuan")
-                        .HasColumnType("text")
-                        .HasColumnName("binh_luan");
-
-                    b.Property<string>("DanhGiaToi")
+                    b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(32)
                         .HasColumnType("varchar(32)")
-                        .HasColumnName("danh_gia_toi");
+                        .HasColumnName("status");
 
-                    b.Property<int>("Diem")
-                        .HasColumnType("int")
-                        .HasColumnName("danh_gia");
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_at");
 
-                    b.Property<long>("IdCongViec")
+                    b.Property<long>("UserId")
                         .HasColumnType("bigint")
-                        .HasColumnName("id_cong_viec");
+                        .HasColumnName("user_id");
 
-                    b.Property<long>("IdTimViec")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id_tim_viec");
+                    b.HasKey("Id");
 
-                    b.Property<long>("IdTuyenDung")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id_tuyen_dung");
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
-                    b.HasKey("IdDanhGia");
-
-                    b.HasIndex("IdCongViec");
-
-                    b.HasIndex("IdTimViec");
-
-                    b.HasIndex("IdTuyenDung");
-
-                    b.ToTable("danh_gia");
+                    b.ToTable("admins");
                 });
 
-            modelBuilder.Entity("JobPortal.API.Models.DanhMuc", b =>
+            modelBuilder.Entity("JobPortal.API.Models.Application", b =>
                 {
-                    b.Property<long>("IdDanhMuc")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasColumnName("id_danh_muc");
+                        .HasColumnName("id");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("IdDanhMuc"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<string>("Ten")
+                    b.Property<DateTime>("AppliedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("applied_at");
+
+                    b.Property<long>("JobId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("job_id");
+
+                    b.Property<long>("JobSeekerId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("job_seeker_id");
+
+                    b.Property<long>("ResumeId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("resume_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("varchar(32)")
+                        .HasColumnName("status");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("JobId");
+
+                    b.HasIndex("JobSeekerId");
+
+                    b.HasIndex("ResumeId");
+
+                    b.ToTable("applications");
+                });
+
+            modelBuilder.Entity("JobPortal.API.Models.Auth.RefreshToken", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedByIp")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("created_by_ip");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("expires_at");
+
+                    b.Property<DateTime?>("ReplacedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("replaced_at");
+
+                    b.Property<string>("ReplacedByToken")
+                        .HasColumnType("longtext")
+                        .HasColumnName("replaced_by_token");
+
+                    b.Property<DateTime?>("RevokedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("revoked_at");
+
+                    b.Property<string>("RevokedByIp")
+                        .HasColumnType("longtext")
+                        .HasColumnName("revoked_by_ip");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("token_hash");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("refresh_tokens");
+                });
+
+            modelBuilder.Entity("JobPortal.API.Models.Auth.User", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)")
-                        .HasColumnName("ten");
+                        .HasColumnName("email");
 
-                    b.HasKey("IdDanhMuc");
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("is_active");
 
-                    b.ToTable("danh_muc");
-                });
-
-            modelBuilder.Entity("JobPortal.API.Models.GoiBaiDang", b =>
-                {
-                    b.Property<long>("IdGoi")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id_goi");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("IdGoi"));
-
-                    b.Property<int>("Gia")
-                        .HasColumnType("int")
-                        .HasColumnName("gia");
-
-                    b.Property<long>("IdQuanTri")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id_quan_tri");
-
-                    b.Property<int>("SoLuotDangBai")
-                        .HasColumnType("int")
-                        .HasColumnName("so_luot_dang_bai");
-
-                    b.Property<string>("Ten")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)")
-                        .HasColumnName("ten");
+                        .HasColumnName("name");
 
-                    b.HasKey("IdGoi");
-
-                    b.HasIndex("IdQuanTri");
-
-                    b.ToTable("goi_bai_dang");
-                });
-
-            modelBuilder.Entity("JobPortal.API.Models.HinhAnh", b =>
-                {
-                    b.Property<long>("IdHinhAnh")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id_hinh_anh");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("IdHinhAnh"));
-
-                    b.Property<string>("DuongDanUrl")
+                    b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("varchar(500)")
-                        .HasColumnName("duong_dan_url");
+                        .HasColumnName("password_hash");
 
-                    b.Property<long>("IdCongViec")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id_cong_viec");
+                    b.Property<DateTime?>("PasswordResetTokenExpiresAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("password_reset_token_expires_at");
 
-                    b.Property<string>("Ten")
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)")
-                        .HasColumnName("ten");
+                    b.Property<string>("PasswordResetTokenHash")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)")
+                        .HasColumnName("password_reset_token_hash");
 
-                    b.HasKey("IdHinhAnh");
+                    b.Property<string>("PhoneNumber")
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)")
+                        .HasColumnName("phone_number");
 
-                    b.HasIndex("IdCongViec");
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("varchar(32)")
+                        .HasColumnName("role");
 
-                    b.ToTable("hinh_anh");
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("users");
                 });
 
-            modelBuilder.Entity("JobPortal.API.Models.HoSoTuyenDung", b =>
+            modelBuilder.Entity("JobPortal.API.Models.Category", b =>
                 {
-                    b.Property<long>("IdCv")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasColumnName("id_cv");
+                        .HasColumnName("id");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("IdCv"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<long>("IdTimViec")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id_tim_viec");
-
-                    b.Property<DateTime>("NgayTao")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("ngay_tao");
-
-                    b.Property<string>("TieuDe")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)")
-                        .HasColumnName("tieu_de");
+                        .HasColumnName("name");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("categories");
+                });
+
+            modelBuilder.Entity("JobPortal.API.Models.Employer", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateOnly?>("DateOfBirth")
+                        .HasColumnType("date")
+                        .HasColumnName("date_of_birth");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("email");
+
+                    b.Property<DateTime?>("EmailVerifiedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("email_verified_at");
+
+                    b.Property<byte?>("Gender")
+                        .HasColumnType("tinyint unsigned")
+                        .HasColumnName("gender");
+
+                    b.Property<string>("IdCard")
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)")
+                        .HasColumnName("id_card");
+
+                    b.Property<string>("Image")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)")
+                        .HasColumnName("image");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)")
+                        .HasColumnName("password_hash");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)")
+                        .HasColumnName("phone");
+
+                    b.Property<int>("PostingLimit")
+                        .HasColumnType("int")
+                        .HasColumnName("posting_limit");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("varchar(32)")
+                        .HasColumnName("role");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("varchar(32)")
+                        .HasColumnName("status");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_at");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("employers");
+                });
+
+            modelBuilder.Entity("JobPortal.API.Models.Image", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("JobId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("job_id");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("name");
 
                     b.Property<string>("Url")
                         .IsRequired()
@@ -247,537 +394,637 @@ namespace JobPortal.API.Migrations
                         .HasColumnType("varchar(500)")
                         .HasColumnName("url");
 
-                    b.HasKey("IdCv");
+                    b.HasKey("Id");
 
-                    b.HasIndex("IdTimViec");
+                    b.HasIndex("JobId");
 
-                    b.ToTable("ho_so_tuyen_dung");
+                    b.ToTable("images");
                 });
 
-            modelBuilder.Entity("JobPortal.API.Models.LichSuThanhToan", b =>
+            modelBuilder.Entity("JobPortal.API.Models.Job", b =>
                 {
-                    b.Property<long>("IdThanhToan")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasColumnName("id_thanh_toan");
+                        .HasColumnName("id");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("IdThanhToan"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<int>("Gia")
+                    b.Property<long>("CategoryId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("category_id");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<long>("EmployerId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("employer_id");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("end_date");
+
+                    b.Property<DateTime>("ExpiryDate")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("expiry_date");
+
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("location");
+
+                    b.Property<string>("PostingStatus")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("varchar(32)")
+                        .HasColumnName("posting_status");
+
+                    b.Property<int>("Salary")
                         .HasColumnType("int")
-                        .HasColumnName("gia");
+                        .HasColumnName("salary");
 
-                    b.Property<string>("IdDonHang")
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("start_date");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)")
+                        .HasColumnName("title");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("EmployerId");
+
+                    b.ToTable("jobs");
+                });
+
+            modelBuilder.Entity("JobPortal.API.Models.JobSeeker", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("AccountNumber")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("account_number");
+
+                    b.Property<string>("BankName")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("bank_name");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateOnly?>("DateOfBirth")
+                        .HasColumnType("date")
+                        .HasColumnName("date_of_birth");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("email");
+
+                    b.Property<DateTime?>("EmailVerifiedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("email_verified_at");
+
+                    b.Property<byte?>("Gender")
+                        .HasColumnType("tinyint unsigned")
+                        .HasColumnName("gender");
+
+                    b.Property<string>("IdCard")
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)")
+                        .HasColumnName("id_card");
+
+                    b.Property<string>("IdCardIssueDate")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("id_card_issue_date");
+
+                    b.Property<string>("IdCardIssuePlace")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("id_card_issue_place");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)")
+                        .HasColumnName("password_hash");
+
+                    b.Property<string>("PermanentAddress")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)")
+                        .HasColumnName("permanent_address");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)")
+                        .HasColumnName("phone");
+
+                    b.Property<string>("ProfileImage")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)")
+                        .HasColumnName("profile_image");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("varchar(32)")
+                        .HasColumnName("role");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("varchar(32)")
+                        .HasColumnName("status");
+
+                    b.Property<string>("TemporaryAddress")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)")
+                        .HasColumnName("temporary_address");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_at");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("job_seekers");
+                });
+
+            modelBuilder.Entity("JobPortal.API.Models.PaymentHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<int>("Amount")
+                        .HasColumnType("int")
+                        .HasColumnName("amount");
+
+                    b.Property<long>("EmployerId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("employer_id");
+
+                    b.Property<string>("OrderId")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)")
-                        .HasColumnName("id_don_hang");
+                        .HasColumnName("order_id");
 
-                    b.Property<long>("IdGoi")
+                    b.Property<string>("PaymentBank")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("payment_bank");
+
+                    b.Property<DateTime?>("PaymentDate")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("payment_date");
+
+                    b.Property<long>("PostingPackageId")
                         .HasColumnType("bigint")
-                        .HasColumnName("id_goi");
+                        .HasColumnName("posting_package_id");
 
-                    b.Property<long>("IdTuyenDung")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id_tuyen_dung");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("varchar(32)")
+                        .HasColumnName("status");
 
-                    b.Property<string>("MaGiaoDich")
+                    b.Property<string>("TransactionCode")
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)")
-                        .HasColumnName("ma_giao_dich");
+                        .HasColumnName("transaction_code");
 
-                    b.Property<string>("NganHangThanhToan")
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)")
-                        .HasColumnName("ngan_hang_thanh_toan");
+                    b.HasKey("Id");
 
-                    b.Property<DateTime?>("NgayThanhToan")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("ngay_thanh_toan");
+                    b.HasIndex("EmployerId");
 
-                    b.Property<string>("TrangThai")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("varchar(32)")
-                        .HasColumnName("trang_thai");
+                    b.HasIndex("PostingPackageId");
 
-                    b.HasKey("IdThanhToan");
-
-                    b.HasIndex("IdGoi");
-
-                    b.HasIndex("IdTuyenDung");
-
-                    b.ToTable("lich_su_thanh_toan");
+                    b.ToTable("payment_histories");
                 });
 
-            modelBuilder.Entity("JobPortal.API.Models.NguoiTimViec", b =>
+            modelBuilder.Entity("JobPortal.API.Models.PostingPackage", b =>
                 {
-                    b.Property<long>("IdTimViec")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasColumnName("id_tim_viec");
+                        .HasColumnName("id");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("IdTimViec"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<string>("AnhDaiDien")
-                        .HasMaxLength(500)
-                        .HasColumnType("varchar(500)")
-                        .HasColumnName("anh_dai_dien");
-
-                    b.Property<string>("Cccd")
-                        .HasMaxLength(20)
-                        .HasColumnType("varchar(20)")
-                        .HasColumnName("cccd");
-
-                    b.Property<string>("DiaChiTamTru")
-                        .HasMaxLength(500)
-                        .HasColumnType("varchar(500)")
-                        .HasColumnName("dia_chi_tam_tru");
-
-                    b.Property<string>("DiaChiThuongTru")
-                        .HasMaxLength(500)
-                        .HasColumnType("varchar(500)")
-                        .HasColumnName("dia_chi_thuong_tru");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)")
-                        .HasColumnName("email");
-
-                    b.Property<DateTime?>("EmailXacThuc")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("email_xac_thuc");
-
-                    b.Property<byte?>("GioiTinh")
-                        .HasColumnType("tinyint unsigned")
-                        .HasColumnName("gioi_tinh");
-
-                    b.Property<string>("MatKhau")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("varchar(500)")
-                        .HasColumnName("mat_khau");
-
-                    b.Property<string>("MoTa")
-                        .HasColumnType("text")
-                        .HasColumnName("mo_ta");
-
-                    b.Property<string>("NgayCapCccd")
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)")
-                        .HasColumnName("ngay_cap_cccd");
-
-                    b.Property<DateOnly?>("NgaySinh")
-                        .HasColumnType("date")
-                        .HasColumnName("ngay_sinh");
-
-                    b.Property<string>("NoiCap")
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)")
-                        .HasColumnName("noi_cap");
-
-                    b.Property<string>("Sdt")
-                        .HasMaxLength(20)
-                        .HasColumnType("varchar(20)")
-                        .HasColumnName("sdt");
-
-                    b.Property<string>("SoTaiKhoan")
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)")
-                        .HasColumnName("so_tai_khoan");
-
-                    b.Property<string>("Ten")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)")
-                        .HasColumnName("ten");
-
-                    b.Property<string>("TenNganHang")
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)")
-                        .HasColumnName("ten_ngan_hang");
-
-                    b.Property<string>("TrangThai")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("varchar(32)")
-                        .HasColumnName("trang_thai");
-
-                    b.HasKey("IdTimViec");
-
-                    b.ToTable("nguoi_tim_viec");
-                });
-
-            modelBuilder.Entity("JobPortal.API.Models.NhaTuyenDung", b =>
-                {
-                    b.Property<long>("IdTuyenDung")
-                        .ValueGeneratedOnAdd()
+                    b.Property<long>("AdminId")
                         .HasColumnType("bigint")
-                        .HasColumnName("id_tuyen_dung");
+                        .HasColumnName("admin_id");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("IdTuyenDung"));
-
-                    b.Property<string>("Anh")
-                        .HasMaxLength(500)
-                        .HasColumnType("varchar(500)")
-                        .HasColumnName("anh");
-
-                    b.Property<string>("Cccd")
-                        .HasMaxLength(20)
-                        .HasColumnType("varchar(20)")
-                        .HasColumnName("cccd");
-
-                    b.Property<string>("Email")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)")
-                        .HasColumnName("email");
+                        .HasColumnName("name");
 
-                    b.Property<DateTime?>("EmailXacThuc")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("email_xac_thuc");
-
-                    b.Property<byte?>("GioiTinh")
-                        .HasColumnType("tinyint unsigned")
-                        .HasColumnName("gioi_tinh");
-
-                    b.Property<string>("MatKhau")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("varchar(500)")
-                        .HasColumnName("mat_khau");
-
-                    b.Property<string>("MoTa")
-                        .HasColumnType("text")
-                        .HasColumnName("mo_ta");
-
-                    b.Property<DateOnly?>("NgaySinh")
-                        .HasColumnType("date")
-                        .HasColumnName("ngay_sinh");
-
-                    b.Property<string>("Sdt")
-                        .HasMaxLength(20)
-                        .HasColumnType("varchar(20)")
-                        .HasColumnName("sdt");
-
-                    b.Property<int>("SoLuotBaiDang")
+                    b.Property<int>("PostingLimit")
                         .HasColumnType("int")
-                        .HasColumnName("so_luot_bai_dang");
+                        .HasColumnName("posting_limit");
 
-                    b.Property<string>("Ten")
+                    b.Property<int>("Price")
+                        .HasColumnType("int")
+                        .HasColumnName("price");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AdminId");
+
+                    b.ToTable("posting_packages");
+                });
+
+            modelBuilder.Entity("JobPortal.API.Models.Resume", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_at");
+
+                    b.Property<long>("JobSeekerId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("job_seeker_id");
+
+                    b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)")
-                        .HasColumnName("ten");
+                        .HasColumnName("title");
 
-                    b.Property<string>("TrangThai")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("varchar(32)")
-                        .HasColumnName("trang_thai");
-
-                    b.HasKey("IdTuyenDung");
-
-                    b.ToTable("nha_tuyen_dung");
-                });
-
-            modelBuilder.Entity("JobPortal.API.Models.QuaTrinhLamViec", b =>
-                {
-                    b.Property<long>("IdLamViec")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id_lam_viec");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("IdLamViec"));
-
-                    b.Property<long>("IdUngTuyen")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id_ung_tuyen");
-
-                    b.Property<string>("TrangThai")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("varchar(32)")
-                        .HasColumnName("trang_thai");
-
-                    b.HasKey("IdLamViec");
-
-                    b.HasIndex("IdUngTuyen");
-
-                    b.ToTable("qua_trinh_lam_viec");
-                });
-
-            modelBuilder.Entity("JobPortal.API.Models.QuanTriVien", b =>
-                {
-                    b.Property<long>("IdQuanTri")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id_quan_tri");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("IdQuanTri"));
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)")
-                        .HasColumnName("email");
-
-                    b.Property<string>("MatKhau")
+                    b.Property<string>("Url")
                         .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("varchar(500)")
-                        .HasColumnName("mat_khau");
+                        .HasColumnName("url");
 
-                    b.Property<string>("SoTaiKhoan")
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)")
-                        .HasColumnName("so_tai_khoan");
+                    b.HasKey("Id");
 
-                    b.Property<string>("Ten")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)")
-                        .HasColumnName("ten");
+                    b.HasIndex("JobSeekerId");
 
-                    b.Property<string>("TenNganHang")
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)")
-                        .HasColumnName("ten_ngan_hang");
-
-                    b.HasKey("IdQuanTri");
-
-                    b.ToTable("quan_tri_vien");
+                    b.ToTable("resumes");
                 });
 
-            modelBuilder.Entity("JobPortal.API.Models.UngTuyen", b =>
+            modelBuilder.Entity("JobPortal.API.Models.Review", b =>
                 {
-                    b.Property<long>("IdUngTuyen")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasColumnName("id_ung_tuyen");
+                        .HasColumnName("id");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("IdUngTuyen"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<long>("IdCongViec")
+                    b.Property<string>("Comment")
+                        .HasColumnType("text")
+                        .HasColumnName("comment");
+
+                    b.Property<long>("EmployerId")
                         .HasColumnType("bigint")
-                        .HasColumnName("id_cong_viec");
+                        .HasColumnName("employer_id");
 
-                    b.Property<long>("IdCv")
+                    b.Property<long>("JobId")
                         .HasColumnType("bigint")
-                        .HasColumnName("id_cv");
+                        .HasColumnName("job_id");
 
-                    b.Property<long>("IdTimViec")
+                    b.Property<long>("JobSeekerId")
                         .HasColumnType("bigint")
-                        .HasColumnName("id_tim_viec");
+                        .HasColumnName("job_seeker_id");
 
-                    b.Property<DateTime>("NgayUngTuyen")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("ngay_ung_tuyen");
+                    b.Property<int>("Rating")
+                        .HasColumnType("int")
+                        .HasColumnName("rating");
 
-                    b.Property<string>("TrangThai")
+                    b.Property<string>("ReviewType")
                         .IsRequired()
                         .HasMaxLength(32)
                         .HasColumnType("varchar(32)")
-                        .HasColumnName("trang_thai");
+                        .HasColumnName("review_type");
 
-                    b.HasKey("IdUngTuyen");
+                    b.HasKey("Id");
 
-                    b.HasIndex("IdCongViec");
+                    b.HasIndex("EmployerId");
 
-                    b.HasIndex("IdCv");
+                    b.HasIndex("JobId");
 
-                    b.HasIndex("IdTimViec");
+                    b.HasIndex("JobSeekerId");
 
-                    b.ToTable("ung_tuyen");
+                    b.ToTable("reviews");
                 });
 
-            modelBuilder.Entity("JobPortal.API.Models.CongViec", b =>
+            modelBuilder.Entity("JobPortal.API.Models.WorkExperience", b =>
                 {
-                    b.HasOne("JobPortal.API.Models.DanhMuc", "DanhMuc")
-                        .WithMany("CongViecs")
-                        .HasForeignKey("IdDanhMuc")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
 
-                    b.HasOne("JobPortal.API.Models.NhaTuyenDung", "NhaTuyenDung")
-                        .WithMany("CongViecs")
-                        .HasForeignKey("IdTuyenDung")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
 
-                    b.Navigation("DanhMuc");
+                    b.Property<long>("ApplicationId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("application_id");
 
-                    b.Navigation("NhaTuyenDung");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("varchar(32)")
+                        .HasColumnName("status");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApplicationId");
+
+                    b.ToTable("work_experiences");
                 });
 
-            modelBuilder.Entity("JobPortal.API.Models.DanhGia", b =>
+            modelBuilder.Entity("JobPortal.API.Models.Admin", b =>
                 {
-                    b.HasOne("JobPortal.API.Models.CongViec", "CongViec")
-                        .WithMany("DanhGias")
-                        .HasForeignKey("IdCongViec")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("JobPortal.API.Models.NguoiTimViec", "NguoiTimViec")
-                        .WithMany("DanhGias")
-                        .HasForeignKey("IdTimViec")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("JobPortal.API.Models.NhaTuyenDung", "NhaTuyenDung")
-                        .WithMany("DanhGias")
-                        .HasForeignKey("IdTuyenDung")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("CongViec");
-
-                    b.Navigation("NguoiTimViec");
-
-                    b.Navigation("NhaTuyenDung");
-                });
-
-            modelBuilder.Entity("JobPortal.API.Models.GoiBaiDang", b =>
-                {
-                    b.HasOne("JobPortal.API.Models.QuanTriVien", "QuanTriVien")
-                        .WithMany("GoiBaiDangs")
-                        .HasForeignKey("IdQuanTri")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("QuanTriVien");
-                });
-
-            modelBuilder.Entity("JobPortal.API.Models.HinhAnh", b =>
-                {
-                    b.HasOne("JobPortal.API.Models.CongViec", "CongViec")
-                        .WithMany("HinhAnhs")
-                        .HasForeignKey("IdCongViec")
+                    b.HasOne("JobPortal.API.Models.Auth.User", "User")
+                        .WithOne("AdminProfile")
+                        .HasForeignKey("JobPortal.API.Models.Admin", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("CongViec");
+                    b.Navigation("User");
                 });
 
-            modelBuilder.Entity("JobPortal.API.Models.HoSoTuyenDung", b =>
+            modelBuilder.Entity("JobPortal.API.Models.Application", b =>
                 {
-                    b.HasOne("JobPortal.API.Models.NguoiTimViec", "NguoiTimViec")
-                        .WithMany("HoSoTuyenDungs")
-                        .HasForeignKey("IdTimViec")
+                    b.HasOne("JobPortal.API.Models.Job", "Job")
+                        .WithMany("Applications")
+                        .HasForeignKey("JobId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("JobPortal.API.Models.JobSeeker", "JobSeeker")
+                        .WithMany("Applications")
+                        .HasForeignKey("JobSeekerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("JobPortal.API.Models.Resume", "Resume")
+                        .WithMany("Applications")
+                        .HasForeignKey("ResumeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Job");
+
+                    b.Navigation("JobSeeker");
+
+                    b.Navigation("Resume");
+                });
+
+            modelBuilder.Entity("JobPortal.API.Models.Auth.RefreshToken", b =>
+                {
+                    b.HasOne("JobPortal.API.Models.Auth.User", "User")
+                        .WithMany("RefreshTokens")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("NguoiTimViec");
+                    b.Navigation("User");
                 });
 
-            modelBuilder.Entity("JobPortal.API.Models.LichSuThanhToan", b =>
+            modelBuilder.Entity("JobPortal.API.Models.Employer", b =>
                 {
-                    b.HasOne("JobPortal.API.Models.GoiBaiDang", "GoiBaiDang")
-                        .WithMany("LichSuThanhToans")
-                        .HasForeignKey("IdGoi")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("JobPortal.API.Models.NhaTuyenDung", "NhaTuyenDung")
-                        .WithMany("LichSuThanhToans")
-                        .HasForeignKey("IdTuyenDung")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("GoiBaiDang");
-
-                    b.Navigation("NhaTuyenDung");
-                });
-
-            modelBuilder.Entity("JobPortal.API.Models.QuaTrinhLamViec", b =>
-                {
-                    b.HasOne("JobPortal.API.Models.UngTuyen", "UngTuyen")
-                        .WithMany("QuaTrinhLamViecs")
-                        .HasForeignKey("IdUngTuyen")
+                    b.HasOne("JobPortal.API.Models.Auth.User", "User")
+                        .WithOne("EmployerProfile")
+                        .HasForeignKey("JobPortal.API.Models.Employer", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("UngTuyen");
+                    b.Navigation("User");
                 });
 
-            modelBuilder.Entity("JobPortal.API.Models.UngTuyen", b =>
+            modelBuilder.Entity("JobPortal.API.Models.Image", b =>
                 {
-                    b.HasOne("JobPortal.API.Models.CongViec", "CongViec")
-                        .WithMany("UngTuyens")
-                        .HasForeignKey("IdCongViec")
+                    b.HasOne("JobPortal.API.Models.Job", "Job")
+                        .WithMany("Images")
+                        .HasForeignKey("JobId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Job");
+                });
+
+            modelBuilder.Entity("JobPortal.API.Models.Job", b =>
+                {
+                    b.HasOne("JobPortal.API.Models.Category", "Category")
+                        .WithMany("Jobs")
+                        .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("JobPortal.API.Models.HoSoTuyenDung", "HoSoTuyenDung")
-                        .WithMany("UngTuyens")
-                        .HasForeignKey("IdCv")
+                    b.HasOne("JobPortal.API.Models.Employer", "Employer")
+                        .WithMany("Jobs")
+                        .HasForeignKey("EmployerId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("JobPortal.API.Models.NguoiTimViec", "NguoiTimViec")
-                        .WithMany("UngTuyens")
-                        .HasForeignKey("IdTimViec")
+                    b.Navigation("Category");
+
+                    b.Navigation("Employer");
+                });
+
+            modelBuilder.Entity("JobPortal.API.Models.JobSeeker", b =>
+                {
+                    b.HasOne("JobPortal.API.Models.Auth.User", "User")
+                        .WithOne("JobSeekerProfile")
+                        .HasForeignKey("JobPortal.API.Models.JobSeeker", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("JobPortal.API.Models.PaymentHistory", b =>
+                {
+                    b.HasOne("JobPortal.API.Models.Employer", "Employer")
+                        .WithMany("PaymentHistories")
+                        .HasForeignKey("EmployerId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("CongViec");
+                    b.HasOne("JobPortal.API.Models.PostingPackage", "PostingPackage")
+                        .WithMany("PaymentHistories")
+                        .HasForeignKey("PostingPackageId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                    b.Navigation("HoSoTuyenDung");
+                    b.Navigation("Employer");
 
-                    b.Navigation("NguoiTimViec");
+                    b.Navigation("PostingPackage");
                 });
 
-            modelBuilder.Entity("JobPortal.API.Models.CongViec", b =>
+            modelBuilder.Entity("JobPortal.API.Models.PostingPackage", b =>
                 {
-                    b.Navigation("DanhGias");
+                    b.HasOne("JobPortal.API.Models.Admin", "Admin")
+                        .WithMany("PostingPackages")
+                        .HasForeignKey("AdminId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                    b.Navigation("HinhAnhs");
-
-                    b.Navigation("UngTuyens");
+                    b.Navigation("Admin");
                 });
 
-            modelBuilder.Entity("JobPortal.API.Models.DanhMuc", b =>
+            modelBuilder.Entity("JobPortal.API.Models.Resume", b =>
                 {
-                    b.Navigation("CongViecs");
+                    b.HasOne("JobPortal.API.Models.JobSeeker", "JobSeeker")
+                        .WithMany("Resumes")
+                        .HasForeignKey("JobSeekerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("JobSeeker");
                 });
 
-            modelBuilder.Entity("JobPortal.API.Models.GoiBaiDang", b =>
+            modelBuilder.Entity("JobPortal.API.Models.Review", b =>
                 {
-                    b.Navigation("LichSuThanhToans");
+                    b.HasOne("JobPortal.API.Models.Employer", "Employer")
+                        .WithMany("Reviews")
+                        .HasForeignKey("EmployerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("JobPortal.API.Models.Job", "Job")
+                        .WithMany("Reviews")
+                        .HasForeignKey("JobId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("JobPortal.API.Models.JobSeeker", "JobSeeker")
+                        .WithMany("Reviews")
+                        .HasForeignKey("JobSeekerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Employer");
+
+                    b.Navigation("Job");
+
+                    b.Navigation("JobSeeker");
                 });
 
-            modelBuilder.Entity("JobPortal.API.Models.HoSoTuyenDung", b =>
+            modelBuilder.Entity("JobPortal.API.Models.WorkExperience", b =>
                 {
-                    b.Navigation("UngTuyens");
+                    b.HasOne("JobPortal.API.Models.Application", "Application")
+                        .WithMany("WorkExperiences")
+                        .HasForeignKey("ApplicationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Application");
                 });
 
-            modelBuilder.Entity("JobPortal.API.Models.NguoiTimViec", b =>
+            modelBuilder.Entity("JobPortal.API.Models.Admin", b =>
                 {
-                    b.Navigation("DanhGias");
-
-                    b.Navigation("HoSoTuyenDungs");
-
-                    b.Navigation("UngTuyens");
+                    b.Navigation("PostingPackages");
                 });
 
-            modelBuilder.Entity("JobPortal.API.Models.NhaTuyenDung", b =>
+            modelBuilder.Entity("JobPortal.API.Models.Application", b =>
                 {
-                    b.Navigation("CongViecs");
-
-                    b.Navigation("DanhGias");
-
-                    b.Navigation("LichSuThanhToans");
+                    b.Navigation("WorkExperiences");
                 });
 
-            modelBuilder.Entity("JobPortal.API.Models.QuanTriVien", b =>
+            modelBuilder.Entity("JobPortal.API.Models.Auth.User", b =>
                 {
-                    b.Navigation("GoiBaiDangs");
+                    b.Navigation("AdminProfile");
+
+                    b.Navigation("EmployerProfile");
+
+                    b.Navigation("JobSeekerProfile");
+
+                    b.Navigation("RefreshTokens");
                 });
 
-            modelBuilder.Entity("JobPortal.API.Models.UngTuyen", b =>
+            modelBuilder.Entity("JobPortal.API.Models.Category", b =>
                 {
-                    b.Navigation("QuaTrinhLamViecs");
+                    b.Navigation("Jobs");
+                });
+
+            modelBuilder.Entity("JobPortal.API.Models.Employer", b =>
+                {
+                    b.Navigation("Jobs");
+
+                    b.Navigation("PaymentHistories");
+
+                    b.Navigation("Reviews");
+                });
+
+            modelBuilder.Entity("JobPortal.API.Models.Job", b =>
+                {
+                    b.Navigation("Applications");
+
+                    b.Navigation("Images");
+
+                    b.Navigation("Reviews");
+                });
+
+            modelBuilder.Entity("JobPortal.API.Models.JobSeeker", b =>
+                {
+                    b.Navigation("Applications");
+
+                    b.Navigation("Resumes");
+
+                    b.Navigation("Reviews");
+                });
+
+            modelBuilder.Entity("JobPortal.API.Models.PostingPackage", b =>
+                {
+                    b.Navigation("PaymentHistories");
+                });
+
+            modelBuilder.Entity("JobPortal.API.Models.Resume", b =>
+                {
+                    b.Navigation("Applications");
                 });
 #pragma warning restore 612, 618
         }

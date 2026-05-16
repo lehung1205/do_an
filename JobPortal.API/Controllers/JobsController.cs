@@ -16,14 +16,14 @@ public class JobsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<CongViecDto>>> GetJobs()
+    public async Task<ActionResult<IEnumerable<JobDto>>> GetJobs()
     {
         var jobs = await _jobService.GetAllJobsAsync();
         return Ok(jobs);
     }
 
     [HttpGet("{id:long}")]
-    public async Task<ActionResult<CongViecDto>> GetJob(long id)
+    public async Task<ActionResult<JobDto>> GetJob(long id)
     {
         var job = await _jobService.GetJobByIdAsync(id);
         if (job == null) return NotFound();
@@ -31,14 +31,14 @@ public class JobsController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<CongViecDto>> CreateJob(CongViecDto jobDto)
+    public async Task<ActionResult<JobDto>> CreateJob(JobDto jobDto)
     {
         var createdJob = await _jobService.CreateJobAsync(jobDto);
-        return CreatedAtAction(nameof(GetJob), new { id = createdJob.id_cong_viec }, createdJob);
+        return CreatedAtAction(nameof(GetJob), new { id = createdJob.Id }, createdJob);
     }
 
     [HttpPut("{id:long}")]
-    public async Task<IActionResult> UpdateJob(long id, CongViecDto jobDto)
+    public async Task<IActionResult> UpdateJob(long id, JobDto jobDto)
     {
         await _jobService.UpdateJobAsync(id, jobDto);
         return NoContent();

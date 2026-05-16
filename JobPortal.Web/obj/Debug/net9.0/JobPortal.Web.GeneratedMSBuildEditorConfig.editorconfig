@@ -9,61 +9,61 @@ build_property.EnforceExtendedAnalyzerRules =
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = JobPortal.Web
 build_property.RootNamespace = JobPortal.Web
-build_property.ProjectDir = d:\ĐATN\JobPortal\JobPortal.Web\
+build_property.ProjectDir = E:\Hung\do_an\JobPortal.Web\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
 build_property.RazorLangVersion = 9.0
 build_property.SupportLocalizedComponentNames = 
 build_property.GenerateRazorMetadataSourceChecksumAttributes = 
-build_property.MSBuildProjectDirectory = d:\ĐATN\JobPortal\JobPortal.Web
+build_property.MSBuildProjectDirectory = E:\Hung\do_an\JobPortal.Web
 build_property._RazorSourceGeneratorDebug = 
 build_property.EffectiveAnalysisLevelStyle = 9.0
 build_property.EnableCodeStyleSeverity = 
 
-[d:/ĐATN/JobPortal/JobPortal.Web/Pages/Admin/Dashboard.cshtml]
+[E:/Hung/do_an/JobPortal.Web/Pages/Admin/Dashboard.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRtaW5cRGFzaGJvYXJkLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[d:/ĐATN/JobPortal/JobPortal.Web/Pages/Chat/Index.cshtml]
+[E:/Hung/do_an/JobPortal.Web/Pages/Chat/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQ2hhdFxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[d:/ĐATN/JobPortal/JobPortal.Web/Pages/Employer/Dashboard.cshtml]
+[E:/Hung/do_an/JobPortal.Web/Pages/Employer/Dashboard.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRW1wbG95ZXJcRGFzaGJvYXJkLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[d:/ĐATN/JobPortal/JobPortal.Web/Pages/Error.cshtml]
+[E:/Hung/do_an/JobPortal.Web/Pages/Error.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRXJyb3IuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[d:/ĐATN/JobPortal/JobPortal.Web/Pages/Index.cshtml]
+[E:/Hung/do_an/JobPortal.Web/Pages/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[d:/ĐATN/JobPortal/JobPortal.Web/Pages/Jobs/Detail.cshtml]
+[E:/Hung/do_an/JobPortal.Web/Pages/Jobs/Detail.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSm9ic1xEZXRhaWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[d:/ĐATN/JobPortal/JobPortal.Web/Pages/Jobs/Index.cshtml]
+[E:/Hung/do_an/JobPortal.Web/Pages/Jobs/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSm9ic1xJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[d:/ĐATN/JobPortal/JobPortal.Web/Pages/Privacy.cshtml]
+[E:/Hung/do_an/JobPortal.Web/Pages/Privacy.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUHJpdmFjeS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[d:/ĐATN/JobPortal/JobPortal.Web/Pages/Shared/_ValidationScriptsPartial.cshtml]
+[E:/Hung/do_an/JobPortal.Web/Pages/Shared/_ValidationScriptsPartial.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[d:/ĐATN/JobPortal/JobPortal.Web/Pages/_ViewImports.cshtml]
+[E:/Hung/do_an/JobPortal.Web/Pages/_ViewImports.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcX1ZpZXdJbXBvcnRzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[d:/ĐATN/JobPortal/JobPortal.Web/Pages/_ViewStart.cshtml]
+[E:/Hung/do_an/JobPortal.Web/Pages/_ViewStart.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcX1ZpZXdTdGFydC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[d:/ĐATN/JobPortal/JobPortal.Web/Pages/Shared/_Layout.cshtml]
+[E:/Hung/do_an/JobPortal.Web/Pages/Shared/_Layout.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcU2hhcmVkXF9MYXlvdXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = b-qi1nm5phis

@@ -2,6 +2,7 @@
 bin/
 obj/
 out/
+_build_check/
 
 # User-specific files
 *.user

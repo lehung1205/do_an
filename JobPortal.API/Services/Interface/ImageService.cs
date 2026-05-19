@@ -2,7 +2,6 @@ using AutoMapper;
 using JobPortal.API.DTOs;
 using JobPortal.API.Exceptions;
 using JobPortal.API.Models;
-using JobPortal.API.Repositories.Interface;
 
 namespace JobPortal.API.Services;
 

@@ -38,5 +38,11 @@ public class MappingProfile : Profile
             .ForMember(d => d.StartDate, o => o.MapFrom(s => s.StartDate))
             .ForMember(d => d.EndDate, o => o.MapFrom(s => s.EndDate))
             .ForMember(d => d.ExpiryDate, o => o.MapFrom(s => s.ExpiryDate));
+
+        CreateMap<PostingPackage, PostingPackageDto>();
+        CreateMap<PostingPackageDto, PostingPackage>()
+            .ForMember(d => d.Id, o => o.Ignore())
+            .ForMember(d => d.Admin, o => o.Ignore())
+            .ForMember(d => d.PaymentHistories, o => o.Ignore());
     }
 }

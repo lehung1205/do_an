@@ -32,6 +32,8 @@ builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"))
 
 builder.Services.AddScoped<IJobRepository, JobRepository>();
 builder.Services.AddScoped<IJobService, JobService>();
+builder.Services.AddScoped<IPostingPackageRepository, PostingPackageRepository>();
+builder.Services.AddScoped<IPostingPackageService, PostingPackageService>();
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();

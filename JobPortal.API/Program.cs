@@ -40,6 +40,8 @@ builder.Services.AddScoped<IApplicationRepository, ApplicationRepository>();
 builder.Services.AddScoped<IApplicationService, ApplicationService>();
 builder.Services.AddScoped<IResumeRepository, ResumeRepository>();
 builder.Services.AddScoped<IResumeService, ResumeService>();
+builder.Services.AddScoped<IPaymentHistoryRepository, PaymentHistoryRepository>();
+builder.Services.AddScoped<IPaymentHistoryService, PaymentHistoryService>();
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();

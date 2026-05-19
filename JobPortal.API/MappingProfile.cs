@@ -63,5 +63,11 @@ public class MappingProfile : Profile
             .ForMember(d => d.Id, o => o.Ignore())
             .ForMember(d => d.JobSeeker, o => o.Ignore())
             .ForMember(d => d.Applications, o => o.Ignore());
+
+        CreateMap<PaymentHistory, PaymentHistoryDto>();
+        CreateMap<PaymentHistoryDto, PaymentHistory>()
+            .ForMember(d => d.Id, o => o.Ignore())
+            .ForMember(d => d.Employer, o => o.Ignore())
+            .ForMember(d => d.PostingPackage, o => o.Ignore());
     }
 }

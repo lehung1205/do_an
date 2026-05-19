@@ -1,0 +1,51 @@
+@page
+@model JobPortal.Web.Pages.Auth.LoginModel
+@{
+    ViewData["Title"] = "Đăng nhập";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5 col-lg-4">
+            <div class="card border-0 shadow-sm auth-card">
+                <div class="card-body p-4">
+                    <h1 class="h4 mb-1 text-center">Đăng nhập</h1>
+                    <p class="text-muted small text-center mb-4">Chào mừng bạn quay lại JobPortal</p>
+
+                    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                    {
+                        <div class="alert alert-danger py-2 small">@Model.ErrorMessage</div>
+                    }
+
+                    <form method="post">
+                        <input type="hidden" asp-for="ReturnUrl" />
+                        <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="Input.Identifier" class="form-label"></label>
+                            <input asp-for="Input.Identifier" class="form-control" placeholder="email@example.com" />
+                            <span asp-validation-for="Input.Identifier" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Input.Password" class="form-label"></label>
+                            <input asp-for="Input.Password" class="form-control" />
+                            <span asp-validation-for="Input.Password" class="text-danger small"></span>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">Đăng nhập</button>
+                    </form>
+
+                    <p class="text-center text-muted small mt-4 mb-0">
+                        Chưa có tài khoản?
+                        <a asp-page="/Auth/Register">Đăng ký ngay</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

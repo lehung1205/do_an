@@ -1,0 +1,206 @@
+@page
+@model JobPortal.Web.Pages.IndexModel
+@{
+    ViewData["Title"] = "Trang chủ";
+    var isLoggedIn = !string.IsNullOrEmpty(HttpContext.Session.GetString("JwtToken"));
+}
+
+<section class="home-hero">
+    <div class="home-hero__bg" aria-hidden="true"></div>
+    <div class="container home-hero__inner">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-7">
+                <span class="home-hero__badge">Nền tảng tuyển dụng thông minh</span>
+                <h1 class="home-hero__title">
+                    Tìm công việc mơ ước<br />
+                    <span class="text-gradient">chỉ trong vài phút</span>
+                </h1>
+                <p class="home-hero__lead">
+                    Kết nối ứng viên và nhà tuyển dụng hàng đầu. Khám phá hàng nghìn cơ hội việc làm phù hợp với kỹ năng và địa điểm của bạn.
+                </p>
+            </div>
+            <div class="col-lg-5">
+                <form class="home-search card border-0 shadow-lg" method="get" asp-page="/Index">
+                    <div class="card-body p-4">
+                        <h2 class="h5 mb-3">Tìm việc làm</h2>
+                        <div class="mb-3">
+                            <label class="form-label small text-muted" for="q">Từ khóa</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0">
+                                    <i class="bi bi-search"></i>
+                                </span>
+                                <input type="text" class="form-control border-start-0 ps-0" id="q" name="q"
+                                       value="@Model.Q" placeholder="VD: Backend, Data Engineer..." />
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label small text-muted" for="location">Địa điểm</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0">
+                                    <i class="bi bi-geo-alt"></i>
+                                </span>
+                                <input type="text" class="form-control border-start-0 ps-0" id="location" name="location"
+                                       value="@Model.Location" placeholder="VD: Hà Nội, TP.HCM..." />
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 btn-lg home-btn-primary">
+                            <i class="bi bi-search me-2"></i>Tìm kiếm ngay
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="home-stats py-4">
+    <div class="container">
+        <div class="row g-3 text-center">
+            <div class="col-md-4">
+                <div class="home-stat-card">
+                    <div class="home-stat-card__value">@(Model.TotalJobCount)+</div>
+                    <div class="home-stat-card__label">Việc làm đang mở</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="home-stat-card">
+                    <div class="home-stat-card__value">500+</div>
+                    <div class="home-stat-card__label">Nhà tuyển dụng</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="home-stat-card">
+                    <div class="home-stat-card__value">10K+</div>
+                    <div class="home-stat-card__label">Ứng viên tin tưởng</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="home-jobs py-5">
+    <div class="container">
+        <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+            <div>
+                <h2 class="section-title mb-1">Việc làm nổi bật</h2>
+                <p class="text-muted mb-0">Các vị trí mới nhất từ nhà tuyển dụng uy tín</p>
+            </div>
+            <a asp-page="/Jobs/Index" class="btn btn-outline-primary">
+                Xem tất cả <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+
+        @if (Model.FeaturedJobs.Count == 0)
+        {
+            <div class="alert alert-light border text-center py-5">
+                <i class="bi bi-inbox display-4 text-muted d-block mb-3"></i>
+                <p class="mb-2">Chưa có việc làm phù hợp với bộ lọc của bạn.</p>
+                <a asp-page="/Index" class="btn btn-sm btn-primary">Xem tất cả việc làm</a>
+            </div>
+        }
+        else
+        {
+            <div class="row g-4">
+                @foreach (var job in Model.FeaturedJobs)
+                {
+                    <div class="col-md-6 col-lg-4">
+                        <article class="job-card card h-100 border-0 shadow-sm">
+                            <div class="card-body d-flex flex-column">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <span class="badge home-badge-status">@IndexModel.FormatStatus(job.PostingStatus)</span>
+                                    <small class="text-muted">
+                                        <i class="bi bi-clock me-1"></i>@job.ExpiryDate.ToString("dd/MM/yyyy")
+                                    </small>
+                                </div>
+                                <h3 class="h5 card-title mb-2">
+                                    <a asp-page="/Jobs/Detail" asp-route-id="@job.Id" class="job-card__title stretched-link text-decoration-none">
+                                        @job.Title
+                                    </a>
+                                </h3>
+                                <p class="text-muted small mb-3 flex-grow-1">
+                                    @(job.Description.Length > 100 ? job.Description[..100] + "…" : job.Description)
+                                </p>
+                                <ul class="list-unstyled small mb-3 job-card__meta">
+                                    <li class="mb-1">
+                                        <i class="bi bi-geo-alt text-primary me-2"></i>@job.Location
+                                    </li>
+                                    <li>
+                                        <i class="bi bi-cash-stack text-primary me-2"></i>@IndexModel.FormatSalary(job.Salary)
+                                    </li>
+                                </ul>
+                                <span class="btn btn-sm btn-outline-primary mt-auto align-self-start position-relative" style="z-index: 2;">
+                                    Xem chi tiết
+                                </span>
+                            </div>
+                        </article>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</section>
+
+<section class="home-features py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="section-title">Vì sao chọn JobPortal?</h2>
+            <p class="text-muted">Trải nghiệm tuyển dụng đơn giản, minh bạch và hiệu quả</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="feature-card text-center p-4 h-100">
+                    <div class="feature-card__icon mb-3">
+                        <i class="bi bi-lightning-charge"></i>
+                    </div>
+                    <h3 class="h5">Ứng tuyển nhanh</h3>
+                    <p class="text-muted small mb-0">Nộp hồ sơ chỉ vài bước với CV đã lưu sẵn trên hệ thống.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card text-center p-4 h-100">
+                    <div class="feature-card__icon mb-3">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+                    <h3 class="h5">Tin cậy & bảo mật</h3>
+                    <p class="text-muted small mb-0">Thông tin cá nhân được bảo vệ, chỉ chia sẻ với nhà tuyển dụng bạn chọn.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card text-center p-4 h-100">
+                    <div class="feature-card__icon mb-3">
+                        <i class="bi bi-graph-up-arrow"></i>
+                    </div>
+                    <h3 class="h5">Cơ hội đa dạng</h3>
+                    <p class="text-muted small mb-0">Từ IT, marketing đến tài chính — cập nhật tin tuyển dụng mỗi ngày.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="home-cta py-5">
+    <div class="container">
+        <div class="home-cta__box rounded-4 p-4 p-md-5 text-center text-md-start">
+            <div class="row align-items-center g-4">
+                <div class="col-md-8">
+                    <h2 class="h3 text-white mb-2">Bạn là nhà tuyển dụng?</h2>
+                    <p class="text-white-50 mb-0">Đăng tin tuyển dụng, tiếp cận ứng viên chất lượng và quản lý hồ sơ tập trung.</p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    @if (isLoggedIn)
+                    {
+                        <a asp-page="/Jobs/Index" class="btn btn-light btn-lg fw-semibold">
+                            Đăng tin ngay
+                        </a>
+                    }
+                    else
+                    {
+                        <a asp-page="/Auth/Login" asp-route-returnUrl="/Index" class="btn btn-light btn-lg fw-semibold">
+                            Đăng tin ngay
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

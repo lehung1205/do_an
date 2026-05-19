@@ -676,6 +676,32 @@ namespace JobPortal.API.Migrations
                     b.ToTable("posting_packages");
                 });
 
+            modelBuilder.Entity("JobPortal.API.Models.Process", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("ApplicationId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("application_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("varchar(32)")
+                        .HasColumnName("status");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApplicationId");
+
+                    b.ToTable("process");
+                });
+
             modelBuilder.Entity("JobPortal.API.Models.Resume", b =>
                 {
                     b.Property<long>("Id")
@@ -756,32 +782,6 @@ namespace JobPortal.API.Migrations
                     b.HasIndex("JobSeekerId");
 
                     b.ToTable("reviews");
-                });
-
-            modelBuilder.Entity("JobPortal.API.Models.WorkExperience", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<long>("ApplicationId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("application_id");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("varchar(32)")
-                        .HasColumnName("status");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ApplicationId");
-
-                    b.ToTable("work_experiences");
                 });
 
             modelBuilder.Entity("JobPortal.API.Models.Admin", b =>
@@ -915,6 +915,17 @@ namespace JobPortal.API.Migrations
                     b.Navigation("Admin");
                 });
 
+            modelBuilder.Entity("JobPortal.API.Models.Process", b =>
+                {
+                    b.HasOne("JobPortal.API.Models.Application", "Application")
+                        .WithMany("Processes")
+                        .HasForeignKey("ApplicationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Application");
+                });
+
             modelBuilder.Entity("JobPortal.API.Models.Resume", b =>
                 {
                     b.HasOne("JobPortal.API.Models.JobSeeker", "JobSeeker")
@@ -953,17 +964,6 @@ namespace JobPortal.API.Migrations
                     b.Navigation("JobSeeker");
                 });
 
-            modelBuilder.Entity("JobPortal.API.Models.WorkExperience", b =>
-                {
-                    b.HasOne("JobPortal.API.Models.Application", "Application")
-                        .WithMany("WorkExperiences")
-                        .HasForeignKey("ApplicationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Application");
-                });
-
             modelBuilder.Entity("JobPortal.API.Models.Admin", b =>
                 {
                     b.Navigation("PostingPackages");
@@ -971,7 +971,7 @@ namespace JobPortal.API.Migrations
 
             modelBuilder.Entity("JobPortal.API.Models.Application", b =>
                 {
-                    b.Navigation("WorkExperiences");
+                    b.Navigation("Processes");
                 });
 
             modelBuilder.Entity("JobPortal.API.Models.Auth.User", b =>

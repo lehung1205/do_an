@@ -65,6 +65,17 @@ public class ApiService
         return await CreateClient().PostAsJsonAsync(endpoint, data, JsonOptions);
     }
 
+    public async Task<ApiResponse<T>?> PostApiResponseAsync<TRequest, T>(string endpoint, TRequest data)
+    {
+        var res = await PostAsync(endpoint, data);
+        if (res.Content.Headers.ContentLength == 0 && !res.IsSuccessStatusCode)
+        {
+            return default;
+        }
+
+        return await res.Content.ReadFromJsonAsync<ApiResponse<T>>(JsonOptions);
+    }
+
     public async Task<HttpResponseMessage> PutAsync<T>(string endpoint, T data)
     {
         return await CreateClient().PutAsJsonAsync(endpoint, data, JsonOptions);

@@ -8,6 +8,7 @@ public interface IAuthRepository
     Task<bool> UserExistsAsync(string email, string? phoneNumber, CancellationToken cancellationToken = default);
     Task AddUserAsync(User user, CancellationToken cancellationToken = default);
     Task AddJobSeekerAsync(JobSeeker jobSeeker, CancellationToken cancellationToken = default);
+    Task AddEmployerAsync(Employer employer, CancellationToken cancellationToken = default);
     Task AddRefreshTokenAsync(RefreshToken refreshToken, CancellationToken cancellationToken = default);
     Task<User?> FindUserByIdentifierAsync(string identifier, CancellationToken cancellationToken = default);
     Task<User?> FindUserByEmailAsync(string email, CancellationToken cancellationToken = default);

@@ -1,6 +1,6 @@
 namespace JobPortal.API.DTOs;
 
-public class WorkExperienceDto
+public class ProcessDto
 {
     public long Id { get; set; }
     public long ApplicationId { get; set; }

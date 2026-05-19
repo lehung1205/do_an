@@ -29,6 +29,11 @@ public class AuthRepository : IAuthRepository
         await _context.JobSeekers.AddAsync(jobSeeker, cancellationToken);
     }
 
+    public async Task AddEmployerAsync(Employer employer, CancellationToken cancellationToken = default)
+    {
+        await _context.Employers.AddAsync(employer, cancellationToken);
+    }
+
     public async Task AddRefreshTokenAsync(RefreshToken refreshToken, CancellationToken cancellationToken = default)
     {
         await _context.RefreshTokens.AddAsync(refreshToken, cancellationToken);

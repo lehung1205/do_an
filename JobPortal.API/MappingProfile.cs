@@ -44,5 +44,24 @@ public class MappingProfile : Profile
             .ForMember(d => d.Id, o => o.Ignore())
             .ForMember(d => d.Admin, o => o.Ignore())
             .ForMember(d => d.PaymentHistories, o => o.Ignore());
+
+        CreateMap<WorkExperience, WorkExperienceDto>();
+        CreateMap<WorkExperienceDto, WorkExperience>()
+            .ForMember(d => d.Id, o => o.Ignore())
+            .ForMember(d => d.Application, o => o.Ignore());
+
+        CreateMap<Application, ApplicationDto>();
+        CreateMap<ApplicationDto, Application>()
+            .ForMember(d => d.Id, o => o.Ignore())
+            .ForMember(d => d.JobSeeker, o => o.Ignore())
+            .ForMember(d => d.Job, o => o.Ignore())
+            .ForMember(d => d.Resume, o => o.Ignore())
+            .ForMember(d => d.WorkExperiences, o => o.Ignore());
+
+        CreateMap<Resume, ResumeDto>();
+        CreateMap<ResumeDto, Resume>()
+            .ForMember(d => d.Id, o => o.Ignore())
+            .ForMember(d => d.JobSeeker, o => o.Ignore())
+            .ForMember(d => d.Applications, o => o.Ignore());
     }
 }

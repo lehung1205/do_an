@@ -19,6 +19,11 @@ public class RegisterRequestValidator : AbstractValidator<RegisterRequest>
             .MaximumLength(20).WithMessage("Phone number must not exceed 20 characters.")
             .When(x => !string.IsNullOrWhiteSpace(x.PhoneNumber));
 
+        RuleFor(x => x.Role)
+            .NotEmpty().WithMessage("Account type is required.")
+            .Must(role => role.Trim().ToUpperInvariant() is "JOB_SEEKER" or "EMPLOYER")
+            .WithMessage("Account type must be JOB_SEEKER or EMPLOYER.");
+
         RuleFor(x => x.Password)
             .NotEmpty().WithMessage("Password is required.")
             .MinimumLength(8).WithMessage("Password must be at least 8 characters long.")

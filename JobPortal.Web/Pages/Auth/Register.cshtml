@@ -1,0 +1,112 @@
+@page
+@model JobPortal.Web.Pages.Auth.RegisterModel
+@{
+    ViewData["Title"] = "Đăng ký";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card border-0 shadow-sm auth-card">
+                <div class="card-body p-4">
+                    <h1 class="h4 mb-1 text-center">Đăng ký tài khoản</h1>
+                    <p class="text-muted small text-center mb-4">Chọn vai trò và tạo tài khoản miễn phí</p>
+
+                    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                    {
+                        <div class="alert alert-danger py-2 small">@Model.ErrorMessage</div>
+                    }
+
+                    <form method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+
+                        <div class="mb-4">
+                            <label class="form-label d-block">@Html.DisplayNameFor(m => m.Input.Role)</label>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <input asp-for="Input.Role" type="radio" class="btn-check" value="JOB_SEEKER" id="roleSeeker" />
+                                    <label class="btn btn-outline-primary w-100 py-3" for="roleSeeker">
+                                        <i class="bi bi-person-badge d-block fs-4 mb-1"></i>
+                                        <span class="small fw-semibold">Ứng viên</span>
+                                    </label>
+                                </div>
+                                <div class="col-6">
+                                    <input asp-for="Input.Role" type="radio" class="btn-check" value="EMPLOYER" id="roleEmployer" />
+                                    <label class="btn btn-outline-primary w-100 py-3" for="roleEmployer">
+                                        <i class="bi bi-building d-block fs-4 mb-1"></i>
+                                        <span class="small fw-semibold">Nhà tuyển dụng</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <span asp-validation-for="Input.Role" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="registerNameInput" class="form-label" id="registerNameLabel">Họ và tên</label>
+                            <input asp-for="Input.Name" class="form-control" id="registerNameInput"
+                                   placeholder="Nguyễn Văn A"
+                                   data-placeholder-seeker="Nguyễn Văn A"
+                                   data-placeholder-employer="Công ty TNHH ABC" />
+                            <span asp-validation-for="Input.Name" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Input.Email" class="form-label"></label>
+                            <input asp-for="Input.Email" class="form-control" />
+                            <span asp-validation-for="Input.Email" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Input.PhoneNumber" class="form-label"></label>
+                            <input asp-for="Input.PhoneNumber" class="form-control" />
+                            <span asp-validation-for="Input.PhoneNumber" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Input.Password" class="form-label"></label>
+                            <input asp-for="Input.Password" class="form-control" />
+                            <span asp-validation-for="Input.Password" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Input.ConfirmPassword" class="form-label"></label>
+                            <input asp-for="Input.ConfirmPassword" class="form-control" />
+                            <span asp-validation-for="Input.ConfirmPassword" class="text-danger small"></span>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">Đăng ký</button>
+                    </form>
+
+                    <p class="text-center text-muted small mt-4 mb-0">
+                        Đã có tài khoản?
+                        <a asp-page="/Auth/Login">Đăng nhập</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            const roleSeeker = document.getElementById('roleSeeker');
+            const roleEmployer = document.getElementById('roleEmployer');
+            const nameLabel = document.getElementById('registerNameLabel');
+            const nameInput = document.getElementById('registerNameInput');
+
+            function updateNameField() {
+                const isEmployer = roleEmployer?.checked;
+                nameLabel.textContent = isEmployer ? 'Tên công ty' : 'Họ và tên';
+                nameInput.placeholder = isEmployer
+                    ? nameInput.dataset.placeholderEmployer
+                    : nameInput.dataset.placeholderSeeker;
+            }
+
+            roleSeeker?.addEventListener('change', updateNameField);
+            roleEmployer?.addEventListener('change', updateNameField);
+            updateNameField();
+        })();
+    </script>
+}

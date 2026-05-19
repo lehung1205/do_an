@@ -14,7 +14,7 @@ public class DetailModel : PageModel
         _api = api;
     }
 
-    public CongViecDto Job { get; set; } = null!;
+    public JobDto Job { get; set; } = null!;
 
     public async Task<IActionResult> OnGetAsync(long id)
     {
@@ -24,7 +24,7 @@ public class DetailModel : PageModel
             return NotFound();
         }
 
-        Job = job.ToCongViecDto();
+        Job = job;
         return Page();
     }
 }

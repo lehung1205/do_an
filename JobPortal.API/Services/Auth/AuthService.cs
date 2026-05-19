@@ -40,34 +40,56 @@ public sealed class AuthService : IAuthService
             throw new ConflictException("A user with the provided credentials already exists.");
         }
 
+        var role = NormalizeRole(request.Role);
         var passwordHash = _passwordHasher.HashPassword(null!, request.Password);
+        var now = DateTime.UtcNow;
         var authUser = new User
         {
             Name = request.Name.Trim(),
             Email = normalizedEmail,
             PhoneNumber = request.PhoneNumber?.Trim(),
             PasswordHash = passwordHash,
-            Role = "JOB_SEEKER",
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow,
+            Role = role,
+            CreatedAt = now,
+            UpdatedAt = now,
             IsActive = true
         };
 
         await _authRepository.AddUserAsync(authUser, cancellationToken);
         await _authRepository.SaveChangesAsync(cancellationToken);
 
-        var jobSeeker = new JobSeeker
+        if (role == "EMPLOYER")
         {
-            Name = authUser.Name,
-            Email = authUser.Email,
-            Phone = authUser.PhoneNumber,
-            PasswordHash = authUser.PasswordHash,
-            Status = "ACTIVE",
-            Role = authUser.Role,
-            UserId = authUser.Id
-        };
+            await _authRepository.AddEmployerAsync(new Employer
+            {
+                Name = authUser.Name,
+                Email = authUser.Email,
+                Phone = authUser.PhoneNumber,
+                PasswordHash = authUser.PasswordHash,
+                Status = "ACTIVE",
+                Role = role,
+                PostingLimit = 10,
+                UserId = authUser.Id,
+                CreatedAt = now,
+                UpdatedAt = now
+            }, cancellationToken);
+        }
+        else
+        {
+            await _authRepository.AddJobSeekerAsync(new JobSeeker
+            {
+                Name = authUser.Name,
+                Email = authUser.Email,
+                Phone = authUser.PhoneNumber,
+                PasswordHash = authUser.PasswordHash,
+                Status = "ACTIVE",
+                Role = role,
+                UserId = authUser.Id,
+                CreatedAt = now,
+                UpdatedAt = now
+            }, cancellationToken);
+        }
 
-        await _authRepository.AddJobSeekerAsync(jobSeeker, cancellationToken);
         await _authRepository.SaveChangesAsync(cancellationToken);
 
         var accessToken = _tokenService.CreateAccessToken(authUser);
@@ -298,5 +320,15 @@ public sealed class AuthService : IAuthService
     private static string NormalizeEmail(string email)
     {
         return email.Trim().ToLowerInvariant();
+    }
+
+    private static string NormalizeRole(string role)
+    {
+        return role.Trim().ToUpperInvariant() switch
+        {
+            "JOB_SEEKER" => "JOB_SEEKER",
+            "EMPLOYER" => "EMPLOYER",
+            _ => throw new BadRequestException("Account type must be JOB_SEEKER or EMPLOYER.")
+        };
     }
 }

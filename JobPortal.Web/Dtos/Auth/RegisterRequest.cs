@@ -1,4 +1,4 @@
-namespace JobPortal.API.DTOs.Auth;
+namespace JobPortal.Web.Dtos.Auth;
 
 public class RegisterRequest
 {

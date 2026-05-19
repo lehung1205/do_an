@@ -1,4 +1,5 @@
 using JobPortal.Web.Dtos;
+using JobPortal.Web.Dtos.Common;
 using JobPortal.Web.Services;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -11,8 +12,9 @@ public class IndexModel : PageModel
 
     public IndexModel(ApiService api) => _api = api;
 
-    public async Task OnGetAsync()
+    public async Task OnGetAsync(int page = 1, int pageSize = 20)
     {
-        Jobs = await _api.GetAsync<List<CongViecDto>>("/api/jobs") ?? new();
+        var paged = await _api.GetApiDataAsync<PagedResult<JobDto>>($"/api/jobs?page={page}&pageSize={pageSize}");
+        Jobs = paged?.Items.Select(j => j.ToCongViecDto()).ToList() ?? new();
     }
 }

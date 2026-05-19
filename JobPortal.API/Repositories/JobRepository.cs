@@ -13,35 +13,46 @@ public class JobRepository : IJobRepository
         _context = context;
     }
 
-    public async Task<IEnumerable<Job>> GetAllAsync()
+    public async Task<(IReadOnlyList<Job> Items, int TotalCount)> GetPagedAsync(int page, int pageSize, CancellationToken cancellationToken = default)
     {
-        return await _context.Jobs.AsNoTracking().ToListAsync();
+        var query = _context.Jobs.AsNoTracking();
+        var totalCount = await query.CountAsync(cancellationToken);
+        var items = await query
+            .OrderByDescending(j => j.Id)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        return (items, totalCount);
     }
 
-    public async Task<Job?> GetByIdAsync(long id)
+    public async Task<Job?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
     {
-        return await _context.Jobs.FindAsync(id);
+        return await _context.Jobs.FindAsync([id], cancellationToken);
     }
 
-    public async Task AddAsync(Job entity)
+    public async Task AddAsync(Job entity, CancellationToken cancellationToken = default)
     {
-        await _context.Jobs.AddAsync(entity);
-        await _context.SaveChangesAsync();
+        await _context.Jobs.AddAsync(entity, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task UpdateAsync(Job entity)
+    public async Task UpdateAsync(Job entity, CancellationToken cancellationToken = default)
     {
         _context.Jobs.Update(entity);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task DeleteAsync(long id)
+    public async Task<bool> DeleteAsync(long id, CancellationToken cancellationToken = default)
     {
-        var entity = await _context.Jobs.FindAsync(id);
-        if (entity != null)
+        var entity = await _context.Jobs.FindAsync([id], cancellationToken);
+        if (entity == null)
         {
-            _context.Jobs.Remove(entity);
-            await _context.SaveChangesAsync();
+            return false;
         }
+
+        _context.Jobs.Remove(entity);
+        await _context.SaveChangesAsync(cancellationToken);
+        return true;
     }
 }

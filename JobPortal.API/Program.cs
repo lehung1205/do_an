@@ -78,9 +78,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("ADMIN", policy => policy.RequireRole("ADMIN"));
-    options.AddPolicy("MANAGER", policy => policy.RequireRole("MANAGER"));
-    options.AddPolicy("STAFF", policy => policy.RequireRole("STAFF"));
-    options.AddPolicy("CUSTOMER", policy => policy.RequireRole("CUSTOMER"));
+    options.AddPolicy("EMPLOYER", policy => policy.RequireRole("EMPLOYER"));
+    options.AddPolicy("JOB_SEEKER", policy => policy.RequireRole("JOB_SEEKER"));
 });
 
 builder.Services.AddControllers()

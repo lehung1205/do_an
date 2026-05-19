@@ -4,9 +4,9 @@ namespace JobPortal.API.Repositories;
 
 public interface IJobRepository
 {
-    Task<IEnumerable<Job>> GetAllAsync();
-    Task<Job?> GetByIdAsync(long id);
-    Task AddAsync(Job entity);
-    Task UpdateAsync(Job entity);
-    Task DeleteAsync(long id);
+    Task<(IReadOnlyList<Job> Items, int TotalCount)> GetPagedAsync(int page, int pageSize, CancellationToken cancellationToken = default);
+    Task<Job?> GetByIdAsync(long id, CancellationToken cancellationToken = default);
+    Task AddAsync(Job entity, CancellationToken cancellationToken = default);
+    Task UpdateAsync(Job entity, CancellationToken cancellationToken = default);
+    Task<bool> DeleteAsync(long id, CancellationToken cancellationToken = default);
 }

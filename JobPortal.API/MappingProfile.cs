@@ -45,8 +45,8 @@ public class MappingProfile : Profile
             .ForMember(d => d.Admin, o => o.Ignore())
             .ForMember(d => d.PaymentHistories, o => o.Ignore());
 
-        CreateMap<WorkExperience, WorkExperienceDto>();
-        CreateMap<WorkExperienceDto, WorkExperience>()
+        CreateMap<Process, ProcessDto>();
+        CreateMap<ProcessDto, Process>()
             .ForMember(d => d.Id, o => o.Ignore())
             .ForMember(d => d.Application, o => o.Ignore());
 
@@ -56,7 +56,7 @@ public class MappingProfile : Profile
             .ForMember(d => d.JobSeeker, o => o.Ignore())
             .ForMember(d => d.Job, o => o.Ignore())
             .ForMember(d => d.Resume, o => o.Ignore())
-            .ForMember(d => d.WorkExperiences, o => o.Ignore());
+            .ForMember(d => d.Processes, o => o.Ignore());
 
         CreateMap<Resume, ResumeDto>();
         CreateMap<ResumeDto, Resume>()
@@ -69,5 +69,24 @@ public class MappingProfile : Profile
             .ForMember(d => d.Id, o => o.Ignore())
             .ForMember(d => d.Employer, o => o.Ignore())
             .ForMember(d => d.PostingPackage, o => o.Ignore());
+
+        CreateMap<Category, CategoryDto>();
+        CreateMap<CategoryDto, Category>()
+            .ForMember(d => d.Id, o => o.Ignore())
+            .ForMember(d => d.Jobs, o => o.Ignore());
+
+        CreateMap<Image, ImageDto>();
+        CreateMap<ImageDto, Image>()
+            .ForMember(d => d.Id, o => o.Ignore())
+            .ForMember(d => d.Job, o => o.Ignore());
+
+        CreateMap<Review, ReviewDto>();
+        CreateMap<ReviewDto, Review>()
+            .ForMember(d => d.Id, o => o.Ignore())
+            .ForMember(d => d.Job, o => o.Ignore())
+            .ForMember(d => d.Employer, o => o.Ignore())
+            .ForMember(d => d.JobSeeker, o => o.Ignore());
+
+        CreateMap<Admin, AdminDto>();
     }
 }

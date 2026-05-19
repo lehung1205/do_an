@@ -17,7 +17,7 @@ public class AppDbContext : DbContext
     public DbSet<Resume> Resumes { get; set; } = null!;
     public DbSet<Image> Images { get; set; } = null!;
     public DbSet<Application> Applications { get; set; } = null!;
-    public DbSet<WorkExperience> WorkExperiences { get; set; } = null!;
+    public DbSet<Process> Processes { get; set; } = null!;
     public DbSet<Review> Reviews { get; set; } = null!;
     public DbSet<PaymentHistory> PaymentHistories { get; set; } = null!;
     public DbSet<User> Users { get; set; } = null!;
@@ -73,9 +73,9 @@ public class AppDbContext : DbContext
             .HasForeignKey(u => u.ResumeId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        modelBuilder.Entity<WorkExperience>()
+        modelBuilder.Entity<Process>()
             .HasOne(q => q.Application)
-            .WithMany(u => u.WorkExperiences)
+            .WithMany(u => u.Processes)
             .HasForeignKey(q => q.ApplicationId)
             .OnDelete(DeleteBehavior.Cascade);
 

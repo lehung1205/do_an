@@ -35,5 +35,5 @@ public class Application
     [MaxLength(32)]
     public string Status { get; set; } = null!;
 
-    public ICollection<WorkExperience> WorkExperiences { get; set; } = new List<WorkExperience>();
+    public ICollection<Process> Processes { get; set; } = new List<Process>();
 }

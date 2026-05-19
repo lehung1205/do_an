@@ -3,8 +3,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace JobPortal.API.Models;
 
-[Table("work_experiences")]
-public class WorkExperience
+[Table("process")]
+public class Process
 {
     [Key]
     [Column("id")]

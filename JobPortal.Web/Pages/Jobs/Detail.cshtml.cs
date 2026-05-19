@@ -18,13 +18,13 @@ public class DetailModel : PageModel
 
     public async Task<IActionResult> OnGetAsync(long id)
     {
-        var job = await _api.GetAsync<CongViecDto>($"/api/jobs/{id}");
+        var job = await _api.GetApiDataAsync<JobDto>($"/api/jobs/{id}");
         if (job == null)
         {
             return NotFound();
         }
 
-        Job = job;
+        Job = job.ToCongViecDto();
         return Page();
     }
 }

@@ -1,4 +1,5 @@
 using JobPortal.API.DTOs;
+using JobPortal.API.DTOs.Common;
 using JobPortal.API.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,38 +17,40 @@ public class JobsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<JobDto>>> GetJobs()
+    public async Task<IActionResult> GetJobs([FromQuery] int page = 1, [FromQuery] int pageSize = 10, CancellationToken cancellationToken = default)
     {
-        var jobs = await _jobService.GetAllJobsAsync();
-        return Ok(jobs);
+        var pagedJobs = await _jobService.GetJobsPagedAsync(page, pageSize, cancellationToken);
+        return Ok(ApiResponse<PagedResult<JobDto>>.SuccessResponse(pagedJobs, "Jobs retrieved successfully."));
     }
 
     [HttpGet("{id:long}")]
-    public async Task<ActionResult<JobDto>> GetJob(long id)
+    public async Task<IActionResult> GetJob(long id, CancellationToken cancellationToken)
     {
-        var job = await _jobService.GetJobByIdAsync(id);
-        if (job == null) return NotFound();
-        return Ok(job);
+        var job = await _jobService.GetJobByIdAsync(id, cancellationToken);
+        return Ok(ApiResponse<JobDto>.SuccessResponse(job, "Job retrieved successfully."));
     }
 
     [HttpPost]
-    public async Task<ActionResult<JobDto>> CreateJob(JobDto jobDto)
+    public async Task<IActionResult> CreateJob([FromBody] JobDto jobDto, CancellationToken cancellationToken)
     {
-        var createdJob = await _jobService.CreateJobAsync(jobDto);
-        return CreatedAtAction(nameof(GetJob), new { id = createdJob.Id }, createdJob);
+        var createdJob = await _jobService.CreateJobAsync(jobDto, cancellationToken);
+        return CreatedAtAction(
+            nameof(GetJob),
+            new { id = createdJob.Id },
+            ApiResponse<JobDto>.SuccessResponse(createdJob, "Job created successfully."));
     }
 
     [HttpPut("{id:long}")]
-    public async Task<IActionResult> UpdateJob(long id, JobDto jobDto)
+    public async Task<IActionResult> UpdateJob(long id, [FromBody] JobDto jobDto, CancellationToken cancellationToken)
     {
-        await _jobService.UpdateJobAsync(id, jobDto);
-        return NoContent();
+        await _jobService.UpdateJobAsync(id, jobDto, cancellationToken);
+        return Ok(ApiResponse<object>.SuccessResponse(null, "Job updated successfully."));
     }
 
     [HttpDelete("{id:long}")]
-    public async Task<IActionResult> DeleteJob(long id)
+    public async Task<IActionResult> DeleteJob(long id, CancellationToken cancellationToken)
     {
-        await _jobService.DeleteJobAsync(id);
-        return NoContent();
+        await _jobService.DeleteJobAsync(id, cancellationToken);
+        return Ok(ApiResponse<object>.SuccessResponse(null, "Job deleted successfully."));
     }
 }

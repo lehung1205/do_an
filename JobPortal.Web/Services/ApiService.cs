@@ -1,7 +1,8 @@
 namespace JobPortal.Web.Services;
+
 using System.Net.Http.Headers;
 using System.Text.Json;
-using System.Threading.Tasks;
+using JobPortal.Web.Dtos.Common;
 
 public class ApiService
 {
@@ -44,6 +45,19 @@ public class ApiService
         var res = await CreateClient().GetAsync(endpoint);
         if (!res.IsSuccessStatusCode) return default;
         return await res.Content.ReadFromJsonAsync<T>(JsonOptions);
+    }
+
+    public async Task<ApiResponse<T>?> GetApiResponseAsync<T>(string endpoint)
+    {
+        var res = await CreateClient().GetAsync(endpoint);
+        if (!res.IsSuccessStatusCode) return default;
+        return await res.Content.ReadFromJsonAsync<ApiResponse<T>>(JsonOptions);
+    }
+
+    public async Task<T?> GetApiDataAsync<T>(string endpoint)
+    {
+        var response = await GetApiResponseAsync<T>(endpoint);
+        return response is { Success: true } ? response.Data : default;
     }
 
     public async Task<HttpResponseMessage> PostAsync<T>(string endpoint, T data)

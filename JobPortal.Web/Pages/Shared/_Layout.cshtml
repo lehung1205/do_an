@@ -27,6 +27,7 @@
                 @{
                     var isLoggedIn = !string.IsNullOrEmpty(Context.Session.GetString("JwtToken"));
                     var userName = Context.Session.GetString("UserName");
+                    var userInitials = JobPortal.Web.Models.AccountPanelViewModel.GetInitials(userName);
                 }
                 <div class="collapse navbar-collapse" id="mainNav">
                     <ul class="navbar-nav me-auto align-items-lg-center gap-lg-1">
@@ -40,11 +41,39 @@
                     <ul class="navbar-nav align-items-lg-center gap-2 nav-auth">
                         @if (isLoggedIn)
                         {
-                            <li class="nav-item nav-auth__greeting d-none d-lg-block">
-                                <span class="text-muted small">Xin chào, <strong>@userName</strong></span>
-                            </li>
-                            <li class="nav-item">
-                                <a class="btn btn-outline-secondary btn-sm px-3" asp-page="/Auth/Logout">Đăng xuất</a>
+                            <li class="nav-item dropdown nav-account">
+                                <button class="btn nav-avatar dropdown-toggle" type="button"
+                                        data-bs-toggle="dropdown" aria-expanded="false"
+                                        aria-label="Menu tài khoản">
+                                    <span class="nav-avatar__circle">@userInitials</span>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                    <li class="dropdown-header small text-muted">@userName</li>
+                                    <li>
+                                        <button type="button" class="dropdown-item"
+                                                data-account-open data-account-tab="view">
+                                            <i class="bi bi-person me-2"></i> Thông tin cá nhân
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button type="button" class="dropdown-item"
+                                                data-account-open data-account-tab="edit">
+                                            <i class="bi bi-pencil me-2"></i> Chỉnh sửa thông tin
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button type="button" class="dropdown-item"
+                                                data-account-open data-account-tab="password">
+                                            <i class="bi bi-shield-lock me-2"></i> Đổi mật khẩu
+                                        </button>
+                                    </li>
+                                    <li><hr class="dropdown-divider" /></li>
+                                    <li>
+                                        <a class="dropdown-item text-danger" asp-page="/Auth/Logout">
+                                            <i class="bi bi-box-arrow-right me-2"></i> Đăng xuất
+                                        </a>
+                                    </li>
+                                </ul>
                             </li>
                         }
                         else
@@ -82,6 +111,12 @@
             </div>
         </div>
     </footer>
+
+    @if (isLoggedIn)
+    {
+        @await Component.InvokeAsync("AccountPanel")
+        <partial name="_ValidationScriptsPartial" />
+    }
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

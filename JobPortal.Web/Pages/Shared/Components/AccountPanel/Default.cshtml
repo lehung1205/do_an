@@ -1,0 +1,120 @@
+@model JobPortal.Web.Models.AccountPanelViewModel
+
+<div class="offcanvas offcanvas-end account-offcanvas" tabindex="-1" id="accountOffcanvas"
+     aria-labelledby="accountOffcanvasLabel" data-active-tab="@Model.ActiveTab">
+    <div class="offcanvas-header border-bottom">
+        <div>
+            <h5 class="offcanvas-title mb-0" id="accountOffcanvasLabel">Tài khoản của tôi</h5>
+            <p class="text-muted small mb-0">@Model.Profile.Name</p>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Đóng"></button>
+    </div>
+    <div class="offcanvas-body p-0 d-flex flex-column">
+        @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+        {
+            <div class="alert alert-success py-2 mx-3 mt-3 mb-0 small">@Model.SuccessMessage</div>
+        }
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="alert alert-danger py-2 mx-3 mt-3 mb-0 small">@Model.ErrorMessage</div>
+        }
+
+        <ul class="nav nav-tabs account-tabs border-0 px-3 pt-3" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="account-tab-view-btn" data-bs-toggle="tab"
+                        data-bs-target="#account-tab-view" type="button" role="tab">
+                    <i class="bi bi-person me-1"></i> Thông tin
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="account-tab-edit-btn" data-bs-toggle="tab"
+                        data-bs-target="#account-tab-edit" type="button" role="tab">
+                    <i class="bi bi-pencil me-1"></i> Chỉnh sửa
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="account-tab-password-btn" data-bs-toggle="tab"
+                        data-bs-target="#account-tab-password" type="button" role="tab">
+                    <i class="bi bi-shield-lock me-1"></i> Mật khẩu
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content flex-grow-1 p-3 overflow-auto">
+            <div class="tab-pane fade show active" id="account-tab-view" role="tabpanel">
+                <dl class="row mb-0 account-info">
+                    <dt class="col-5 text-muted">Họ và tên</dt>
+                    <dd class="col-7 fw-semibold mb-2">@Model.Profile.Name</dd>
+                    <dt class="col-5 text-muted">Email</dt>
+                    <dd class="col-7 mb-2">@Model.Profile.Email</dd>
+                    <dt class="col-5 text-muted">Số điện thoại</dt>
+                    <dd class="col-7 mb-2">
+                        @(string.IsNullOrWhiteSpace(Model.Profile.PhoneNumber) ? "—" : Model.Profile.PhoneNumber)
+                    </dd>
+                    <dt class="col-5 text-muted">Loại TK</dt>
+                    <dd class="col-7 mb-0">
+                        <span class="badge text-bg-primary-subtle text-primary border border-primary-subtle">
+                            @AccountPanelViewModel.FormatRole(Model.Profile.Role)
+                        </span>
+                    </dd>
+                </dl>
+                <button type="button" class="btn btn-primary btn-sm mt-3" data-account-switch-tab="edit">
+                    <i class="bi bi-pencil me-1"></i> Chỉnh sửa thông tin
+                </button>
+            </div>
+
+            <div class="tab-pane fade" id="account-tab-edit" role="tabpanel">
+                <form method="post" action="@Model.UpdateFormAction">
+                    <input type="hidden" name="@Model.AntiForgeryFieldName" value="@Model.AntiForgeryRequestToken" />
+                    <input type="hidden" name="ReturnUrl" value="@Model.ReturnUrl" />
+                    <div class="mb-3">
+                        <label class="form-label" for="EditInput_Name">Họ và tên</label>
+                        <input type="text" class="form-control" id="EditInput_Name" name="EditInput.Name"
+                               value="@Model.EditInput.Name" maxlength="255" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" value="@Model.Profile.Email" disabled />
+                        <div class="form-text">Email không thể thay đổi tại đây.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="EditInput_PhoneNumber">Số điện thoại</label>
+                        <input type="text" class="form-control" id="EditInput_PhoneNumber" name="EditInput.PhoneNumber"
+                               value="@Model.EditInput.PhoneNumber" maxlength="20" placeholder="0901234567" />
+                    </div>
+                    <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                </form>
+            </div>
+
+            <div class="tab-pane fade" id="account-tab-password" role="tabpanel">
+                <form method="post" action="@Model.ChangePasswordFormAction">
+                    <input type="hidden" name="@Model.AntiForgeryFieldName" value="@Model.AntiForgeryRequestToken" />
+                    <input type="hidden" name="ReturnUrl" value="@Model.ReturnUrl" />
+                    <div class="mb-3">
+                        <label class="form-label" for="PasswordInput_CurrentPassword">Mật khẩu hiện tại</label>
+                        <input type="password" class="form-control" id="PasswordInput_CurrentPassword"
+                               name="PasswordInput.CurrentPassword" autocomplete="current-password" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="PasswordInput_NewPassword">Mật khẩu mới</label>
+                        <input type="password" class="form-control" id="PasswordInput_NewPassword"
+                               name="PasswordInput.NewPassword" autocomplete="new-password" />
+                        <div class="form-text">Ít nhất 8 ký tự, có chữ hoa và chữ số (theo quy tắc API).</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="PasswordInput_ConfirmNewPassword">Xác nhận mật khẩu mới</label>
+                        <input type="password" class="form-control" id="PasswordInput_ConfirmNewPassword"
+                               name="PasswordInput.ConfirmNewPassword" autocomplete="new-password" />
+                    </div>
+                    <button type="submit" class="btn btn-primary">Đổi mật khẩu</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="border-top p-3">
+            <a asp-page="/Auth/Logout" class="btn btn-outline-secondary btn-sm w-100">
+                <i class="bi bi-box-arrow-right me-1"></i> Đăng xuất
+            </a>
+        </div>
+    </div>
+</div>

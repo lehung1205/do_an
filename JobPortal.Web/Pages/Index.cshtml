@@ -64,13 +64,13 @@
             </div>
             <div class="col-md-4">
                 <div class="home-stat-card">
-                    <div class="home-stat-card__value">500+</div>
+                    <div class="home-stat-card__value">@(Model.EmployerCount)+</div>
                     <div class="home-stat-card__label">Nhà tuyển dụng</div>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="home-stat-card">
-                    <div class="home-stat-card__value">10K+</div>
+                    <div class="home-stat-card__value">@(Model.JobSeekerCount)+</div>
                     <div class="home-stat-card__label">Ứng viên tin tưởng</div>
                 </div>
             </div>
@@ -113,7 +113,7 @@
                                     </small>
                                 </div>
                                 <h3 class="h5 card-title mb-2">
-                                    <a asp-page="/Jobs/Detail" asp-route-id="@job.Id" class="job-card__title stretched-link text-decoration-none">
+                                    <a asp-page="/Jobs/Detail" asp-route-id="@job.Id" class="job-card__title text-decoration-none">
                                         @job.Title
                                     </a>
                                 </h3>
@@ -128,9 +128,10 @@
                                         <i class="bi bi-cash-stack text-primary me-2"></i>@IndexModel.FormatSalary(job.Salary)
                                     </li>
                                 </ul>
-                                <span class="btn btn-sm btn-outline-primary mt-auto align-self-start position-relative" style="z-index: 2;">
+                                <a asp-page="/Jobs/Detail" asp-route-id="@job.Id"
+                                   class="btn btn-sm btn-outline-primary mt-auto align-self-start">
                                     Xem chi tiết
-                                </span>
+                                </a>
                             </div>
                         </article>
                     </div>

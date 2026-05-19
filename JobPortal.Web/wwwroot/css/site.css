@@ -81,6 +81,75 @@ main {
   border-radius: var(--jp-radius);
 }
 
+.account-card {
+  border-radius: var(--jp-radius);
+}
+
+.account-tabs .nav-link {
+  color: var(--jp-muted);
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+}
+
+.account-tabs .nav-link:hover {
+  color: var(--jp-primary);
+}
+
+.account-tabs .nav-link.active {
+  color: var(--jp-primary);
+  background: transparent;
+  border-bottom-color: var(--jp-primary);
+}
+
+.account-info dt {
+  padding-top: 0.35rem;
+  padding-bottom: 0.35rem;
+}
+
+.account-info dd {
+  padding-top: 0.35rem;
+  padding-bottom: 0.35rem;
+  margin-bottom: 0;
+}
+
+.account-offcanvas {
+  width: min(100%, 420px);
+}
+
+.nav-account .dropdown-toggle::after {
+  display: none;
+}
+
+.nav-avatar {
+  padding: 0;
+  border: none;
+  background: transparent;
+  line-height: 1;
+}
+
+.nav-avatar__circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--jp-primary), var(--jp-accent));
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
+}
+
+.nav-avatar:hover .nav-avatar__circle,
+.nav-avatar:focus .nav-avatar__circle {
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.45);
+}
+
 .btn-primary,
 .home-btn-primary {
   background: linear-gradient(135deg, var(--jp-primary), var(--jp-primary-dark));

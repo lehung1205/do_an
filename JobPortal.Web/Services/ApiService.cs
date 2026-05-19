@@ -24,15 +24,15 @@ public class ApiService
     private HttpClient CreateClient()
     {
         var client = _factory.CreateClient("JobPortalAPI");
-        
-        try 
+
+        try
         {
             var token = _accessor.HttpContext?.Session?.GetString("JwtToken");
             if (!string.IsNullOrEmpty(token))
                 client.DefaultRequestHeaders.Authorization =
                     new AuthenticationHeaderValue("Bearer", token);
         }
-        catch (InvalidOperationException) 
+        catch (InvalidOperationException)
         {
             // Session not available or not configured yet
         }
@@ -50,8 +50,7 @@ public class ApiService
     public async Task<ApiResponse<T>?> GetApiResponseAsync<T>(string endpoint)
     {
         var res = await CreateClient().GetAsync(endpoint);
-        if (!res.IsSuccessStatusCode) return default;
-        return await res.Content.ReadFromJsonAsync<ApiResponse<T>>(JsonOptions);
+        return await ReadApiResponseAsync<T>(res);
     }
 
     public async Task<T?> GetApiDataAsync<T>(string endpoint)
@@ -68,12 +67,7 @@ public class ApiService
     public async Task<ApiResponse<T>?> PostApiResponseAsync<TRequest, T>(string endpoint, TRequest data)
     {
         var res = await PostAsync(endpoint, data);
-        if (res.Content.Headers.ContentLength == 0 && !res.IsSuccessStatusCode)
-        {
-            return default;
-        }
-
-        return await res.Content.ReadFromJsonAsync<ApiResponse<T>>(JsonOptions);
+        return await ReadApiResponseAsync<T>(res);
     }
 
     public async Task<HttpResponseMessage> PutAsync<T>(string endpoint, T data)
@@ -81,8 +75,25 @@ public class ApiService
         return await CreateClient().PutAsJsonAsync(endpoint, data, JsonOptions);
     }
 
+    public async Task<ApiResponse<T>?> PutApiResponseAsync<TRequest, T>(string endpoint, TRequest data)
+    {
+        var res = await PutAsync(endpoint, data);
+        return await ReadApiResponseAsync<T>(res);
+    }
+
     public async Task<HttpResponseMessage> DeleteAsync(string endpoint)
     {
         return await CreateClient().DeleteAsync(endpoint);
+    }
+
+    private static async Task<ApiResponse<T>?> ReadApiResponseAsync<T>(HttpResponseMessage res)
+    {
+        var body = await res.Content.ReadAsStringAsync();
+        if (string.IsNullOrWhiteSpace(body))
+        {
+            return null;
+        }
+
+        return JsonSerializer.Deserialize<ApiResponse<T>>(body, JsonOptions);
     }
 }

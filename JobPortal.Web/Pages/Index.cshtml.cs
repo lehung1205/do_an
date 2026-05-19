@@ -11,6 +11,8 @@ public class IndexModel : PageModel
 
     public List<JobDto> FeaturedJobs { get; set; } = new();
     public int TotalJobCount { get; set; }
+    public int EmployerCount { get; set; }
+    public int JobSeekerCount { get; set; }
     public string? Q { get; set; }
     public string? Location { get; set; }
 
@@ -21,9 +23,16 @@ public class IndexModel : PageModel
         Q = q;
         Location = location;
 
-        var paged = await _api.GetApiDataAsync<PagedResult<JobDto>>("/api/jobs?page=1&pageSize=50");
+        var pagedTask = _api.GetApiDataAsync<PagedResult<JobDto>>("/api/jobs?page=1&pageSize=50");
+        var statsTask = _api.GetApiDataAsync<HomeStatsDto>("/api/stats");
+        await Task.WhenAll(pagedTask, statsTask);
+
+        var paged = await pagedTask;
+        var stats = await statsTask;
         var jobs = paged?.Items.ToList() ?? new();
         TotalJobCount = paged?.TotalCount ?? jobs.Count;
+        EmployerCount = stats?.EmployerCount ?? 0;
+        JobSeekerCount = stats?.JobSeekerCount ?? 0;
 
         if (!string.IsNullOrWhiteSpace(q))
         {

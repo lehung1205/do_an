@@ -99,6 +99,15 @@ public class AuthController : ControllerBase
         return Ok(ApiResponse<ProfileResponse>.SuccessResponse(profile, "Current user profile retrieved."));
     }
 
+    [HttpPut("me")]
+    [Authorize]
+    public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequest request, CancellationToken cancellationToken)
+    {
+        var userId = GetCurrentUserId();
+        var profile = await _authService.UpdateProfileAsync(userId, request, cancellationToken);
+        return Ok(ApiResponse<ProfileResponse>.SuccessResponse(profile, "Profile updated successfully."));
+    }
+
     private string GetClientIp()
     {
         return HttpContext?.Connection?.RemoteIpAddress?.ToString() ?? "unknown";

@@ -1,0 +1,230 @@
+using System.ComponentModel.DataAnnotations;
+using JobPortal.Web.Dtos.Auth;
+using JobPortal.Web.Services;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+
+namespace JobPortal.Web.Pages.Account;
+
+public class IndexModel : PageModel
+{
+    private readonly ApiService _api;
+
+    public IndexModel(ApiService api) => _api = api;
+
+    public ProfileResponse? Profile { get; set; }
+
+    public EditInputModel EditInput { get; set; } = new();
+
+    public PasswordInputModel PasswordInput { get; set; } = new();
+
+    public string? SuccessMessage { get; set; }
+    public string? ErrorMessage { get; set; }
+
+    public Task<IActionResult> OnGetAsync(string? tab)
+    {
+        var redirect = RequireLogin();
+        if (redirect != null)
+        {
+            return Task.FromResult(redirect);
+        }
+
+        return Task.FromResult(RedirectBack(null, openAccount: true, tab: NormalizeTab(tab ?? "view")));
+    }
+
+    public async Task<IActionResult> OnPostUpdateAsync(
+        [Bind(Prefix = "EditInput")] EditInputModel? editInput,
+        [FromForm] string? returnUrl)
+    {
+        var redirect = RequireLogin();
+        if (redirect != null)
+        {
+            return redirect;
+        }
+
+        ModelState.Clear();
+        editInput ??= new EditInputModel();
+
+        var validationError = ValidateEditInput(editInput);
+        if (validationError != null)
+        {
+            TempData["AccountErrorMessage"] = validationError;
+            TempData["AccountTab"] = "edit";
+            return RedirectBack(returnUrl, openAccount: true, tab: "edit");
+        }
+
+        var response = await _api.PutApiResponseAsync<UpdateProfileRequest, ProfileResponse>(
+            "/api/auth/me",
+            new UpdateProfileRequest
+            {
+                Name = editInput.Name.Trim(),
+                PhoneNumber = string.IsNullOrWhiteSpace(editInput.PhoneNumber) ? null : editInput.PhoneNumber.Trim()
+            });
+
+        if (response is not { Success: true, Data: not null })
+        {
+            TempData["AccountErrorMessage"] = response?.Message
+                ?? response?.Errors.FirstOrDefault()?.Message
+                ?? "Cập nhật thông tin thất bại.";
+            TempData["AccountTab"] = "edit";
+            return RedirectBack(returnUrl, openAccount: true, tab: "edit");
+        }
+
+        HttpContext.Session.SetString("UserName", response.Data.Name);
+        TempData["AccountSuccessMessage"] = "Đã cập nhật thông tin cá nhân.";
+        TempData["AccountTab"] = "view";
+        return RedirectBack(returnUrl, openAccount: true, tab: "view");
+    }
+
+    public async Task<IActionResult> OnPostChangePasswordAsync(
+        [Bind(Prefix = "PasswordInput")] PasswordInputModel? passwordInput,
+        [FromForm] string? returnUrl)
+    {
+        var redirect = RequireLogin();
+        if (redirect != null)
+        {
+            return redirect;
+        }
+
+        ModelState.Clear();
+        passwordInput ??= new PasswordInputModel();
+
+        var validationError = ValidatePasswordInput(passwordInput);
+        if (validationError != null)
+        {
+            TempData["AccountErrorMessage"] = validationError;
+            TempData["AccountTab"] = "password";
+            return RedirectBack(returnUrl, openAccount: true, tab: "password");
+        }
+
+        var response = await _api.PostApiResponseAsync<ChangePasswordRequest, object>(
+            "/api/auth/change-password",
+            new ChangePasswordRequest
+            {
+                CurrentPassword = passwordInput.CurrentPassword,
+                NewPassword = passwordInput.NewPassword,
+                ConfirmNewPassword = passwordInput.ConfirmNewPassword
+            });
+
+        if (response is not { Success: true })
+        {
+            TempData["AccountErrorMessage"] = response?.Message
+                ?? response?.Errors.FirstOrDefault()?.Message
+                ?? "Đổi mật khẩu thất bại.";
+            TempData["AccountTab"] = "password";
+            return RedirectBack(returnUrl, openAccount: true, tab: "password");
+        }
+
+        TempData["AccountSuccessMessage"] = "Đã đổi mật khẩu thành công.";
+        TempData["AccountTab"] = "password";
+        return RedirectBack(returnUrl, openAccount: true, tab: "password");
+    }
+
+    public static string FormatRole(string role) => role switch
+    {
+        "JOB_SEEKER" => "Ứng viên",
+        "EMPLOYER" => "Nhà tuyển dụng",
+        "ADMIN" => "Quản trị viên",
+        _ => role
+    };
+
+    private static string? ValidateEditInput(EditInputModel input)
+    {
+        if (string.IsNullOrWhiteSpace(input.Name))
+        {
+            return "Vui lòng nhập họ tên.";
+        }
+
+        if (input.Name.Length > 255)
+        {
+            return "Họ tên không được vượt quá 255 ký tự.";
+        }
+
+        if (input.PhoneNumber?.Length > 20)
+        {
+            return "Số điện thoại không được vượt quá 20 ký tự.";
+        }
+
+        return null;
+    }
+
+    private static string? ValidatePasswordInput(PasswordInputModel input)
+    {
+        if (string.IsNullOrWhiteSpace(input.CurrentPassword))
+        {
+            return "Vui lòng nhập mật khẩu hiện tại.";
+        }
+
+        if (string.IsNullOrWhiteSpace(input.NewPassword))
+        {
+            return "Vui lòng nhập mật khẩu mới.";
+        }
+
+        if (input.NewPassword.Length < 8)
+        {
+            return "Mật khẩu mới phải có ít nhất 8 ký tự.";
+        }
+
+        if (input.NewPassword != input.ConfirmNewPassword)
+        {
+            return "Mật khẩu xác nhận không khớp.";
+        }
+
+        return null;
+    }
+
+    private IActionResult? RequireLogin()
+    {
+        if (string.IsNullOrEmpty(HttpContext.Session.GetString("JwtToken")))
+        {
+            return RedirectToPage("/Auth/Login", new { returnUrl = Url.Page("/Index") });
+        }
+
+        return null;
+    }
+
+    private IActionResult RedirectBack(string? returnUrl, bool openAccount, string tab)
+    {
+        var target = ResolveReturnUrl(returnUrl);
+        if (!openAccount)
+        {
+            return Redirect(target);
+        }
+
+        var separator = target.Contains('?') ? "&" : "?";
+        return Redirect($"{target}{separator}accountOpen=1&accountTab={tab}");
+    }
+
+    private string ResolveReturnUrl(string? returnUrl)
+    {
+        if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+        {
+            return returnUrl;
+        }
+
+        return Url.Page("/Index")!;
+    }
+
+    private static string NormalizeTab(string tab) => tab switch
+    {
+        "edit" => "edit",
+        "password" => "password",
+        _ => "view"
+    };
+
+    public class EditInputModel
+    {
+        public string Name { get; set; } = string.Empty;
+
+        public string? PhoneNumber { get; set; }
+    }
+
+    public class PasswordInputModel
+    {
+        public string CurrentPassword { get; set; } = string.Empty;
+
+        public string NewPassword { get; set; } = string.Empty;
+
+        public string ConfirmNewPassword { get; set; } = string.Empty;
+    }
+}

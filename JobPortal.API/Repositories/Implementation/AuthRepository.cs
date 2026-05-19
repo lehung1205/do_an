@@ -20,6 +20,13 @@ public class AuthRepository : IAuthRepository
         return await _context.Users.AnyAsync(u => u.Email == email || u.PhoneNumber == phoneNumber, cancellationToken);
     }
 
+    public async Task<bool> UserExistsForOtherAsync(long excludeUserId, string email, string? phoneNumber, CancellationToken cancellationToken = default)
+    {
+        return await _context.Users.AnyAsync(
+            u => u.Id != excludeUserId && (u.Email == email || (phoneNumber != null && u.PhoneNumber == phoneNumber)),
+            cancellationToken);
+    }
+
     public async Task AddUserAsync(User user, CancellationToken cancellationToken = default)
     {
         await _context.Users.AddAsync(user, cancellationToken);
@@ -60,6 +67,15 @@ public class AuthRepository : IAuthRepository
     public async Task<User?> FindUserByIdAsync(long id, CancellationToken cancellationToken = default)
     {
         return await _context.Users.FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
+    }
+
+    public async Task<User?> FindUserByIdWithProfilesAsync(long id, CancellationToken cancellationToken = default)
+    {
+        return await _context.Users
+            .Include(u => u.AdminProfile)
+            .Include(u => u.EmployerProfile)
+            .Include(u => u.JobSeekerProfile)
+            .FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
     }
 
     public async Task<User?> FindUserByPasswordResetTokenHashAsync(string tokenHash, CancellationToken cancellationToken = default)

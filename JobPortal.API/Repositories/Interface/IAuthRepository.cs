@@ -6,6 +6,8 @@ namespace JobPortal.API.Repositories.Interface;
 public interface IAuthRepository
 {
     Task<bool> UserExistsAsync(string email, string? phoneNumber, CancellationToken cancellationToken = default);
+    Task<bool> UserExistsForOtherAsync(long excludeUserId, string email, string? phoneNumber, CancellationToken cancellationToken = default);
+    Task<User?> FindUserByIdWithProfilesAsync(long id, CancellationToken cancellationToken = default);
     Task AddUserAsync(User user, CancellationToken cancellationToken = default);
     Task AddJobSeekerAsync(JobSeeker jobSeeker, CancellationToken cancellationToken = default);
     Task AddEmployerAsync(Employer employer, CancellationToken cancellationToken = default);

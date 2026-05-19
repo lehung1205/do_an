@@ -260,6 +260,47 @@ public sealed class AuthService : IAuthService
         return MapProfile(user);
     }
 
+    public async Task<ProfileResponse> UpdateProfileAsync(long userId, UpdateProfileRequest request, CancellationToken cancellationToken = default)
+    {
+        var user = await _authRepository.FindUserByIdWithProfilesAsync(userId, cancellationToken);
+        if (user == null)
+        {
+            throw new NotFoundException("User not found.");
+        }
+
+        var phone = string.IsNullOrWhiteSpace(request.PhoneNumber) ? null : request.PhoneNumber.Trim();
+        if (await _authRepository.UserExistsForOtherAsync(userId, user.Email, phone, cancellationToken))
+        {
+            throw new ConflictException("Email or phone number is already in use.");
+        }
+
+        var now = DateTime.UtcNow;
+        user.Name = request.Name.Trim();
+        user.PhoneNumber = phone;
+        user.UpdatedAt = now;
+
+        if (user.EmployerProfile != null)
+        {
+            user.EmployerProfile.Name = user.Name;
+            user.EmployerProfile.Phone = phone;
+            user.EmployerProfile.UpdatedAt = now;
+        }
+        else if (user.JobSeekerProfile != null)
+        {
+            user.JobSeekerProfile.Name = user.Name;
+            user.JobSeekerProfile.Phone = phone;
+            user.JobSeekerProfile.UpdatedAt = now;
+        }
+        else if (user.AdminProfile != null)
+        {
+            user.AdminProfile.Name = user.Name;
+            user.AdminProfile.UpdatedAt = now;
+        }
+
+        await _authRepository.SaveChangesAsync(cancellationToken);
+        return MapProfile(user);
+    }
+
     private Task<bool> UserExistsAsync(string email, string? phoneNumber, CancellationToken cancellationToken)
     {
         return _authRepository.UserExistsAsync(email, phoneNumber, cancellationToken);
@@ -313,6 +354,7 @@ public sealed class AuthService : IAuthService
             Id = user.Id,
             Name = user.Name,
             Email = user.Email,
+            PhoneNumber = user.PhoneNumber,
             Role = user.Role
         };
     }

@@ -88,5 +88,7 @@ public class MappingProfile : Profile
             .ForMember(d => d.JobSeeker, o => o.Ignore());
 
         CreateMap<Admin, AdminDto>();
+        CreateMap<Employer, EmployerDto>();
+        CreateMap<JobSeeker, JobSeekerDto>();
     }
 }

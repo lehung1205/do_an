@@ -30,6 +30,7 @@
                     var userRole = Context.Session.GetString("UserRole");
                     var isJobSeeker = string.Equals(userRole, "JOB_SEEKER", StringComparison.Ordinal);
                     var isEmployer = string.Equals(userRole, "EMPLOYER", StringComparison.Ordinal);
+                    var userAvatarUrl = Context.Session.GetString("UserAvatarUrl");
                     var userInitials = JobPortal.Web.Models.AccountPanelViewModel.GetInitials(userName);
                 }
                 <div class="collapse navbar-collapse" id="mainNav">
@@ -57,7 +58,14 @@
                                 <button class="btn nav-avatar dropdown-toggle" type="button"
                                         data-bs-toggle="dropdown" aria-expanded="false"
                                         aria-label="Menu tài khoản">
-                                    <span class="nav-avatar__circle">@userInitials</span>
+                                    @if (!string.IsNullOrWhiteSpace(userAvatarUrl))
+                                    {
+                                        <img src="@userAvatarUrl" alt="" class="nav-avatar__circle nav-avatar__img" width="40" height="40" />
+                                    }
+                                    else
+                                    {
+                                        <span class="nav-avatar__circle">@userInitials</span>
+                                    }
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-end shadow-sm">
                                     <li class="dropdown-header small text-muted">@userName</li>

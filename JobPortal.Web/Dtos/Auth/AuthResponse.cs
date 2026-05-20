@@ -18,4 +18,5 @@ public class ProfileResponse
     public string Role { get; set; } = null!;
     public long? JobSeekerId { get; set; }
     public long? EmployerId { get; set; }
+    public string? ProfileImage { get; set; }
 }

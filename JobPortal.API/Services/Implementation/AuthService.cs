@@ -299,6 +299,26 @@ public sealed class AuthService : IAuthService
             user.AdminProfile.UpdatedAt = now;
         }
 
+        if (request.ProfileImage != null)
+        {
+            var imageUrl = string.IsNullOrWhiteSpace(request.ProfileImage) ? null : request.ProfileImage.Trim();
+            if (imageUrl != null && imageUrl.Length > 500)
+            {
+                throw new BadRequestException("Profile image URL is too long.");
+            }
+
+            user.ProfileImage = imageUrl;
+            if (user.JobSeekerProfile != null)
+            {
+                user.JobSeekerProfile.ProfileImage = imageUrl;
+            }
+
+            if (user.EmployerProfile != null)
+            {
+                user.EmployerProfile.Image = imageUrl;
+            }
+        }
+
         await _authRepository.SaveChangesAsync(cancellationToken);
         return MapProfile(user);
     }
@@ -359,7 +379,10 @@ public sealed class AuthService : IAuthService
             PhoneNumber = user.PhoneNumber,
             Role = user.Role,
             JobSeekerId = user.JobSeekerProfile?.Id,
-            EmployerId = user.EmployerProfile?.Id
+            EmployerId = user.EmployerProfile?.Id,
+            ProfileImage = user.ProfileImage
+                ?? user.JobSeekerProfile?.ProfileImage
+                ?? user.EmployerProfile?.Image
         };
     }
 

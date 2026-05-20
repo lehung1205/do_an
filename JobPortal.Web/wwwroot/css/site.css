@@ -145,8 +145,18 @@ main {
   box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
 }
 
+.nav-avatar__img {
+  display: block;
+  border-radius: 50%;
+  object-fit: cover;
+  padding: 0;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
+}
+
 .nav-avatar:hover .nav-avatar__circle,
-.nav-avatar:focus .nav-avatar__circle {
+.nav-avatar:focus .nav-avatar__circle,
+.nav-avatar:hover .nav-avatar__img,
+.nav-avatar:focus .nav-avatar__img {
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.45);
 }
 

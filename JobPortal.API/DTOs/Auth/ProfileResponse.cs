@@ -13,4 +13,7 @@ public class ProfileResponse
 
     /// <summary>Present when the user has an employer profile (same row as <c>employers</c>).</summary>
     public long? EmployerId { get; set; }
+
+    /// <summary>Avatar URL (stored on <c>users.profile_image</c>; may mirror job seeker / employer).</summary>
+    public string? ProfileImage { get; set; }
 }

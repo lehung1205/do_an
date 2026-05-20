@@ -51,6 +51,19 @@
 
         <div class="tab-content flex-grow-1 p-3 overflow-auto">
             <div class="tab-pane fade show active" id="account-tab-view" role="tabpanel">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    @if (!string.IsNullOrWhiteSpace(Model.Profile.ProfileImage))
+                    {
+                        <img src="@Model.Profile.ProfileImage" alt="" class="rounded-circle border" width="72" height="72" style="object-fit:cover;" />
+                    }
+                    else
+                    {
+                        <span class="rounded-circle bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center border border-primary-subtle fw-semibold" style="width:72px;height:72px;font-size:1.5rem;">
+                            @AccountPanelViewModel.GetInitials(Model.Profile.Name)
+                        </span>
+                    }
+                    <div class="small text-muted">Ảnh đại diện có thể đổi trong tab Chỉnh sửa.</div>
+                </div>
                 <dl class="row mb-0 account-info">
                     <dt class="col-5 text-muted">Họ và tên</dt>
                     <dd class="col-7 fw-semibold mb-2">@Model.Profile.Name</dd>
@@ -73,9 +86,20 @@
             </div>
 
             <div class="tab-pane fade" id="account-tab-edit" role="tabpanel">
-                <form method="post" action="@Model.UpdateFormAction">
+                <form method="post" enctype="multipart/form-data" action="@Model.UpdateFormAction">
                     <input type="hidden" name="@Model.AntiForgeryFieldName" value="@Model.AntiForgeryRequestToken" />
                     <input type="hidden" name="ReturnUrl" value="@Model.ReturnUrl" />
+                    <div class="mb-3">
+                        <label class="form-label">Ảnh đại diện</label>
+                        @if (!string.IsNullOrWhiteSpace(Model.Profile.ProfileImage))
+                        {
+                            <div class="mb-2">
+                                <img src="@Model.Profile.ProfileImage" alt="" class="rounded-circle border" width="64" height="64" style="object-fit:cover;" />
+                            </div>
+                        }
+                        <input type="file" name="avatarFile" class="form-control" accept="image/jpeg,image/png,image/gif,image/webp" />
+                        <div class="form-text">Tuỳ chọn. JPG/PNG/GIF/WebP, tối đa 2 MB.</div>
+                    </div>
                     <div class="mb-3">
                         <label class="form-label" for="EditInput_Name">Họ và tên</label>
                         <input type="text" class="form-control" id="EditInput_Name" name="EditInput.Name"

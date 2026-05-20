@@ -11,4 +11,6 @@ public interface IApplicationRepository
     Task<bool> DeleteAsync(long id, CancellationToken cancellationToken = default);
     /// <summary>Removes all applications submitted with this resume (required before deleting the resume row).</summary>
     Task DeleteByResumeIdAsync(long resumeId, CancellationToken cancellationToken = default);
+    Task<bool> ExistsForJobSeekerAndJobAsync(long jobSeekerId, long jobId, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<Application>> GetByJobSeekerIdAsync(long jobSeekerId, CancellationToken cancellationToken = default);
 }

@@ -9,14 +9,18 @@ namespace JobPortal.API.Services.Implementation;
 public class EmployerDashboardService : IEmployerDashboardService
 {
     private readonly AppDbContext _context;
+    private readonly IJobExpiryService _jobExpiryService;
 
-    public EmployerDashboardService(AppDbContext context)
+    public EmployerDashboardService(AppDbContext context, IJobExpiryService jobExpiryService)
     {
         _context = context;
+        _jobExpiryService = jobExpiryService;
     }
 
     public async Task<EmployerDashboardDto> GetDashboardForUserAsync(long userId, CancellationToken cancellationToken = default)
     {
+        await _jobExpiryService.CloseExpiredJobsAsync(cancellationToken);
+
         var employer = await _context.Employers
             .AsNoTracking()
             .FirstOrDefaultAsync(e => e.UserId == userId, cancellationToken);
@@ -42,7 +46,7 @@ public class EmployerDashboardService : IEmployerDashboardService
         var newCv = await allApplicationsQuery.CountAsync(a => a.AppliedAt >= weekAgo, cancellationToken);
         var newToday = await allApplicationsQuery.CountAsync(a => a.AppliedAt >= todayStart, cancellationToken);
         var unreadCv = await allApplicationsQuery.CountAsync(
-            a => a.Status != "reviewed" && a.Status != "rejected",
+            a => a.Status == "submitted" || a.Status == "pending",
             cancellationToken);
 
         var openJobs = jobs.Count(j => string.Equals(j.PostingStatus, "recruiting", StringComparison.OrdinalIgnoreCase));
@@ -102,15 +106,7 @@ public class EmployerDashboardService : IEmployerDashboardService
                 ExpiringSoonCount = expiringSoon
             },
             RecentJobs = jobs.Take(5).Select(MapJobDto).ToList(),
-            RecentApplications = applications.Select(a => new EmployerDashboardApplicationDto
-            {
-                Id = a.Id,
-                ApplicantName = a.ApplicantName,
-                JobTitle = a.JobTitle,
-                AppliedAt = a.AppliedAt,
-                ResumeUrl = a.ResumeUrl,
-                Status = a.Status
-            }).ToList(),
+            RecentApplications = applications.Select(MapApplicationDto).ToList(),
             Notifications = notifications
         };
     }
@@ -119,6 +115,8 @@ public class EmployerDashboardService : IEmployerDashboardService
         long userId,
         CancellationToken cancellationToken = default)
     {
+        await _jobExpiryService.CloseExpiredJobsAsync(cancellationToken);
+
         var employer = await _context.Employers
             .AsNoTracking()
             .FirstOrDefaultAsync(e => e.UserId == userId, cancellationToken);
@@ -136,6 +134,8 @@ public class EmployerDashboardService : IEmployerDashboardService
         long userId,
         CancellationToken cancellationToken = default)
     {
+        await _jobExpiryService.CloseExpiredJobsAsync(cancellationToken);
+
         var employer = await _context.Employers
             .AsNoTracking()
             .FirstOrDefaultAsync(e => e.UserId == userId, cancellationToken);
@@ -146,15 +146,106 @@ public class EmployerDashboardService : IEmployerDashboardService
         }
 
         var applications = await QueryApplicationsAsync(employer.Id, take: null, cancellationToken);
-        return applications.Select(a => new EmployerDashboardApplicationDto
+        return applications.Select(MapApplicationDto).ToList();
+    }
+
+    public async Task<EmployerDashboardApplicationDto> UpdateApplicationStatusAsync(
+        long userId,
+        long applicationId,
+        UpdateEmployerApplicationStatusRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        await _jobExpiryService.CloseExpiredJobsAsync(cancellationToken);
+
+        var employer = await _context.Employers
+            .FirstOrDefaultAsync(e => e.UserId == userId, cancellationToken);
+
+        if (employer == null)
         {
-            Id = a.Id,
-            ApplicantName = a.ApplicantName,
-            JobTitle = a.JobTitle,
-            AppliedAt = a.AppliedAt,
-            ResumeUrl = a.ResumeUrl,
-            Status = a.Status
-        }).ToList();
+            throw new NotFoundException("Employer profile not found for this user.");
+        }
+
+        var application = await _context.Applications
+            .Include(a => a.Job)
+            .Include(a => a.JobSeeker)
+            .Include(a => a.Resume)
+            .FirstOrDefaultAsync(
+                a => a.Id == applicationId && a.Job.EmployerId == employer.Id,
+                cancellationToken);
+
+        if (application == null)
+        {
+            throw new NotFoundException($"Application with id {applicationId} was not found.");
+        }
+
+        var current = application.Status.Trim().ToLowerInvariant();
+        var status = request.Status.Trim().ToLowerInvariant();
+
+        if (current is "accepted" or "rejected")
+        {
+            if (status == current)
+            {
+                return MapApplicationDto(new ApplicationRow
+                {
+                    Id = application.Id,
+                    JobId = application.JobId,
+                    AppliedAt = application.AppliedAt,
+                    Status = application.Status,
+                    ApplicantName = application.JobSeeker.Name,
+                    ApplicantEmail = application.JobSeeker.Email,
+                    ApplicantPhone = application.JobSeeker.Phone,
+                    JobTitle = application.Job.Title,
+                    ResumeId = application.ResumeId,
+                    ResumeTitle = application.Resume.Title,
+                    ResumeUrl = application.Resume.Url
+                });
+            }
+
+            throw new BadRequestException(
+                current == "accepted"
+                    ? "Đơn đã được chấp nhận, không thể đổi sang trạng thái khác."
+                    : "Đơn đã bị từ chối, không thể đổi sang trạng thái khác.");
+        }
+
+        application.Status = status;
+        await _context.SaveChangesAsync(cancellationToken);
+
+        return MapApplicationDto(new ApplicationRow
+        {
+            Id = application.Id,
+            JobId = application.JobId,
+            AppliedAt = application.AppliedAt,
+            Status = application.Status,
+            ApplicantName = application.JobSeeker.Name,
+            ApplicantEmail = application.JobSeeker.Email,
+            ApplicantPhone = application.JobSeeker.Phone,
+            JobTitle = application.Job.Title,
+            ResumeId = application.ResumeId,
+            ResumeTitle = application.Resume.Title,
+            ResumeUrl = application.Resume.Url
+        });
+    }
+
+    private static EmployerDashboardApplicationDto MapApplicationDto(ApplicationRow a) => new()
+    {
+        Id = a.Id,
+        JobId = a.JobId,
+        ApplicantName = a.ApplicantName,
+        ApplicantEmail = a.ApplicantEmail,
+        ApplicantPhone = a.ApplicantPhone,
+        JobTitle = a.JobTitle,
+        AppliedAt = a.AppliedAt,
+        ResumeId = a.ResumeId,
+        ResumeTitle = a.ResumeTitle,
+        ResumeUrl = a.ResumeUrl,
+        Status = a.Status,
+        IsUnread = IsUnreadStatus(a.Status)
+    };
+
+    private static bool IsUnreadStatus(string status)
+    {
+        var s = status.Trim().ToLowerInvariant();
+        return s is "submitted" or "pending";
     }
 
     private async Task<List<JobRow>> QueryJobsAsync(long employerId, CancellationToken cancellationToken)
@@ -203,10 +294,15 @@ public class EmployerDashboardService : IEmployerDashboardService
             .Select(a => new ApplicationRow
             {
                 Id = a.Id,
+                JobId = a.JobId,
                 AppliedAt = a.AppliedAt,
                 Status = a.Status,
                 ApplicantName = a.JobSeeker.Name,
+                ApplicantEmail = a.JobSeeker.Email,
+                ApplicantPhone = a.JobSeeker.Phone,
                 JobTitle = a.Job.Title,
+                ResumeId = a.ResumeId,
+                ResumeTitle = a.Resume.Title,
                 ResumeUrl = a.Resume.Url
             });
 
@@ -234,10 +330,15 @@ public class EmployerDashboardService : IEmployerDashboardService
     private sealed class ApplicationRow
     {
         public long Id { get; init; }
+        public long JobId { get; init; }
         public DateTime AppliedAt { get; init; }
         public string Status { get; init; } = null!;
         public string ApplicantName { get; init; } = null!;
+        public string? ApplicantEmail { get; init; }
+        public string? ApplicantPhone { get; init; }
         public string JobTitle { get; init; } = null!;
+        public long ResumeId { get; init; }
+        public string ResumeTitle { get; init; } = null!;
         public string? ResumeUrl { get; init; }
     }
 }

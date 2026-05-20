@@ -112,4 +112,14 @@ public class IndexModel : PageModel
 
         return utc.ToLocalTime().ToString("dd/MM/yyyy");
     }
+
+    public static string FormatApplicationStatus(string status) => status.Trim().ToLowerInvariant() switch
+    {
+        "submitted" => "Mới nộp",
+        "pending" => "Chờ xử lý",
+        "reviewed" => "Đã xem",
+        "accepted" => "Chấp nhận",
+        "rejected" => "Từ chối",
+        _ => status
+    };
 }

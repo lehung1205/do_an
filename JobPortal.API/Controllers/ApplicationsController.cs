@@ -1,6 +1,9 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using JobPortal.API.DTOs;
 using JobPortal.API.DTOs.Common;
 using JobPortal.API.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace JobPortal.API.Controllers;
@@ -21,6 +24,33 @@ public class ApplicationsController : ControllerBase
     {
         var items = await _applicationService.GetAllApplicationsAsync(cancellationToken);
         return Ok(ApiResponse<IReadOnlyList<ApplicationDto>>.SuccessResponse(items, "Applications retrieved successfully."));
+    }
+
+    [HttpGet("me")]
+    [Authorize(Roles = "JOB_SEEKER")]
+    public async Task<IActionResult> GetMyApplications(CancellationToken cancellationToken)
+    {
+        var userId = GetCurrentUserId();
+        var items = await _applicationService.GetMyApplicationsAsync(userId, cancellationToken);
+        return Ok(ApiResponse<IReadOnlyList<MyApplicationDto>>.SuccessResponse(items, "Applications retrieved successfully."));
+    }
+
+    [HttpGet("me/job/{jobId:long}/applied")]
+    [Authorize(Roles = "JOB_SEEKER")]
+    public async Task<IActionResult> HasAppliedToJob(long jobId, CancellationToken cancellationToken)
+    {
+        var userId = GetCurrentUserId();
+        var applied = await _applicationService.HasAppliedToJobAsync(userId, jobId, cancellationToken);
+        return Ok(ApiResponse<bool>.SuccessResponse(applied, applied ? "Already applied." : "Not applied yet."));
+    }
+
+    [HttpPost("me")]
+    [Authorize(Roles = "JOB_SEEKER")]
+    public async Task<IActionResult> ApplyForJob([FromBody] CreateApplicationRequest request, CancellationToken cancellationToken)
+    {
+        var userId = GetCurrentUserId();
+        var created = await _applicationService.ApplyForJobAsync(userId, request, cancellationToken);
+        return Ok(ApiResponse<MyApplicationDto>.SuccessResponse(created, "Application submitted successfully."));
     }
 
     [HttpGet("{id:long}")]
@@ -52,5 +82,16 @@ public class ApplicationsController : ControllerBase
     {
         await _applicationService.DeleteApplicationAsync(id, cancellationToken);
         return Ok(ApiResponse<object>.SuccessResponse(null, "Application deleted successfully."));
+    }
+
+    private long GetCurrentUserId()
+    {
+        var sub = User.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!long.TryParse(sub, out var userId))
+        {
+            throw new UnauthorizedAccessException("User identifier is missing.");
+        }
+
+        return userId;
     }
 }

@@ -53,6 +53,8 @@ builder.Services.AddScoped<IEmployerService, EmployerService>();
 builder.Services.AddScoped<IEmployerDashboardService, EmployerDashboardService>();
 builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<IJobService, JobService>();
+builder.Services.AddScoped<IJobExpiryService, JobExpiryService>();
+builder.Services.AddHostedService<JobExpiryBackgroundService>();
 builder.Services.AddScoped<IJobSeekerService, JobSeekerService>();
 builder.Services.AddScoped<IPaymentHistoryService, PaymentHistoryService>();
 builder.Services.AddScoped<IPostingPackageService, PostingPackageService>();

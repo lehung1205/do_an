@@ -90,10 +90,11 @@
                         @foreach (var job in dash.RecentJobs)
                         {
                             var isRecruiting = string.Equals(job.PostingStatus, "recruiting", StringComparison.OrdinalIgnoreCase);
+                            var isClosed = string.Equals(job.PostingStatus, "closed", StringComparison.OrdinalIgnoreCase);
                             <div class="employer-panel">
                                 <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-2">
                                     <h3 class="h6 mb-0 fw-semibold">@job.Title</h3>
-                                    <span class="badge @(isRecruiting ? "employer-badge--open" : "employer-badge--draft")">
+                                    <span class="badge @(isRecruiting ? "employer-badge--open" : isClosed ? "bg-secondary" : "employer-badge--draft")">
                                         @IndexModel.FormatJobStatus(job.PostingStatus)
                                     </span>
                                 </div>
@@ -101,7 +102,7 @@
                                     @job.ApplicantCount ứng viên@(string.IsNullOrWhiteSpace(job.WorkingHours) ? "" : $" • {job.WorkingHours}")
                                 </p>
                                 <div class="d-flex flex-wrap gap-2">
-                                    @if (isRecruiting)
+                                    @if (isRecruiting || isClosed)
                                     {
                                         <a asp-page="/Employer/Applicants" class="btn btn-sm btn-outline-primary">Xem CV</a>
                                         <a asp-page="/Jobs/Detail" asp-route-id="@job.Id" class="btn btn-sm btn-outline-secondary">Chi tiết</a>
@@ -132,21 +133,36 @@
                     <div class="d-flex flex-column gap-3">
                         @foreach (var app in dash.RecentApplications)
                         {
-                            <div class="employer-panel">
-                                <h3 class="h6 mb-1 fw-semibold">@app.ApplicantName</h3>
+                            <div class="employer-panel @(app.IsUnread ? "border-warning" : "")">
+                                <div class="d-flex flex-wrap justify-content-between gap-2 mb-1">
+                                    <h3 class="h6 mb-0 fw-semibold">
+                                        @app.ApplicantName
+                                        @if (app.IsUnread)
+                                        {
+                                            <span class="badge bg-warning text-dark ms-1">Mới</span>
+                                        }
+                                    </h3>
+                                    <span class="badge @(app.Status.ToLowerInvariant() switch {
+                                        "submitted" or "pending" => "bg-warning text-dark",
+                                        "reviewed" => "bg-info text-dark",
+                                        "accepted" => "bg-success",
+                                        "rejected" => "bg-danger",
+                                        _ => "bg-secondary"
+                                    })">@IndexModel.FormatApplicationStatus(app.Status)</span>
+                                </div>
                                 <p class="text-muted small mb-3">
                                     @app.JobTitle • @IndexModel.FormatRelativeTime(app.AppliedAt)
                                 </p>
                                 <div class="d-flex flex-wrap gap-2">
+                                    <a asp-page="/Employer/Applicants" asp-route-filter="@(app.IsUnread ? "unread" : "all")" class="btn btn-sm btn-outline-primary">
+                                        Duyệt CV
+                                    </a>
                                     @if (!string.IsNullOrWhiteSpace(app.ResumeUrl))
                                     {
-                                        <a href="@app.ResumeUrl" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary">
-                                            Xem CV
+                                        <a href="@app.ResumeUrl" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-secondary">
+                                            Mở file CV
                                         </a>
                                     }
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" disabled title="Tính năng đặt lịch phỏng vấn sẽ bổ sung sau">
-                                        Đặt lịch PV
-                                    </button>
                                 </div>
                             </div>
                         }

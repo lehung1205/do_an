@@ -21,8 +21,23 @@
                             <h1 class="h2 mb-1">@Model.Job.Title</h1>
                             <p class="text-primary h5 mb-0">Nhà tuyển dụng #@Model.Job.EmployerId</p>
                         </div>
-                        <span class="badge bg-success p-2">@Model.Job.PostingStatus</span>
+                        <span class="badge @DetailModel.StatusBadgeClass(Model.Job.PostingStatus) p-2">
+                            @DetailModel.FormatPostingStatus(Model.Job.PostingStatus)
+                        </span>
                     </div>
+
+                    @if (Model.IsClosed && Model.IsEmployerViewer)
+                    {
+                        <div class="alert alert-secondary">
+                            Tin đã hết hạn và được đóng tự động. Bạn vẫn xem được nội dung chi tiết; ứng viên không thể nộp hồ sơ mới.
+                        </div>
+                    }
+                    else if (Model.IsClosed)
+                    {
+                        <div class="alert alert-warning">
+                            Tin tuyển dụng đã đóng, không nhận hồ sơ ứng tuyển mới.
+                        </div>
+                    }
 
                     <div class="d-flex flex-wrap gap-3 mb-4 text-muted">
                         <span><i class="bi bi-geo-alt"></i> @Model.Job.Location</span>
@@ -57,10 +72,82 @@
                         </div>
                     }
 
+                    @if (!string.IsNullOrEmpty(Model.ApplySuccessMessage))
+                    {
+                        <div class="alert alert-success mt-4">@Model.ApplySuccessMessage</div>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.ApplyErrorMessage))
+                    {
+                        <div class="alert alert-danger mt-4">@Model.ApplyErrorMessage</div>
+                    }
+
                     @if (Model.ShowApplyButton)
                     {
                         <div class="mt-5">
-                            <button class="btn btn-primary btn-lg px-5">Ứng tuyển ngay</button>
+                            @if (Model.HasApplied)
+                            {
+                                <span class="badge bg-success fs-6 px-4 py-2">
+                                    <i class="bi bi-check-circle me-1"></i> Đã ứng tuyển
+                                </span>
+                                <a asp-page="/Applications/Index" class="btn btn-outline-primary ms-2">Xem đơn của tôi</a>
+                            }
+                            else if (!Model.IsRecruiting)
+                            {
+                                <p class="text-muted mb-0">
+                                    @(Model.IsClosed ? "Tin tuyển dụng đã đóng, không nhận hồ sơ mới." : "Tin tuyển dụng hiện không nhận hồ sơ.")
+                                </p>
+                            }
+                            else if (!Model.IsLoggedIn)
+                            {
+                                <a asp-page="/Auth/Login"
+                                   asp-route-returnUrl="@Model.ReturnUrl"
+                                   class="btn btn-primary btn-lg px-5">
+                                    Đăng nhập để ứng tuyển
+                                </a>
+                            }
+                            else if (!Model.IsJobSeeker)
+                            {
+                                <p class="text-muted mb-0">Chỉ tài khoản ứng viên mới có thể ứng tuyển.</p>
+                            }
+                            else if (Model.Resumes.Count == 0)
+                            {
+                                <p class="text-muted">Bạn cần thêm ít nhất một hồ sơ (CV) trước khi ứng tuyển.</p>
+                                <a asp-page="/Index"
+                                   asp-route-openAccount="true"
+                                   asp-route-accountTab="resume"
+                                   asp-route-returnUrl="@Model.ReturnUrl"
+                                   class="btn btn-primary btn-lg mt-2">
+                                    Thêm hồ sơ (CV)
+                                </a>
+                            }
+                            else
+                            {
+                                <form method="post" asp-page-handler="Apply" asp-route-id="@Model.Job.Id" class="apply-form">
+                                    @if (Model.Resumes.Count > 1)
+                                    {
+                                        <div class="mb-3" style="max-width: 400px;">
+                                            <label class="form-label fw-semibold" for="SelectedResumeId">Chọn hồ sơ (CV)</label>
+                                            <select asp-for="SelectedResumeId" id="SelectedResumeId" class="form-select form-select-lg" required>
+                                                <option value="">-- Chọn CV --</option>
+                                                @foreach (var cv in Model.Resumes)
+                                                {
+                                                    <option value="@cv.Id">@cv.Title</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <input type="hidden" asp-for="SelectedResumeId" />
+                                        <p class="text-muted small mb-2">
+                                            Hồ sơ: <strong>@Model.Resumes[0].Title</strong>
+                                        </p>
+                                    }
+                                    <button type="submit" class="btn btn-primary btn-lg px-5">
+                                        <i class="bi bi-send me-1"></i> Ứng tuyển ngay
+                                    </button>
+                                </form>
+                            }
                         </div>
                     }
                 </div>

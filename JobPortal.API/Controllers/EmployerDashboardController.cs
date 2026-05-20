@@ -48,6 +48,19 @@ public class EmployerDashboardController : ControllerBase
             "Employer applications retrieved successfully."));
     }
 
+    [HttpPut("applications/{id:long}/status")]
+    public async Task<IActionResult> UpdateApplicationStatus(
+        long id,
+        [FromBody] UpdateEmployerApplicationStatusRequest request,
+        CancellationToken cancellationToken)
+    {
+        var userId = GetCurrentUserId();
+        var updated = await _dashboardService.UpdateApplicationStatusAsync(userId, id, request, cancellationToken);
+        return Ok(ApiResponse<EmployerDashboardApplicationDto>.SuccessResponse(
+            updated,
+            "Application status updated successfully."));
+    }
+
     private long GetCurrentUserId()
     {
         var sub = User.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? User.FindFirstValue(ClaimTypes.NameIdentifier);

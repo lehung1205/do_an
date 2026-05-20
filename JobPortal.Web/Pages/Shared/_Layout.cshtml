@@ -58,6 +58,12 @@
                             <li class="nav-item">
                                 <a class="nav-link" asp-page="/Jobs/Index">Việc làm</a>
                             </li>
+                            @if (isLoggedIn && isJobSeeker)
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-page="/Applications/Index">Đơn ứng tuyển</a>
+                                </li>
+                            }
                         }
                     </ul>
                     <ul class="navbar-nav align-items-lg-center gap-2 nav-auth">
@@ -98,6 +104,11 @@
                                     </li>
                                     @if (isJobSeeker)
                                     {
+                                        <li>
+                                            <a class="dropdown-item" asp-page="/Applications/Index">
+                                                <i class="bi bi-inbox me-2"></i> Đơn ứng tuyển
+                                            </a>
+                                        </li>
                                         <li>
                                             <button type="button" class="dropdown-item"
                                                     data-account-open data-account-tab="resume">

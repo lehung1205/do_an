@@ -35,10 +35,21 @@ public class EmployerDashboardJobDto
 public class EmployerDashboardApplicationDto
 {
     public long Id { get; set; }
+    public long JobId { get; set; }
     public string ApplicantName { get; set; } = null!;
+    public string? ApplicantEmail { get; set; }
+    public string? ApplicantPhone { get; set; }
     public string JobTitle { get; set; } = null!;
     public DateTime AppliedAt { get; set; }
+    public long ResumeId { get; set; }
+    public string ResumeTitle { get; set; } = null!;
     public string? ResumeUrl { get; set; }
+    public string Status { get; set; } = null!;
+    public bool IsUnread { get; set; }
+}
+
+public class UpdateEmployerApplicationStatusRequest
+{
     public string Status { get; set; } = null!;
 }
 

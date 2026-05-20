@@ -31,10 +31,11 @@
             @foreach (var job in Model.Jobs)
             {
                 var isRecruiting = string.Equals(job.PostingStatus, "recruiting", StringComparison.OrdinalIgnoreCase);
+                var isClosed = string.Equals(job.PostingStatus, "closed", StringComparison.OrdinalIgnoreCase);
                 <div class="employer-panel">
                     <div class="d-flex flex-wrap justify-content-between gap-2 mb-2">
                         <h3 class="h6 mb-0 fw-semibold">@job.Title</h3>
-                        <span class="badge @(isRecruiting ? "employer-badge--open" : "employer-badge--draft")">
+                        <span class="badge @(isRecruiting ? "employer-badge--open" : isClosed ? "bg-secondary" : "employer-badge--draft")">
                             @JobsModel.FormatJobStatus(job.PostingStatus)
                         </span>
                     </div>
@@ -49,7 +50,7 @@
                         · Hết hạn @job.ExpiryDate.ToLocalTime().ToString("dd/MM/yyyy")
                     </p>
                     <div class="d-flex flex-wrap gap-2">
-                        @if (isRecruiting)
+                        @if (isRecruiting || isClosed)
                         {
                             <a asp-page="/Employer/Applicants" class="btn btn-sm btn-outline-primary">Xem CV</a>
                             <a asp-page="/Jobs/Detail" asp-route-id="@job.Id" class="btn btn-sm btn-outline-secondary">Chi tiết</a>

@@ -12,4 +12,5 @@ public class JobDto
     public string PostingStatus { get; set; } = null!;
     public string? WorkingHours { get; set; }
     public DateTime ExpiryDate { get; set; }
+    public string? ThumbnailUrl { get; set; }
 }

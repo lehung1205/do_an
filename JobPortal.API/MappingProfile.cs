@@ -18,7 +18,10 @@ public class MappingProfile : Profile
             .ForMember(d => d.Location, o => o.MapFrom(s => s.Location))
             .ForMember(d => d.PostingStatus, o => o.MapFrom(s => s.PostingStatus))
             .ForMember(d => d.WorkingHours, o => o.MapFrom(s => s.WorkingHours))
-            .ForMember(d => d.ExpiryDate, o => o.MapFrom(s => s.ExpiryDate));
+            .ForMember(d => d.ExpiryDate, o => o.MapFrom(s => s.ExpiryDate))
+            .ForMember(
+                d => d.ThumbnailUrl,
+                o => o.MapFrom(s => s.Images.OrderBy(i => i.Id).Select(i => i.Url).FirstOrDefault()));
 
         CreateMap<JobDto, Job>()
             .ForMember(d => d.Id, o => o.Ignore())

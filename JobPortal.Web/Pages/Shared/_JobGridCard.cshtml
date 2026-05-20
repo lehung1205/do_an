@@ -1,0 +1,47 @@
+@model JobPortal.Web.Models.JobGridCardModel
+
+<article class="job-card job-grid-card card border-0 shadow-sm h-100 w-100">
+    <div class="job-grid-card__media">
+        @if (!string.IsNullOrWhiteSpace(Model.ThumbnailUrl))
+        {
+            <img src="@Model.ThumbnailUrl"
+                 alt="@Model.Title"
+                 class="job-grid-card__img"
+                 loading="lazy" />
+        }
+        else
+        {
+            <div class="job-grid-card__placeholder" aria-hidden="true">
+                <i class="bi bi-briefcase"></i>
+            </div>
+        }
+        <span class="badge home-badge-status job-grid-card__badge">
+            @JobPortal.Web.Pages.IndexModel.FormatJobStatus(Model.PostingStatus)
+        </span>
+    </div>
+    <div class="card-body position-relative d-flex flex-column">
+        <small class="text-muted job-grid-card__date">
+            <i class="bi bi-clock me-1"></i>Hết hạn @Model.ExpiryDate.ToString("dd/MM/yyyy")
+        </small>
+        <h3 class="h6 card-title job-grid-card__title">
+            <a asp-page="/Jobs/Detail" asp-route-id="@Model.Id" class="job-card__title text-decoration-none stretched-link">
+                @Model.Title
+            </a>
+        </h3>
+        <p class="text-muted small job-grid-card__desc">@Model.Description</p>
+        <ul class="list-unstyled small mb-0 job-card__meta job-grid-card__meta mt-auto">
+            <li class="mb-1 text-truncate">
+                <i class="bi bi-geo-alt text-primary me-1"></i>@Model.Location
+            </li>
+            <li class="@(Model.ApplicantCount is not null ? "mb-1" : "") text-truncate">
+                <i class="bi bi-cash-stack text-primary me-1"></i>@JobPortal.Web.Pages.IndexModel.FormatSalary(Model.Salary)
+            </li>
+            @if (Model.ApplicantCount is int applicantCount)
+            {
+                <li class="text-truncate">
+                    <i class="bi bi-people text-primary me-1"></i>@applicantCount ứng viên
+                </li>
+            }
+        </ul>
+    </div>
+</article>

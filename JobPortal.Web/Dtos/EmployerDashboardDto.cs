@@ -30,6 +30,7 @@ public class EmployerDashboardJobDto
     public int ApplicantCount { get; set; }
     public string? WorkingHours { get; set; }
     public DateTime ExpiryDate { get; set; }
+    public string? ThumbnailUrl { get; set; }
 }
 
 public class EmployerDashboardApplicationDto

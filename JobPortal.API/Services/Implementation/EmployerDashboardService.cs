@@ -32,8 +32,8 @@ public class EmployerDashboardService : IEmployerDashboardService
 
         var now = DateTime.UtcNow;
         var todayStart = now.Date;
-        var weekAgo = now.AddDays(-7);
-        var expiringThreshold = now.AddDays(7);
+        var twoDaysAgo = now.AddDays(-2);
+        var expiringThreshold = now.AddDays(3);
 
         var jobs = await QueryJobsAsync(employer.Id, cancellationToken);
 
@@ -43,7 +43,7 @@ public class EmployerDashboardService : IEmployerDashboardService
             .Where(a => a.Job.EmployerId == employer.Id);
 
         var totalCv = await allApplicationsQuery.CountAsync(cancellationToken);
-        var newCv = await allApplicationsQuery.CountAsync(a => a.AppliedAt >= weekAgo, cancellationToken);
+        var newCv = await allApplicationsQuery.CountAsync(a => a.AppliedAt >= twoDaysAgo, cancellationToken);
         var newToday = await allApplicationsQuery.CountAsync(a => a.AppliedAt >= todayStart, cancellationToken);
         var unreadCv = await allApplicationsQuery.CountAsync(
             a => a.Status == "submitted" || a.Status == "pending",
@@ -59,7 +59,7 @@ public class EmployerDashboardService : IEmployerDashboardService
 
         foreach (var job in jobs.Where(j =>
                      string.Equals(j.PostingStatus, "recruiting", StringComparison.OrdinalIgnoreCase) &&
-                     j.ExpiryDate <= now.AddDays(2) &&
+                     j.ExpiryDate <= expiringThreshold &&
                      j.ExpiryDate >= now))
         {
             var days = (int)Math.Ceiling((job.ExpiryDate - now).TotalDays);
@@ -264,7 +264,8 @@ public class EmployerDashboardService : IEmployerDashboardService
                 PostingStatus = j.PostingStatus,
                 WorkingHours = j.WorkingHours,
                 ExpiryDate = j.ExpiryDate,
-                ApplicantCount = j.Applications.Count
+                ApplicantCount = j.Applications.Count,
+                ThumbnailUrl = j.Images.OrderBy(i => i.Id).Select(i => i.Url).FirstOrDefault()
             })
             .ToListAsync(cancellationToken);
     }
@@ -279,7 +280,8 @@ public class EmployerDashboardService : IEmployerDashboardService
         PostingStatus = j.PostingStatus,
         ApplicantCount = j.ApplicantCount,
         WorkingHours = j.WorkingHours,
-        ExpiryDate = j.ExpiryDate
+        ExpiryDate = j.ExpiryDate,
+        ThumbnailUrl = j.ThumbnailUrl
     };
 
     private async Task<List<ApplicationRow>> QueryApplicationsAsync(
@@ -325,6 +327,7 @@ public class EmployerDashboardService : IEmployerDashboardService
         public string? WorkingHours { get; init; }
         public DateTime ExpiryDate { get; init; }
         public int ApplicantCount { get; init; }
+        public string? ThumbnailUrl { get; init; }
     }
 
     private sealed class ApplicationRow

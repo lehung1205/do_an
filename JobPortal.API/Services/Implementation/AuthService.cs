@@ -371,7 +371,7 @@ public sealed class AuthService : IAuthService
 
     private ProfileResponse MapProfile(User user)
     {
-        return new ProfileResponse
+        var profile = new ProfileResponse
         {
             Id = user.Id,
             Name = user.Name,
@@ -380,10 +380,54 @@ public sealed class AuthService : IAuthService
             Role = user.Role,
             JobSeekerId = user.JobSeekerProfile?.Id,
             EmployerId = user.EmployerProfile?.Id,
+            AdminId = user.AdminProfile?.Id,
             ProfileImage = user.ProfileImage
                 ?? user.JobSeekerProfile?.ProfileImage
-                ?? user.EmployerProfile?.Image
+                ?? user.EmployerProfile?.Image,
+            CreatedAt = user.CreatedAt,
+            UpdatedAt = user.UpdatedAt
         };
+
+        if (user.JobSeekerProfile != null)
+        {
+            var j = user.JobSeekerProfile;
+            profile.AccountStatus = j.Status;
+            profile.EmailVerifiedAt = j.EmailVerifiedAt;
+            profile.DateOfBirth = j.DateOfBirth;
+            profile.Gender = j.Gender;
+            profile.Description = j.Description;
+            profile.PermanentAddress = j.PermanentAddress;
+            profile.TemporaryAddress = j.TemporaryAddress;
+            profile.IdCard = j.IdCard;
+            profile.IdCardIssueDate = j.IdCardIssueDate;
+            profile.IdCardIssuePlace = j.IdCardIssuePlace;
+            profile.BankName = j.BankName;
+            profile.BankAccountNumber = j.AccountNumber;
+            profile.ProfilePhone = j.Phone;
+            profile.PostingLimit = null;
+        }
+        else if (user.EmployerProfile != null)
+        {
+            var e = user.EmployerProfile;
+            profile.AccountStatus = e.Status;
+            profile.EmailVerifiedAt = e.EmailVerifiedAt;
+            profile.DateOfBirth = e.DateOfBirth;
+            profile.Gender = e.Gender;
+            profile.Description = e.Description;
+            profile.IdCard = e.IdCard;
+            profile.ProfilePhone = e.Phone;
+            profile.PostingLimit = e.PostingLimit;
+        }
+        else if (user.AdminProfile != null)
+        {
+            var a = user.AdminProfile;
+            profile.AccountStatus = a.Status;
+            profile.BankName = a.BankName;
+            profile.BankAccountNumber = a.AccountNumber;
+            profile.ProfilePhone = a.Phone;
+        }
+
+        return profile;
     }
 
     private static string NormalizeEmail(string email)

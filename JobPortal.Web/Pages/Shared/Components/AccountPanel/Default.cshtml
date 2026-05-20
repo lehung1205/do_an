@@ -74,11 +74,83 @@
                         @(string.IsNullOrWhiteSpace(Model.Profile.PhoneNumber) ? "—" : Model.Profile.PhoneNumber)
                     </dd>
                     <dt class="col-5 text-muted">Loại TK</dt>
-                    <dd class="col-7 mb-0">
+                    <dd class="col-7 mb-2">
                         <span class="badge text-bg-primary-subtle text-primary border border-primary-subtle">
                             @AccountPanelViewModel.FormatRole(Model.Profile.Role)
                         </span>
                     </dd>
+                    <dt class="col-5 text-muted">Ngày tham gia</dt>
+                    <dd class="col-7 mb-2">@AccountPanelViewModel.FormatDateTime(Model.Profile.CreatedAt)</dd>
+                    <dt class="col-5 text-muted">Cập nhật lần cuối</dt>
+                    <dd class="col-7 mb-2">@AccountPanelViewModel.FormatDateTimeNullable(Model.Profile.UpdatedAt)</dd>
+                    <dt class="col-5 text-muted">Trạng thái tài khoản</dt>
+                    <dd class="col-7 mb-2">@AccountPanelViewModel.FormatAccountStatus(Model.Profile.AccountStatus)</dd>
+                    @if (Model.Profile.JobSeekerId is long sid)
+                    {
+                        <dt class="col-5 text-muted">Mã hồ sơ ứng viên</dt>
+                        <dd class="col-7 mb-2">@sid</dd>
+                    }
+                    @if (Model.Profile.EmployerId is long eid)
+                    {
+                        <dt class="col-5 text-muted">Mã hồ sơ NTD</dt>
+                        <dd class="col-7 mb-2">@eid</dd>
+                    }
+                    @if (Model.Profile.AdminId is long aid)
+                    {
+                        <dt class="col-5 text-muted">Mã quản trị</dt>
+                        <dd class="col-7 mb-2">@aid</dd>
+                    }
+                    <dt class="col-5 text-muted">Xác thực email</dt>
+                    <dd class="col-7 mb-2">@AccountPanelViewModel.FormatDateTimeNullable(Model.Profile.EmailVerifiedAt)</dd>
+                    <dt class="col-5 text-muted">Ngày sinh</dt>
+                    <dd class="col-7 mb-2">@AccountPanelViewModel.FormatDateOnly(Model.Profile.DateOfBirth)</dd>
+                    <dt class="col-5 text-muted">Giới tính</dt>
+                    <dd class="col-7 mb-2">@AccountPanelViewModel.FormatGender(Model.Profile.Gender)</dd>
+                    @if (!string.IsNullOrWhiteSpace(Model.Profile.Description))
+                    {
+                        <dt class="col-5 text-muted align-top pt-1">Giới thiệu</dt>
+                        <dd class="col-7 mb-2"><div class="small" style="white-space:pre-wrap;">@Model.Profile.Description</div></dd>
+                    }
+                    @if (Model.IsJobSeeker)
+                    {
+                        <dt class="col-5 text-muted">Địa chỉ thường trú</dt>
+                        <dd class="col-7 mb-2">@AccountPanelViewModel.DashIfEmpty(Model.Profile.PermanentAddress)</dd>
+                        <dt class="col-5 text-muted">Địa chỉ tạm trú</dt>
+                        <dd class="col-7 mb-2">@AccountPanelViewModel.DashIfEmpty(Model.Profile.TemporaryAddress)</dd>
+                        <dt class="col-5 text-muted">CMND/CCCD</dt>
+                        <dd class="col-7 mb-2">@AccountPanelViewModel.DashIfEmpty(Model.Profile.IdCard)</dd>
+                        <dt class="col-5 text-muted">Ngày cấp</dt>
+                        <dd class="col-7 mb-2">@AccountPanelViewModel.DashIfEmpty(Model.Profile.IdCardIssueDate)</dd>
+                        <dt class="col-5 text-muted">Nơi cấp</dt>
+                        <dd class="col-7 mb-2">@AccountPanelViewModel.DashIfEmpty(Model.Profile.IdCardIssuePlace)</dd>
+                        <dt class="col-5 text-muted">Ngân hàng</dt>
+                        <dd class="col-7 mb-2">@AccountPanelViewModel.DashIfEmpty(Model.Profile.BankName)</dd>
+                        <dt class="col-5 text-muted">Số tài khoản</dt>
+                        <dd class="col-7 mb-2">@AccountPanelViewModel.DashIfEmpty(Model.Profile.BankAccountNumber)</dd>
+                    }
+                    @if (string.Equals(Model.Profile.Role, "EMPLOYER", StringComparison.Ordinal))
+                    {
+                        <dt class="col-5 text-muted">CMND/CCCD</dt>
+                        <dd class="col-7 mb-2">@AccountPanelViewModel.DashIfEmpty(Model.Profile.IdCard)</dd>
+                        <dt class="col-5 text-muted">Hạn đăng bài</dt>
+                        <dd class="col-7 mb-2">@(Model.Profile.PostingLimit is int pl ? pl.ToString() : "—")</dd>
+                    }
+                    @if (string.Equals(Model.Profile.Role, "ADMIN", StringComparison.Ordinal))
+                    {
+                        <dt class="col-5 text-muted">Ngân hàng</dt>
+                        <dd class="col-7 mb-2">@AccountPanelViewModel.DashIfEmpty(Model.Profile.BankName)</dd>
+                        <dt class="col-5 text-muted">Số tài khoản</dt>
+                        <dd class="col-7 mb-2">@AccountPanelViewModel.DashIfEmpty(Model.Profile.BankAccountNumber)</dd>
+                        <dt class="col-5 text-muted">Số điện thoại (hồ sơ)</dt>
+                        <dd class="col-7 mb-2">@AccountPanelViewModel.DashIfEmpty(Model.Profile.ProfilePhone)</dd>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(Model.Profile.ProfilePhone)
+                        && !string.Equals(Model.Profile.Role, "ADMIN", StringComparison.Ordinal)
+                        && !string.Equals(Model.Profile.PhoneNumber, Model.Profile.ProfilePhone, StringComparison.Ordinal))
+                    {
+                        <dt class="col-5 text-muted">SĐT trên hồ sơ</dt>
+                        <dd class="col-7 mb-0">@Model.Profile.ProfilePhone</dd>
+                    }
                 </dl>
                 <button type="button" class="btn btn-primary btn-sm mt-3" data-account-switch-tab="edit">
                     <i class="bi bi-pencil me-1"></i> Chỉnh sửa thông tin

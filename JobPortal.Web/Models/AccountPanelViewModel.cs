@@ -1,3 +1,4 @@
+using System.Globalization;
 using JobPortal.Web.Dtos;
 using JobPortal.Web.Dtos.Auth;
 using JobPortal.Web.Pages.Account;
@@ -41,4 +42,36 @@ public class AccountPanelViewModel
 
         return $"{parts[0][0]}{parts[^1][0]}".ToUpperInvariant();
     }
+
+    private static readonly CultureInfo Vi = CultureInfo.GetCultureInfo("vi-VN");
+
+    public static string DashIfEmpty(string? value) =>
+        string.IsNullOrWhiteSpace(value) ? "—" : value;
+
+    public static string FormatDateOnly(DateOnly? value) =>
+        value == null ? "—" : value.Value.ToString("dd/MM/yyyy", Vi);
+
+    public static string FormatDateTime(DateTime value) =>
+        value.ToLocalTime().ToString("dd/MM/yyyy HH:mm", Vi);
+
+    public static string FormatDateTimeNullable(DateTime? value) =>
+        value == null ? "—" : value.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm", Vi);
+
+    /// <summary>Giả định: 0 = khác, 1 = nam, 2 = nữ (điều chỉnh nếu seed DB khác).</summary>
+    public static string FormatGender(byte? gender) => gender switch
+    {
+        1 => "Nam",
+        2 => "Nữ",
+        0 => "Khác",
+        _ => "—"
+    };
+
+    public static string FormatAccountStatus(string? status) =>
+        string.IsNullOrWhiteSpace(status) ? "—" : status.Trim().ToUpperInvariant() switch
+        {
+            "ACTIVE" => "Đang hoạt động",
+            "INACTIVE" => "Không hoạt động",
+            "SUSPENDED" => "Tạm khóa",
+            _ => status
+        };
 }

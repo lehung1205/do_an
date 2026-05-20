@@ -90,6 +90,8 @@ public class AuthRepository : IAuthRepository
                 .ThenInclude(u => u!.JobSeekerProfile)
             .Include(t => t.User)
                 .ThenInclude(u => u!.EmployerProfile)
+            .Include(t => t.User)
+                .ThenInclude(u => u!.AdminProfile)
             .FirstOrDefaultAsync(t => t.TokenHash == tokenHash, cancellationToken);
     }
 

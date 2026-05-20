@@ -86,6 +86,12 @@ public class ApiService
         return await CreateClient().DeleteAsync(endpoint);
     }
 
+    public async Task<ApiResponse<T>?> DeleteApiResponseAsync<T>(string endpoint)
+    {
+        var res = await DeleteAsync(endpoint);
+        return await ReadApiResponseAsync<T>(res);
+    }
+
     private static async Task<ApiResponse<T>?> ReadApiResponseAsync<T>(HttpResponseMessage res)
     {
         var body = await res.Content.ReadAsStringAsync();

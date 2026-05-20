@@ -9,4 +9,6 @@ public interface IApplicationRepository
     Task AddAsync(Application entity, CancellationToken cancellationToken = default);
     Task UpdateAsync(Application entity, CancellationToken cancellationToken = default);
     Task<bool> DeleteAsync(long id, CancellationToken cancellationToken = default);
+    /// <summary>Removes all applications submitted with this resume (required before deleting the resume row).</summary>
+    Task DeleteByResumeIdAsync(long resumeId, CancellationToken cancellationToken = default);
 }

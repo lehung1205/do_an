@@ -16,4 +16,6 @@ public class ProfileResponse
     public string Email { get; set; } = null!;
     public string? PhoneNumber { get; set; }
     public string Role { get; set; } = null!;
+    public long? JobSeekerId { get; set; }
+    public long? EmployerId { get; set; }
 }

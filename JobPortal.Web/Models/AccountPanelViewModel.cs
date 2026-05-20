@@ -1,3 +1,4 @@
+using JobPortal.Web.Dtos;
 using JobPortal.Web.Dtos.Auth;
 using JobPortal.Web.Pages.Account;
 
@@ -10,12 +11,18 @@ public class AccountPanelViewModel
     public string? SuccessMessage { get; set; }
     public string? ErrorMessage { get; set; }
     public string ActiveTab { get; set; } = "view";
+    public IReadOnlyList<ResumeDto> Resumes { get; set; } = Array.Empty<ResumeDto>();
     public IndexModel.EditInputModel EditInput { get; set; } = new();
     public IndexModel.PasswordInputModel PasswordInput { get; set; } = new();
+    public IndexModel.ResumeInputModel ResumeInput { get; set; } = new();
     public string UpdateFormAction { get; set; } = "/Account/Index?handler=Update";
     public string ChangePasswordFormAction { get; set; } = "/Account/Index?handler=ChangePassword";
+    public string AddResumeFormAction { get; set; } = "/Account/Index?handler=AddResume";
+    public string DeleteResumeFormAction { get; set; } = "/Account/Index?handler=DeleteResume";
     public string AntiForgeryFieldName { get; set; } = "__RequestVerificationToken";
     public string AntiForgeryRequestToken { get; set; } = string.Empty;
+
+    public bool IsJobSeeker => string.Equals(Profile.Role, "JOB_SEEKER", StringComparison.Ordinal);
 
     public static string FormatRole(string role) => IndexModel.FormatRole(role);
 

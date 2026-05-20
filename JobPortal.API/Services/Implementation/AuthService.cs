@@ -92,6 +92,8 @@ public sealed class AuthService : IAuthService
 
         await _authRepository.SaveChangesAsync(cancellationToken);
 
+        var userForProfile = await _authRepository.FindUserByIdWithProfilesAsync(authUser.Id, cancellationToken) ?? authUser;
+
         var accessToken = _tokenService.CreateAccessToken(authUser);
         var (refreshTokenEntity, refreshTokenValue) = _tokenService.GenerateRefreshToken(ipAddress);
         refreshTokenEntity.UserId = authUser.Id;
@@ -105,7 +107,7 @@ public sealed class AuthService : IAuthService
             RefreshToken = refreshTokenValue,
             AccessTokenExpiresAt = DateTime.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpirationMinutes),
             RefreshTokenExpiresAt = refreshTokenEntity.ExpiresAt,
-            User = MapProfile(authUser)
+            User = MapProfile(userForProfile)
         };
     }
 
@@ -251,7 +253,7 @@ public sealed class AuthService : IAuthService
 
     public async Task<ProfileResponse> GetProfileAsync(long userId, CancellationToken cancellationToken = default)
     {
-        var user = await FindUserByIdAsync(userId, cancellationToken);
+        var user = await _authRepository.FindUserByIdWithProfilesAsync(userId, cancellationToken);
         if (user == null)
         {
             throw new NotFoundException("User not found.");
@@ -355,7 +357,9 @@ public sealed class AuthService : IAuthService
             Name = user.Name,
             Email = user.Email,
             PhoneNumber = user.PhoneNumber,
-            Role = user.Role
+            Role = user.Role,
+            JobSeekerId = user.JobSeekerProfile?.Id,
+            EmployerId = user.EmployerProfile?.Id
         };
     }
 

@@ -3,11 +3,15 @@
     view: "account-tab-view-btn",
     edit: "account-tab-edit-btn",
     password: "account-tab-password-btn",
+    resume: "account-tab-resume-btn",
   };
 
   function showAccountTab(tabName) {
     const buttonId = tabButtons[tabName] || tabButtons.view;
-    const button = document.getElementById(buttonId);
+    let button = document.getElementById(buttonId);
+    if (!button && tabName !== "view") {
+      button = document.getElementById(tabButtons.view);
+    }
     if (button) {
       bootstrap.Tab.getOrCreateInstance(button).show();
     }

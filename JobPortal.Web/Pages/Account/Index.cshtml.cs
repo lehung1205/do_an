@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using JobPortal.Web.Dtos;
 using JobPortal.Web.Dtos.Auth;
 using JobPortal.Web.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -120,6 +121,84 @@ public class IndexModel : PageModel
         return RedirectBack(returnUrl, openAccount: true, tab: "password");
     }
 
+    public async Task<IActionResult> OnPostAddResumeAsync(
+        [Bind(Prefix = "ResumeInput")] ResumeInputModel? resumeInput,
+        [FromForm] string? returnUrl)
+    {
+        var redirect = RequireLogin();
+        if (redirect != null)
+        {
+            return redirect;
+        }
+
+        ModelState.Clear();
+        resumeInput ??= new ResumeInputModel();
+
+        var validationError = ValidateResumeInput(resumeInput);
+        if (validationError != null)
+        {
+            TempData["AccountErrorMessage"] = validationError;
+            TempData["AccountTab"] = "resume";
+            TempData["ResumeInputTitle"] = resumeInput.Title;
+            TempData["ResumeInputUrl"] = resumeInput.Url;
+            return RedirectBack(returnUrl, openAccount: true, tab: "resume");
+        }
+
+        var response = await _api.PostApiResponseAsync<CreateResumeRequest, ResumeDto>(
+            "/api/resumes/me",
+            new CreateResumeRequest
+            {
+                Title = resumeInput.Title.Trim(),
+                Url = resumeInput.Url.Trim()
+            });
+
+        if (response is not { Success: true })
+        {
+            TempData["AccountErrorMessage"] = response?.Message
+                ?? response?.Errors.FirstOrDefault()?.Message
+                ?? "Thêm hồ sơ thất bại.";
+            TempData["AccountTab"] = "resume";
+            TempData["ResumeInputTitle"] = resumeInput.Title;
+            TempData["ResumeInputUrl"] = resumeInput.Url;
+            return RedirectBack(returnUrl, openAccount: true, tab: "resume");
+        }
+
+        TempData["AccountSuccessMessage"] = "Đã thêm hồ sơ (CV) thành công.";
+        TempData["AccountTab"] = "resume";
+        return RedirectBack(returnUrl, openAccount: true, tab: "resume");
+    }
+
+    public async Task<IActionResult> OnPostDeleteResumeAsync([FromForm] long resumeId, [FromForm] string? returnUrl)
+    {
+        var redirect = RequireLogin();
+        if (redirect != null)
+        {
+            return redirect;
+        }
+
+        if (resumeId <= 0)
+        {
+            TempData["AccountErrorMessage"] = "Hồ sơ không hợp lệ.";
+            TempData["AccountTab"] = "resume";
+            return RedirectBack(returnUrl, openAccount: true, tab: "resume");
+        }
+
+        var response = await _api.DeleteApiResponseAsync<object>($"/api/resumes/me/{resumeId}");
+
+        if (response is not { Success: true })
+        {
+            TempData["AccountErrorMessage"] = response?.Message
+                ?? response?.Errors.FirstOrDefault()?.Message
+                ?? "Xóa hồ sơ thất bại.";
+            TempData["AccountTab"] = "resume";
+            return RedirectBack(returnUrl, openAccount: true, tab: "resume");
+        }
+
+        TempData["AccountSuccessMessage"] = "Đã xóa hồ sơ. Các đơn ứng tuyển dùng hồ sơ này cũng đã được gỡ bỏ.";
+        TempData["AccountTab"] = "resume";
+        return RedirectBack(returnUrl, openAccount: true, tab: "resume");
+    }
+
     public static string FormatRole(string role) => role switch
     {
         "JOB_SEEKER" => "Ứng viên",
@@ -173,6 +252,37 @@ public class IndexModel : PageModel
         return null;
     }
 
+    private static string? ValidateResumeInput(ResumeInputModel input)
+    {
+        if (string.IsNullOrWhiteSpace(input.Title))
+        {
+            return "Vui lòng nhập tiêu đề hồ sơ.";
+        }
+
+        if (input.Title.Length > 255)
+        {
+            return "Tiêu đề không được vượt quá 255 ký tự.";
+        }
+
+        if (string.IsNullOrWhiteSpace(input.Url))
+        {
+            return "Vui lòng nhập liên kết CV (URL).";
+        }
+
+        if (input.Url.Length > 500)
+        {
+            return "Liên kết không được vượt quá 500 ký tự.";
+        }
+
+        if (!Uri.TryCreate(input.Url.Trim(), UriKind.Absolute, out var uri) ||
+            (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+        {
+            return "Liên kết phải là URL http hoặc https hợp lệ.";
+        }
+
+        return null;
+    }
+
     private IActionResult? RequireLogin()
     {
         if (string.IsNullOrEmpty(HttpContext.Session.GetString("JwtToken")))
@@ -209,6 +319,7 @@ public class IndexModel : PageModel
     {
         "edit" => "edit",
         "password" => "password",
+        "resume" => "resume",
         _ => "view"
     };
 
@@ -226,5 +337,12 @@ public class IndexModel : PageModel
         public string NewPassword { get; set; } = string.Empty;
 
         public string ConfirmNewPassword { get; set; } = string.Empty;
+    }
+
+    public class ResumeInputModel
+    {
+        public string Title { get; set; } = string.Empty;
+
+        public string Url { get; set; } = string.Empty;
     }
 }

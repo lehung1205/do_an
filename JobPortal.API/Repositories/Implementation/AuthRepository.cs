@@ -87,6 +87,9 @@ public class AuthRepository : IAuthRepository
     {
         return await _context.RefreshTokens
             .Include(t => t.User)
+                .ThenInclude(u => u!.JobSeekerProfile)
+            .Include(t => t.User)
+                .ThenInclude(u => u!.EmployerProfile)
             .FirstOrDefaultAsync(t => t.TokenHash == tokenHash, cancellationToken);
     }
 

@@ -6,6 +6,7 @@ namespace JobPortal.API.Repositories.Interface;
 public interface IJobSeekerRepository
 {
     Task<IReadOnlyList<JobSeeker>> GetAllAsync(CancellationToken cancellationToken = default);
+    Task<JobSeeker?> GetByUserIdAsync(long userId, CancellationToken cancellationToken = default);
     Task<JobSeeker?> GetByIdAsync(long id, CancellationToken cancellationToken = default);
     Task<JobSeeker?> GetByIdWithUserAsync(long id, CancellationToken cancellationToken = default);
     Task<bool> UserExistsAsync(string email, string? phoneNumber, CancellationToken cancellationToken = default);

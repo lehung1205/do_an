@@ -22,6 +22,15 @@ public class ResumeRepository : IResumeRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyList<Resume>> GetByJobSeekerIdAsync(long jobSeekerId, CancellationToken cancellationToken = default)
+    {
+        return await _context.Resumes
+            .AsNoTracking()
+            .Where(r => r.JobSeekerId == jobSeekerId)
+            .OrderByDescending(r => r.Id)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<Resume?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
     {
         return await _context.Resumes.FindAsync([id], cancellationToken);

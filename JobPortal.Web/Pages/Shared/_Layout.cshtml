@@ -27,6 +27,9 @@
                 @{
                     var isLoggedIn = !string.IsNullOrEmpty(Context.Session.GetString("JwtToken"));
                     var userName = Context.Session.GetString("UserName");
+                    var userRole = Context.Session.GetString("UserRole");
+                    var isJobSeeker = string.Equals(userRole, "JOB_SEEKER", StringComparison.Ordinal);
+                    var isEmployer = string.Equals(userRole, "EMPLOYER", StringComparison.Ordinal);
                     var userInitials = JobPortal.Web.Models.AccountPanelViewModel.GetInitials(userName);
                 }
                 <div class="collapse navbar-collapse" id="mainNav">
@@ -37,6 +40,15 @@
                         <li class="nav-item">
                             <a class="nav-link" asp-page="/Jobs/Index">Việc làm</a>
                         </li>
+                        @if (isLoggedIn && isEmployer)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-page="/Employer/PostJob">Đăng bài</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-page="/Employer/BuyPackages">Mua gói</a>
+                            </li>
+                        }
                     </ul>
                     <ul class="navbar-nav align-items-lg-center gap-2 nav-auth">
                         @if (isLoggedIn)
@@ -67,6 +79,15 @@
                                             <i class="bi bi-shield-lock me-2"></i> Đổi mật khẩu
                                         </button>
                                     </li>
+                                    @if (isJobSeeker)
+                                    {
+                                        <li>
+                                            <button type="button" class="dropdown-item"
+                                                    data-account-open data-account-tab="resume">
+                                                <i class="bi bi-file-earmark-person me-2"></i> Thêm hồ sơ
+                                            </button>
+                                        </li>
+                                    }
                                     <li><hr class="dropdown-divider" /></li>
                                     <li>
                                         <a class="dropdown-item text-danger" asp-page="/Auth/Logout">

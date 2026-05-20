@@ -47,6 +47,7 @@ public class RegisterModel : PageModel
         HttpContext.Session.SetString("JwtToken", response.Data.AccessToken);
         HttpContext.Session.SetString("RefreshToken", response.Data.RefreshToken);
         HttpContext.Session.SetString("UserName", response.Data.User.Name);
+        HttpContext.Session.SetString("UserRole", response.Data.User.Role);
 
         return RedirectToPage("/Index");
     }

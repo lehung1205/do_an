@@ -23,6 +23,13 @@ public class JobSeekerRepository : IJobSeekerRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<JobSeeker?> GetByUserIdAsync(long userId, CancellationToken cancellationToken = default)
+    {
+        return await _context.JobSeekers
+            .AsNoTracking()
+            .FirstOrDefaultAsync(j => j.UserId == userId, cancellationToken);
+    }
+
     public async Task<JobSeeker?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
     {
         return await _context.JobSeekers.FindAsync([id], cancellationToken);

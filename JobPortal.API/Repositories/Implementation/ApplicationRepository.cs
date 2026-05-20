@@ -51,4 +51,20 @@ public class ApplicationRepository : IApplicationRepository
         await _context.SaveChangesAsync(cancellationToken);
         return true;
     }
+
+    public async Task DeleteByResumeIdAsync(long resumeId, CancellationToken cancellationToken = default)
+    {
+        var applications = await _context.Applications
+            .Include(a => a.Processes)
+            .Where(a => a.ResumeId == resumeId)
+            .ToListAsync(cancellationToken);
+
+        if (applications.Count == 0)
+        {
+            return;
+        }
+
+        _context.Applications.RemoveRange(applications);
+        await _context.SaveChangesAsync(cancellationToken);
+    }
 }

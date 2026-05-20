@@ -92,6 +92,8 @@ public sealed class AuthService : IAuthService
 
         await _authRepository.SaveChangesAsync(cancellationToken);
 
+        var userForProfile = await _authRepository.FindUserByIdWithProfilesAsync(authUser.Id, cancellationToken) ?? authUser;
+
         var accessToken = _tokenService.CreateAccessToken(authUser);
         var (refreshTokenEntity, refreshTokenValue) = _tokenService.GenerateRefreshToken(ipAddress);
         refreshTokenEntity.UserId = authUser.Id;
@@ -105,7 +107,7 @@ public sealed class AuthService : IAuthService
             RefreshToken = refreshTokenValue,
             AccessTokenExpiresAt = DateTime.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpirationMinutes),
             RefreshTokenExpiresAt = refreshTokenEntity.ExpiresAt,
-            User = MapProfile(authUser)
+            User = MapProfile(userForProfile)
         };
     }
 
@@ -251,7 +253,7 @@ public sealed class AuthService : IAuthService
 
     public async Task<ProfileResponse> GetProfileAsync(long userId, CancellationToken cancellationToken = default)
     {
-        var user = await FindUserByIdAsync(userId, cancellationToken);
+        var user = await _authRepository.FindUserByIdWithProfilesAsync(userId, cancellationToken);
         if (user == null)
         {
             throw new NotFoundException("User not found.");
@@ -295,6 +297,26 @@ public sealed class AuthService : IAuthService
         {
             user.AdminProfile.Name = user.Name;
             user.AdminProfile.UpdatedAt = now;
+        }
+
+        if (request.ProfileImage != null)
+        {
+            var imageUrl = string.IsNullOrWhiteSpace(request.ProfileImage) ? null : request.ProfileImage.Trim();
+            if (imageUrl != null && imageUrl.Length > 500)
+            {
+                throw new BadRequestException("Profile image URL is too long.");
+            }
+
+            user.ProfileImage = imageUrl;
+            if (user.JobSeekerProfile != null)
+            {
+                user.JobSeekerProfile.ProfileImage = imageUrl;
+            }
+
+            if (user.EmployerProfile != null)
+            {
+                user.EmployerProfile.Image = imageUrl;
+            }
         }
 
         await _authRepository.SaveChangesAsync(cancellationToken);
@@ -349,14 +371,63 @@ public sealed class AuthService : IAuthService
 
     private ProfileResponse MapProfile(User user)
     {
-        return new ProfileResponse
+        var profile = new ProfileResponse
         {
             Id = user.Id,
             Name = user.Name,
             Email = user.Email,
             PhoneNumber = user.PhoneNumber,
-            Role = user.Role
+            Role = user.Role,
+            JobSeekerId = user.JobSeekerProfile?.Id,
+            EmployerId = user.EmployerProfile?.Id,
+            AdminId = user.AdminProfile?.Id,
+            ProfileImage = user.ProfileImage
+                ?? user.JobSeekerProfile?.ProfileImage
+                ?? user.EmployerProfile?.Image,
+            CreatedAt = user.CreatedAt,
+            UpdatedAt = user.UpdatedAt
         };
+
+        if (user.JobSeekerProfile != null)
+        {
+            var j = user.JobSeekerProfile;
+            profile.AccountStatus = j.Status;
+            profile.EmailVerifiedAt = j.EmailVerifiedAt;
+            profile.DateOfBirth = j.DateOfBirth;
+            profile.Gender = j.Gender;
+            profile.Description = j.Description;
+            profile.PermanentAddress = j.PermanentAddress;
+            profile.TemporaryAddress = j.TemporaryAddress;
+            profile.IdCard = j.IdCard;
+            profile.IdCardIssueDate = j.IdCardIssueDate;
+            profile.IdCardIssuePlace = j.IdCardIssuePlace;
+            profile.BankName = j.BankName;
+            profile.BankAccountNumber = j.AccountNumber;
+            profile.ProfilePhone = j.Phone;
+            profile.PostingLimit = null;
+        }
+        else if (user.EmployerProfile != null)
+        {
+            var e = user.EmployerProfile;
+            profile.AccountStatus = e.Status;
+            profile.EmailVerifiedAt = e.EmailVerifiedAt;
+            profile.DateOfBirth = e.DateOfBirth;
+            profile.Gender = e.Gender;
+            profile.Description = e.Description;
+            profile.IdCard = e.IdCard;
+            profile.ProfilePhone = e.Phone;
+            profile.PostingLimit = e.PostingLimit;
+        }
+        else if (user.AdminProfile != null)
+        {
+            var a = user.AdminProfile;
+            profile.AccountStatus = a.Status;
+            profile.BankName = a.BankName;
+            profile.BankAccountNumber = a.AccountNumber;
+            profile.ProfilePhone = a.Phone;
+        }
+
+        return profile;
     }
 
     private static string NormalizeEmail(string email)

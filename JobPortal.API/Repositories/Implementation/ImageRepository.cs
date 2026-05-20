@@ -22,6 +22,15 @@ public class ImageRepository : IImageRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyList<Image>> GetByJobIdAsync(long jobId, CancellationToken cancellationToken = default)
+    {
+        return await _context.Images
+            .AsNoTracking()
+            .Where(i => i.JobId == jobId)
+            .OrderBy(i => i.Id)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<Image?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
     {
         return await _context.Images.FindAsync([id], cancellationToken);

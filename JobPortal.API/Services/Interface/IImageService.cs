@@ -5,6 +5,7 @@ namespace JobPortal.API.Services.Interface;
 public interface IImageService
 {
     Task<IReadOnlyList<ImageDto>> GetAllImagesAsync(CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<ImageDto>> GetImagesByJobIdAsync(long jobId, CancellationToken cancellationToken = default);
     Task<ImageDto> GetImageByIdAsync(long id, CancellationToken cancellationToken = default);
     Task<ImageDto> CreateImageAsync(ImageDto dto, CancellationToken cancellationToken = default);
     Task UpdateImageAsync(long id, ImageDto dto, CancellationToken cancellationToken = default);

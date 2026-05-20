@@ -1,6 +1,9 @@
 using System.ComponentModel.DataAnnotations;
+using JobPortal.Web.Dtos;
 using JobPortal.Web.Dtos.Auth;
 using JobPortal.Web.Services;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -8,9 +11,20 @@ namespace JobPortal.Web.Pages.Account;
 
 public class IndexModel : PageModel
 {
-    private readonly ApiService _api;
+    private const long MaxAvatarBytes = 2 * 1024 * 1024;
+    private static readonly HashSet<string> AllowedAvatarExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".jpg", ".jpeg", ".png", ".gif", ".webp"
+    };
 
-    public IndexModel(ApiService api) => _api = api;
+    private readonly ApiService _api;
+    private readonly IWebHostEnvironment _env;
+
+    public IndexModel(ApiService api, IWebHostEnvironment env)
+    {
+        _api = api;
+        _env = env;
+    }
 
     public ProfileResponse? Profile { get; set; }
 
@@ -34,6 +48,7 @@ public class IndexModel : PageModel
 
     public async Task<IActionResult> OnPostUpdateAsync(
         [Bind(Prefix = "EditInput")] EditInputModel? editInput,
+        IFormFile? avatarFile,
         [FromForm] string? returnUrl)
     {
         var redirect = RequireLogin();
@@ -53,12 +68,43 @@ public class IndexModel : PageModel
             return RedirectBack(returnUrl, openAccount: true, tab: "edit");
         }
 
+        var avatarErr = ValidateAvatarFile(avatarFile);
+        if (avatarErr != null)
+        {
+            TempData["AccountErrorMessage"] = avatarErr;
+            TempData["AccountTab"] = "edit";
+            return RedirectBack(returnUrl, openAccount: true, tab: "edit");
+        }
+
+        var current = await _api.GetApiDataAsync<ProfileResponse>("/api/auth/me");
+        if (current == null)
+        {
+            TempData["AccountErrorMessage"] = "Không tải được thông tin tài khoản.";
+            TempData["AccountTab"] = "edit";
+            return RedirectBack(returnUrl, openAccount: true, tab: "edit");
+        }
+
+        string? profileImageUrl = current.ProfileImage;
+        if (avatarFile is { Length: > 0 })
+        {
+            var saved = await TrySaveAvatarAsync(current.Id, avatarFile);
+            if (saved.Error != null)
+            {
+                TempData["AccountErrorMessage"] = saved.Error;
+                TempData["AccountTab"] = "edit";
+                return RedirectBack(returnUrl, openAccount: true, tab: "edit");
+            }
+
+            profileImageUrl = saved.Url;
+        }
+
         var response = await _api.PutApiResponseAsync<UpdateProfileRequest, ProfileResponse>(
             "/api/auth/me",
             new UpdateProfileRequest
             {
                 Name = editInput.Name.Trim(),
-                PhoneNumber = string.IsNullOrWhiteSpace(editInput.PhoneNumber) ? null : editInput.PhoneNumber.Trim()
+                PhoneNumber = string.IsNullOrWhiteSpace(editInput.PhoneNumber) ? null : editInput.PhoneNumber.Trim(),
+                ProfileImage = profileImageUrl
             });
 
         if (response is not { Success: true, Data: not null })
@@ -71,6 +117,7 @@ public class IndexModel : PageModel
         }
 
         HttpContext.Session.SetString("UserName", response.Data.Name);
+        HttpContext.Session.SetString("UserAvatarUrl", response.Data.ProfileImage ?? string.Empty);
         TempData["AccountSuccessMessage"] = "Đã cập nhật thông tin cá nhân.";
         TempData["AccountTab"] = "view";
         return RedirectBack(returnUrl, openAccount: true, tab: "view");
@@ -120,6 +167,84 @@ public class IndexModel : PageModel
         return RedirectBack(returnUrl, openAccount: true, tab: "password");
     }
 
+    public async Task<IActionResult> OnPostAddResumeAsync(
+        [Bind(Prefix = "ResumeInput")] ResumeInputModel? resumeInput,
+        [FromForm] string? returnUrl)
+    {
+        var redirect = RequireLogin();
+        if (redirect != null)
+        {
+            return redirect;
+        }
+
+        ModelState.Clear();
+        resumeInput ??= new ResumeInputModel();
+
+        var validationError = ValidateResumeInput(resumeInput);
+        if (validationError != null)
+        {
+            TempData["AccountErrorMessage"] = validationError;
+            TempData["AccountTab"] = "resume";
+            TempData["ResumeInputTitle"] = resumeInput.Title;
+            TempData["ResumeInputUrl"] = resumeInput.Url;
+            return RedirectBack(returnUrl, openAccount: true, tab: "resume");
+        }
+
+        var response = await _api.PostApiResponseAsync<CreateResumeRequest, ResumeDto>(
+            "/api/resumes/me",
+            new CreateResumeRequest
+            {
+                Title = resumeInput.Title.Trim(),
+                Url = resumeInput.Url.Trim()
+            });
+
+        if (response is not { Success: true })
+        {
+            TempData["AccountErrorMessage"] = response?.Message
+                ?? response?.Errors.FirstOrDefault()?.Message
+                ?? "Thêm hồ sơ thất bại.";
+            TempData["AccountTab"] = "resume";
+            TempData["ResumeInputTitle"] = resumeInput.Title;
+            TempData["ResumeInputUrl"] = resumeInput.Url;
+            return RedirectBack(returnUrl, openAccount: true, tab: "resume");
+        }
+
+        TempData["AccountSuccessMessage"] = "Đã thêm hồ sơ (CV) thành công.";
+        TempData["AccountTab"] = "resume";
+        return RedirectBack(returnUrl, openAccount: true, tab: "resume");
+    }
+
+    public async Task<IActionResult> OnPostDeleteResumeAsync([FromForm] long resumeId, [FromForm] string? returnUrl)
+    {
+        var redirect = RequireLogin();
+        if (redirect != null)
+        {
+            return redirect;
+        }
+
+        if (resumeId <= 0)
+        {
+            TempData["AccountErrorMessage"] = "Hồ sơ không hợp lệ.";
+            TempData["AccountTab"] = "resume";
+            return RedirectBack(returnUrl, openAccount: true, tab: "resume");
+        }
+
+        var response = await _api.DeleteApiResponseAsync<object>($"/api/resumes/me/{resumeId}");
+
+        if (response is not { Success: true })
+        {
+            TempData["AccountErrorMessage"] = response?.Message
+                ?? response?.Errors.FirstOrDefault()?.Message
+                ?? "Xóa hồ sơ thất bại.";
+            TempData["AccountTab"] = "resume";
+            return RedirectBack(returnUrl, openAccount: true, tab: "resume");
+        }
+
+        TempData["AccountSuccessMessage"] = "Đã xóa hồ sơ. Các đơn ứng tuyển dùng hồ sơ này cũng đã được gỡ bỏ.";
+        TempData["AccountTab"] = "resume";
+        return RedirectBack(returnUrl, openAccount: true, tab: "resume");
+    }
+
     public static string FormatRole(string role) => role switch
     {
         "JOB_SEEKER" => "Ứng viên",
@@ -148,6 +273,63 @@ public class IndexModel : PageModel
         return null;
     }
 
+    private static string? ValidateAvatarFile(IFormFile? file)
+    {
+        if (file == null || file.Length == 0)
+        {
+            return null;
+        }
+
+        if (file.Length > MaxAvatarBytes)
+        {
+            return "Ảnh đại diện không vượt quá 2 MB.";
+        }
+
+        var ext = Path.GetExtension(file.FileName);
+        if (string.IsNullOrEmpty(ext) || !AllowedAvatarExtensions.Contains(ext))
+        {
+            return "Chỉ chấp nhận ảnh: jpg, jpeg, png, gif, webp.";
+        }
+
+        return null;
+    }
+
+    private async Task<(string? Url, string? Error)> TrySaveAvatarAsync(long userId, IFormFile file)
+    {
+        var webRoot = _env.WebRootPath;
+        if (string.IsNullOrEmpty(webRoot))
+        {
+            return (null, "Thư mục wwwroot không khả dụng.");
+        }
+
+        var ext = Path.GetExtension(file.FileName);
+        var storedName = $"{Guid.NewGuid():N}{ext}";
+        var dir = Path.Combine(webRoot, "uploads", "avatars", userId.ToString());
+        Directory.CreateDirectory(dir);
+        var physicalPath = Path.Combine(dir, storedName);
+
+        try
+        {
+            await using (var stream = System.IO.File.Create(physicalPath))
+            {
+                await file.CopyToAsync(stream);
+            }
+        }
+        catch
+        {
+            return (null, "Không lưu được file ảnh.");
+        }
+
+        var relativeUrlPath = $"{Request.PathBase}/uploads/avatars/{userId}/{storedName}".Replace("//", "/");
+        if (!relativeUrlPath.StartsWith('/'))
+        {
+            relativeUrlPath = "/" + relativeUrlPath;
+        }
+
+        var publicUrl = $"{Request.Scheme}://{Request.Host}{relativeUrlPath}";
+        return (publicUrl, null);
+    }
+
     private static string? ValidatePasswordInput(PasswordInputModel input)
     {
         if (string.IsNullOrWhiteSpace(input.CurrentPassword))
@@ -168,6 +350,37 @@ public class IndexModel : PageModel
         if (input.NewPassword != input.ConfirmNewPassword)
         {
             return "Mật khẩu xác nhận không khớp.";
+        }
+
+        return null;
+    }
+
+    private static string? ValidateResumeInput(ResumeInputModel input)
+    {
+        if (string.IsNullOrWhiteSpace(input.Title))
+        {
+            return "Vui lòng nhập tiêu đề hồ sơ.";
+        }
+
+        if (input.Title.Length > 255)
+        {
+            return "Tiêu đề không được vượt quá 255 ký tự.";
+        }
+
+        if (string.IsNullOrWhiteSpace(input.Url))
+        {
+            return "Vui lòng nhập liên kết CV (URL).";
+        }
+
+        if (input.Url.Length > 500)
+        {
+            return "Liên kết không được vượt quá 500 ký tự.";
+        }
+
+        if (!Uri.TryCreate(input.Url.Trim(), UriKind.Absolute, out var uri) ||
+            (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+        {
+            return "Liên kết phải là URL http hoặc https hợp lệ.";
         }
 
         return null;
@@ -209,6 +422,7 @@ public class IndexModel : PageModel
     {
         "edit" => "edit",
         "password" => "password",
+        "resume" => "resume",
         _ => "view"
     };
 
@@ -226,5 +440,12 @@ public class IndexModel : PageModel
         public string NewPassword { get; set; } = string.Empty;
 
         public string ConfirmNewPassword { get; set; } = string.Empty;
+    }
+
+    public class ResumeInputModel
+    {
+        public string Title { get; set; } = string.Empty;
+
+        public string Url { get; set; } = string.Empty;
     }
 }

@@ -1,3 +1,4 @@
+using JobPortal.Web.Dtos;
 using JobPortal.Web.Dtos.Auth;
 using JobPortal.Web.Models;
 using JobPortal.Web.Pages.Account;
@@ -37,6 +38,27 @@ public class AccountPanelViewComponent : ViewComponent
 
         ViewData.TemplateInfo.HtmlFieldPrefix = string.Empty;
 
+        IReadOnlyList<ResumeDto> resumes = Array.Empty<ResumeDto>();
+        if (string.Equals(profile.Role, "JOB_SEEKER", StringComparison.Ordinal))
+        {
+            resumes = await _api.GetApiDataAsync<List<ResumeDto>>("/api/resumes/me") ?? new List<ResumeDto>();
+        }
+
+        var resumeInput = new IndexModel.ResumeInputModel();
+        var tempData = ViewContext?.TempData;
+        if (tempData != null)
+        {
+            if (tempData.TryGetValue("ResumeInputTitle", out var resumeTitle) && resumeTitle is string t)
+            {
+                resumeInput.Title = t;
+            }
+
+            if (tempData.TryGetValue("ResumeInputUrl", out var resumeUrl) && resumeUrl is string u)
+            {
+                resumeInput.Url = u;
+            }
+        }
+
         var model = new AccountPanelViewModel
         {
             Profile = profile,
@@ -44,15 +66,19 @@ public class AccountPanelViewComponent : ViewComponent
             SuccessMessage = TempData["AccountSuccessMessage"] as string,
             ErrorMessage = TempData["AccountErrorMessage"] as string,
             ActiveTab = TempData["AccountTab"] as string ?? "view",
+            Resumes = resumes,
             UpdateFormAction = Url.Page("/Account/Index", pageHandler: "Update") ?? "/Account/Index?handler=Update",
             ChangePasswordFormAction = Url.Page("/Account/Index", pageHandler: "ChangePassword") ?? "/Account/Index?handler=ChangePassword",
+            AddResumeFormAction = Url.Page("/Account/Index", pageHandler: "AddResume") ?? "/Account/Index?handler=AddResume",
+            DeleteResumeFormAction = Url.Page("/Account/Index", pageHandler: "DeleteResume") ?? "/Account/Index?handler=DeleteResume",
             AntiForgeryFieldName = tokens.FormFieldName,
             AntiForgeryRequestToken = tokens.RequestToken ?? string.Empty,
             EditInput = new IndexModel.EditInputModel
             {
                 Name = profile.Name,
                 PhoneNumber = profile.PhoneNumber
-            }
+            },
+            ResumeInput = resumeInput
         };
 
         return View(model);

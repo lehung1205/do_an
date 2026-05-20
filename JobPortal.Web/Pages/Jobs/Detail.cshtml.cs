@@ -16,6 +16,8 @@ public class DetailModel : PageModel
 
     public JobDto Job { get; set; } = null!;
 
+    public IReadOnlyList<ImageDto> JobImages { get; set; } = Array.Empty<ImageDto>();
+
     public async Task<IActionResult> OnGetAsync(long id)
     {
         var job = await _api.GetApiDataAsync<JobDto>($"/api/jobs/{id}");
@@ -25,6 +27,7 @@ public class DetailModel : PageModel
         }
 
         Job = job;
+        JobImages = await _api.GetApiDataAsync<List<ImageDto>>($"/api/images/job/{id}") ?? new List<ImageDto>();
         return Page();
     }
 }

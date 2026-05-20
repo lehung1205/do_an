@@ -25,6 +25,10 @@ public class User
     [Column("phone_number")]
     public string? PhoneNumber { get; set; }
 
+    [MaxLength(500)]
+    [Column("profile_image")]
+    public string? ProfileImage { get; set; }
+
     [Required]
     [MaxLength(32)]
     [Column("role")]

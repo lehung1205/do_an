@@ -13,11 +13,13 @@ public class JobService : IJobService
 {
     private const int MaxPageSize = 100;
     private readonly IJobRepository _repository;
+    private readonly IEmployerRepository _employerRepository;
     private readonly IMapper _mapper;
 
-    public JobService(IJobRepository repository, IMapper mapper)
+    public JobService(IJobRepository repository, IEmployerRepository employerRepository, IMapper mapper)
     {
         _repository = repository;
+        _employerRepository = employerRepository;
         _mapper = mapper;
     }
 
@@ -51,6 +53,20 @@ public class JobService : IJobService
 
     public async Task<JobDto> CreateJobAsync(JobDto jobDto, CancellationToken cancellationToken = default)
     {
+        var employer = await _employerRepository.GetByIdAsync(jobDto.EmployerId, cancellationToken);
+        if (employer == null)
+        {
+            throw new NotFoundException($"Employer with id {jobDto.EmployerId} was not found.");
+        }
+
+        if (employer.PostingLimit < 1)
+        {
+            throw new BadRequestException("Bạn đã hết lượt đăng tin. Vui lòng mua gói để thêm lượt.");
+        }
+
+        employer.PostingLimit--;
+        employer.UpdatedAt = DateTime.UtcNow;
+
         var entity = _mapper.Map<Job>(jobDto);
         await _repository.AddAsync(entity, cancellationToken);
         return _mapper.Map<JobDto>(entity);

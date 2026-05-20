@@ -16,4 +16,25 @@ public class ProfileResponse
     public string Email { get; set; } = null!;
     public string? PhoneNumber { get; set; }
     public string Role { get; set; } = null!;
+    public long? JobSeekerId { get; set; }
+    public long? EmployerId { get; set; }
+    public long? AdminId { get; set; }
+    public string? ProfileImage { get; set; }
+
+    public DateTime CreatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
+    public string? AccountStatus { get; set; }
+    public DateTime? EmailVerifiedAt { get; set; }
+    public DateOnly? DateOfBirth { get; set; }
+    public byte? Gender { get; set; }
+    public string? Description { get; set; }
+    public string? PermanentAddress { get; set; }
+    public string? TemporaryAddress { get; set; }
+    public string? IdCard { get; set; }
+    public string? IdCardIssueDate { get; set; }
+    public string? IdCardIssuePlace { get; set; }
+    public string? BankName { get; set; }
+    public string? BankAccountNumber { get; set; }
+    public string? ProfilePhone { get; set; }
+    public int? PostingLimit { get; set; }
 }

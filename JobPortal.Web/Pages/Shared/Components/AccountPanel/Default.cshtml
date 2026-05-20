@@ -38,10 +38,32 @@
                     <i class="bi bi-shield-lock me-1"></i> Mật khẩu
                 </button>
             </li>
+            @if (Model.IsJobSeeker)
+            {
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="account-tab-resume-btn" data-bs-toggle="tab"
+                            data-bs-target="#account-tab-resume" type="button" role="tab">
+                        <i class="bi bi-file-earmark-person me-1"></i> Thêm hồ sơ
+                    </button>
+                </li>
+            }
         </ul>
 
         <div class="tab-content flex-grow-1 p-3 overflow-auto">
             <div class="tab-pane fade show active" id="account-tab-view" role="tabpanel">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    @if (!string.IsNullOrWhiteSpace(Model.Profile.ProfileImage))
+                    {
+                        <img src="@Model.Profile.ProfileImage" alt="" class="rounded-circle border" width="72" height="72" style="object-fit:cover;" />
+                    }
+                    else
+                    {
+                        <span class="rounded-circle bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center border border-primary-subtle fw-semibold" style="width:72px;height:72px;font-size:1.5rem;">
+                            @AccountPanelViewModel.GetInitials(Model.Profile.Name)
+                        </span>
+                    }
+                    <div class="small text-muted">Ảnh đại diện có thể đổi trong tab Chỉnh sửa.</div>
+                </div>
                 <dl class="row mb-0 account-info">
                     <dt class="col-5 text-muted">Họ và tên</dt>
                     <dd class="col-7 fw-semibold mb-2">@Model.Profile.Name</dd>
@@ -52,11 +74,83 @@
                         @(string.IsNullOrWhiteSpace(Model.Profile.PhoneNumber) ? "—" : Model.Profile.PhoneNumber)
                     </dd>
                     <dt class="col-5 text-muted">Loại TK</dt>
-                    <dd class="col-7 mb-0">
+                    <dd class="col-7 mb-2">
                         <span class="badge text-bg-primary-subtle text-primary border border-primary-subtle">
                             @AccountPanelViewModel.FormatRole(Model.Profile.Role)
                         </span>
                     </dd>
+                    <dt class="col-5 text-muted">Ngày tham gia</dt>
+                    <dd class="col-7 mb-2">@AccountPanelViewModel.FormatDateTime(Model.Profile.CreatedAt)</dd>
+                    <dt class="col-5 text-muted">Cập nhật lần cuối</dt>
+                    <dd class="col-7 mb-2">@AccountPanelViewModel.FormatDateTimeNullable(Model.Profile.UpdatedAt)</dd>
+                    <dt class="col-5 text-muted">Trạng thái tài khoản</dt>
+                    <dd class="col-7 mb-2">@AccountPanelViewModel.FormatAccountStatus(Model.Profile.AccountStatus)</dd>
+                    @if (Model.Profile.JobSeekerId is long sid)
+                    {
+                        <dt class="col-5 text-muted">Mã hồ sơ ứng viên</dt>
+                        <dd class="col-7 mb-2">@sid</dd>
+                    }
+                    @if (Model.Profile.EmployerId is long eid)
+                    {
+                        <dt class="col-5 text-muted">Mã hồ sơ NTD</dt>
+                        <dd class="col-7 mb-2">@eid</dd>
+                    }
+                    @if (Model.Profile.AdminId is long aid)
+                    {
+                        <dt class="col-5 text-muted">Mã quản trị</dt>
+                        <dd class="col-7 mb-2">@aid</dd>
+                    }
+                    <dt class="col-5 text-muted">Xác thực email</dt>
+                    <dd class="col-7 mb-2">@AccountPanelViewModel.FormatDateTimeNullable(Model.Profile.EmailVerifiedAt)</dd>
+                    <dt class="col-5 text-muted">Ngày sinh</dt>
+                    <dd class="col-7 mb-2">@AccountPanelViewModel.FormatDateOnly(Model.Profile.DateOfBirth)</dd>
+                    <dt class="col-5 text-muted">Giới tính</dt>
+                    <dd class="col-7 mb-2">@AccountPanelViewModel.FormatGender(Model.Profile.Gender)</dd>
+                    @if (!string.IsNullOrWhiteSpace(Model.Profile.Description))
+                    {
+                        <dt class="col-5 text-muted align-top pt-1">Giới thiệu</dt>
+                        <dd class="col-7 mb-2"><div class="small" style="white-space:pre-wrap;">@Model.Profile.Description</div></dd>
+                    }
+                    @if (Model.IsJobSeeker)
+                    {
+                        <dt class="col-5 text-muted">Địa chỉ thường trú</dt>
+                        <dd class="col-7 mb-2">@AccountPanelViewModel.DashIfEmpty(Model.Profile.PermanentAddress)</dd>
+                        <dt class="col-5 text-muted">Địa chỉ tạm trú</dt>
+                        <dd class="col-7 mb-2">@AccountPanelViewModel.DashIfEmpty(Model.Profile.TemporaryAddress)</dd>
+                        <dt class="col-5 text-muted">CMND/CCCD</dt>
+                        <dd class="col-7 mb-2">@AccountPanelViewModel.DashIfEmpty(Model.Profile.IdCard)</dd>
+                        <dt class="col-5 text-muted">Ngày cấp</dt>
+                        <dd class="col-7 mb-2">@AccountPanelViewModel.DashIfEmpty(Model.Profile.IdCardIssueDate)</dd>
+                        <dt class="col-5 text-muted">Nơi cấp</dt>
+                        <dd class="col-7 mb-2">@AccountPanelViewModel.DashIfEmpty(Model.Profile.IdCardIssuePlace)</dd>
+                        <dt class="col-5 text-muted">Ngân hàng</dt>
+                        <dd class="col-7 mb-2">@AccountPanelViewModel.DashIfEmpty(Model.Profile.BankName)</dd>
+                        <dt class="col-5 text-muted">Số tài khoản</dt>
+                        <dd class="col-7 mb-2">@AccountPanelViewModel.DashIfEmpty(Model.Profile.BankAccountNumber)</dd>
+                    }
+                    @if (string.Equals(Model.Profile.Role, "EMPLOYER", StringComparison.Ordinal))
+                    {
+                        <dt class="col-5 text-muted">CMND/CCCD</dt>
+                        <dd class="col-7 mb-2">@AccountPanelViewModel.DashIfEmpty(Model.Profile.IdCard)</dd>
+                        <dt class="col-5 text-muted">Hạn đăng bài</dt>
+                        <dd class="col-7 mb-2">@(Model.Profile.PostingLimit is int pl ? pl.ToString() : "—")</dd>
+                    }
+                    @if (string.Equals(Model.Profile.Role, "ADMIN", StringComparison.Ordinal))
+                    {
+                        <dt class="col-5 text-muted">Ngân hàng</dt>
+                        <dd class="col-7 mb-2">@AccountPanelViewModel.DashIfEmpty(Model.Profile.BankName)</dd>
+                        <dt class="col-5 text-muted">Số tài khoản</dt>
+                        <dd class="col-7 mb-2">@AccountPanelViewModel.DashIfEmpty(Model.Profile.BankAccountNumber)</dd>
+                        <dt class="col-5 text-muted">Số điện thoại (hồ sơ)</dt>
+                        <dd class="col-7 mb-2">@AccountPanelViewModel.DashIfEmpty(Model.Profile.ProfilePhone)</dd>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(Model.Profile.ProfilePhone)
+                        && !string.Equals(Model.Profile.Role, "ADMIN", StringComparison.Ordinal)
+                        && !string.Equals(Model.Profile.PhoneNumber, Model.Profile.ProfilePhone, StringComparison.Ordinal))
+                    {
+                        <dt class="col-5 text-muted">SĐT trên hồ sơ</dt>
+                        <dd class="col-7 mb-0">@Model.Profile.ProfilePhone</dd>
+                    }
                 </dl>
                 <button type="button" class="btn btn-primary btn-sm mt-3" data-account-switch-tab="edit">
                     <i class="bi bi-pencil me-1"></i> Chỉnh sửa thông tin
@@ -64,9 +158,20 @@
             </div>
 
             <div class="tab-pane fade" id="account-tab-edit" role="tabpanel">
-                <form method="post" action="@Model.UpdateFormAction">
+                <form method="post" enctype="multipart/form-data" action="@Model.UpdateFormAction">
                     <input type="hidden" name="@Model.AntiForgeryFieldName" value="@Model.AntiForgeryRequestToken" />
                     <input type="hidden" name="ReturnUrl" value="@Model.ReturnUrl" />
+                    <div class="mb-3">
+                        <label class="form-label">Ảnh đại diện</label>
+                        @if (!string.IsNullOrWhiteSpace(Model.Profile.ProfileImage))
+                        {
+                            <div class="mb-2">
+                                <img src="@Model.Profile.ProfileImage" alt="" class="rounded-circle border" width="64" height="64" style="object-fit:cover;" />
+                            </div>
+                        }
+                        <input type="file" name="avatarFile" class="form-control" accept="image/jpeg,image/png,image/gif,image/webp" />
+                        <div class="form-text">Tuỳ chọn. JPG/PNG/GIF/WebP, tối đa 2 MB.</div>
+                    </div>
                     <div class="mb-3">
                         <label class="form-label" for="EditInput_Name">Họ và tên</label>
                         <input type="text" class="form-control" id="EditInput_Name" name="EditInput.Name"
@@ -109,6 +214,61 @@
                     <button type="submit" class="btn btn-primary">Đổi mật khẩu</button>
                 </form>
             </div>
+
+            @if (Model.IsJobSeeker)
+            {
+                <div class="tab-pane fade" id="account-tab-resume" role="tabpanel">
+                    @if (Model.Resumes.Count > 0)
+                    {
+                        <p class="text-muted small mb-2">Hồ sơ đã lưu</p>
+                        <ul class="list-group list-group-flush border rounded mb-3 small">
+                            @foreach (var r in Model.Resumes)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-start gap-2">
+                                    <div class="me-auto min-w-0">
+                                        <div class="fw-semibold">@r.Title</div>
+                                        <a href="@r.Url" target="_blank" rel="noopener noreferrer" class="text-break">@r.Url</a>
+                                    </div>
+                                    <div class="d-flex flex-column align-items-end gap-1 flex-shrink-0">
+                                        <span class="text-muted text-nowrap small">@r.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy")</span>
+                                        <form method="post" action="@Model.DeleteResumeFormAction" class="m-0"
+                                              onsubmit="return confirm('Xóa hồ sơ này? Các đơn ứng tuyển đã nộp bằng hồ sơ này cũng sẽ bị xóa. Thao tác không thể hoàn tác.');">
+                                            <input type="hidden" name="@Model.AntiForgeryFieldName" value="@Model.AntiForgeryRequestToken" />
+                                            <input type="hidden" name="ReturnUrl" value="@Model.ReturnUrl" />
+                                            <input type="hidden" name="resumeId" value="@r.Id" />
+                                            <button type="submit" class="btn btn-outline-danger btn-sm py-0 px-2">
+                                                <i class="bi bi-trash me-1"></i> Xóa
+                                            </button>
+                                        </form>
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="text-muted small">Bạn chưa có hồ sơ nào. Thêm tiêu đề và liên kết tới file CV (PDF/Drive…).</p>
+                    }
+                    <form method="post" action="@Model.AddResumeFormAction">
+                        <input type="hidden" name="@Model.AntiForgeryFieldName" value="@Model.AntiForgeryRequestToken" />
+                        <input type="hidden" name="ReturnUrl" value="@Model.ReturnUrl" />
+                        <div class="mb-3">
+                            <label class="form-label" for="ResumeInput_Title">Tiêu đề hồ sơ</label>
+                            <input type="text" class="form-control" id="ResumeInput_Title" name="ResumeInput.Title"
+                                   value="@Model.ResumeInput.Title" maxlength="255" required placeholder="VD: CV Frontend 2025" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="ResumeInput_Url">Liên kết CV (URL)</label>
+                            <input type="url" class="form-control" id="ResumeInput_Url" name="ResumeInput.Url"
+                                   value="@Model.ResumeInput.Url" maxlength="500" required placeholder="https://..." />
+                            <div class="form-text">Dán link tải hoặc xem CV (http/https).</div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-plus-lg me-1"></i> Thêm hồ sơ
+                        </button>
+                    </form>
+                </div>
+            }
         </div>
 
         <div class="border-top p-3">

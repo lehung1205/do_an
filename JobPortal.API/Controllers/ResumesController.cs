@@ -1,6 +1,8 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using JobPortal.API.DTOs;
 using JobPortal.API.DTOs.Common;
-using JobPortal.API.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace JobPortal.API.Controllers;
@@ -23,6 +25,15 @@ public class ResumesController : ControllerBase
         return Ok(ApiResponse<IReadOnlyList<ResumeDto>>.SuccessResponse(items, "Resumes retrieved successfully."));
     }
 
+    [HttpGet("me")]
+    [Authorize(Roles = "JOB_SEEKER")]
+    public async Task<IActionResult> GetMyResumes(CancellationToken cancellationToken)
+    {
+        var userId = GetCurrentUserId();
+        var items = await _resumeService.GetResumesForUserAsync(userId, cancellationToken);
+        return Ok(ApiResponse<IReadOnlyList<ResumeDto>>.SuccessResponse(items, "Resumes retrieved successfully."));
+    }
+
     [HttpGet("{id:long}")]
     public async Task<IActionResult> GetResume(long id, CancellationToken cancellationToken)
     {
@@ -40,6 +51,27 @@ public class ResumesController : ControllerBase
             ApiResponse<ResumeDto>.SuccessResponse(created, "Resume created successfully."));
     }
 
+    [HttpPost("me")]
+    [Authorize(Roles = "JOB_SEEKER")]
+    public async Task<IActionResult> CreateMyResume([FromBody] CreateResumeRequest request, CancellationToken cancellationToken)
+    {
+        var userId = GetCurrentUserId();
+        var created = await _resumeService.CreateResumeForUserAsync(userId, request, cancellationToken);
+        return CreatedAtAction(
+            nameof(GetResume),
+            new { id = created.Id },
+            ApiResponse<ResumeDto>.SuccessResponse(created, "Resume created successfully."));
+    }
+
+    [HttpDelete("me/{id:long}")]
+    [Authorize(Roles = "JOB_SEEKER")]
+    public async Task<IActionResult> DeleteMyResume(long id, CancellationToken cancellationToken)
+    {
+        var userId = GetCurrentUserId();
+        await _resumeService.DeleteResumeForUserAsync(userId, id, cancellationToken);
+        return Ok(ApiResponse<object>.SuccessResponse(null, "Resume deleted successfully."));
+    }
+
     [HttpPut("{id:long}")]
     public async Task<IActionResult> UpdateResume(long id, [FromBody] ResumeDto dto, CancellationToken cancellationToken)
     {
@@ -52,5 +84,16 @@ public class ResumesController : ControllerBase
     {
         await _resumeService.DeleteResumeAsync(id, cancellationToken);
         return Ok(ApiResponse<object>.SuccessResponse(null, "Resume deleted successfully."));
+    }
+
+    private long GetCurrentUserId()
+    {
+        var sub = User.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!long.TryParse(sub, out var userId))
+        {
+            throw new UnauthorizedAccessException("User identifier is missing.");
+        }
+
+        return userId;
     }
 }

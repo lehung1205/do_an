@@ -50,6 +50,7 @@ builder.Services.AddScoped<IApplicationService, ApplicationService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IEmployerService, EmployerService>();
+builder.Services.AddScoped<IEmployerDashboardService, EmployerDashboardService>();
 builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<IJobService, JobService>();
 builder.Services.AddScoped<IJobSeekerService, JobSeekerService>();
@@ -237,8 +238,7 @@ using (var scope = app.Services.CreateScope())
                 Salary = 25_000_000,
                 Location = "Ho Chi Minh City",
                 PostingStatus = "recruiting",
-                StartDate = now,
-                EndDate = now.AddMonths(3),
+                WorkingHours = "8h-17h",
                 ExpiryDate = now.AddMonths(2)
             },
             new JobPortal.API.Models.Job
@@ -250,8 +250,7 @@ using (var scope = app.Services.CreateScope())
                 Salary = 30_000_000,
                 Location = "Hanoi",
                 PostingStatus = "recruiting",
-                StartDate = now,
-                EndDate = now.AddMonths(3),
+                WorkingHours = "14h-16h",
                 ExpiryDate = now.AddMonths(2)
             });
         context.SaveChanges();

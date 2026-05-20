@@ -331,6 +331,81 @@ main {
   margin-top: auto;
 }
 
+/* Employer dashboard */
+.employer-dashboard {
+  background: var(--jp-surface);
+}
+
+.employer-welcome__card {
+  background: linear-gradient(135deg, #eff6ff 0%, #fff 60%);
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06);
+}
+
+.employer-welcome__title {
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 700;
+}
+
+.employer-stat-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--jp-radius);
+  padding: 1.25rem 1rem;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
+}
+
+.employer-stat-card__value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--jp-primary);
+  line-height: 1.2;
+}
+
+.employer-stat-card__label {
+  font-size: 0.85rem;
+  color: var(--jp-muted);
+  margin-top: 0.25rem;
+}
+
+.employer-section__title {
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.employer-section__link {
+  color: var(--jp-primary);
+  font-weight: 500;
+}
+
+.employer-panel {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--jp-radius);
+  padding: 1.25rem;
+  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.04);
+}
+
+.employer-badge--open {
+  background: #dcfce7;
+  color: #166534;
+  font-weight: 500;
+}
+
+.employer-badge--draft {
+  background: #f1f5f9;
+  color: #475569;
+  font-weight: 500;
+}
+
+.employer-notification + .employer-notification {
+  border-top: 1px solid #f1f5f9;
+}
+
+.employer-notification--warning {
+  color: var(--jp-dark);
+}
+
 /* Focus */
 .btn:focus,
 .btn:active:focus,

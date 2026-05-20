@@ -15,11 +15,26 @@ public class IndexModel : PageModel
     public int JobSeekerCount { get; set; }
     public string? Q { get; set; }
     public string? Location { get; set; }
+    public bool IsEmployerHome { get; set; }
+    public EmployerDashboardDto? EmployerDashboard { get; set; }
 
     public IndexModel(ApiService api) => _api = api;
 
     public async Task OnGetAsync(string? q, string? location)
     {
+        var role = HttpContext.Session.GetString("UserRole");
+        var isLoggedIn = !string.IsNullOrEmpty(HttpContext.Session.GetString("JwtToken"));
+
+        if (isLoggedIn && string.Equals(role, "EMPLOYER", StringComparison.Ordinal))
+        {
+            EmployerDashboard = await _api.GetApiDataAsync<EmployerDashboardDto>("/api/employers/me/dashboard");
+            IsEmployerHome = EmployerDashboard != null;
+            if (IsEmployerHome)
+            {
+                return;
+            }
+        }
+
         Q = q;
         Location = location;
 
@@ -63,4 +78,38 @@ public class IndexModel : PageModel
         "recruiting" => "Đang tuyển",
         _ => status
     };
+
+    public static string FormatJobStatus(string status) => status.Trim().ToLowerInvariant() switch
+    {
+        "recruiting" => "Đang tuyển",
+        "draft" => "Nháp",
+        "closed" => "Đã đóng",
+        _ => status
+    };
+
+    public static string FormatRelativeTime(DateTime utc)
+    {
+        var delta = DateTime.UtcNow - utc;
+        if (delta.TotalMinutes < 1)
+        {
+            return "Vừa xong";
+        }
+
+        if (delta.TotalHours < 1)
+        {
+            return $"{(int)delta.TotalMinutes} phút trước";
+        }
+
+        if (delta.TotalDays < 1)
+        {
+            return $"{(int)delta.TotalHours} giờ trước";
+        }
+
+        if (delta.TotalDays < 30)
+        {
+            return $"{(int)delta.TotalDays} ngày trước";
+        }
+
+        return utc.ToLocalTime().ToString("dd/MM/yyyy");
+    }
 }

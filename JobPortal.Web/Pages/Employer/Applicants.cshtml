@@ -1,0 +1,49 @@
+@page
+@model JobPortal.Web.Pages.Employer.ApplicantsModel
+@{
+    ViewData["Title"] = "Ứng viên";
+}
+
+<div class="container py-4">
+    <div class="mb-4">
+        <h2 class="mb-1"><i class="bi bi-people me-2"></i>Ứng viên</h2>
+        <p class="text-muted mb-0">Danh sách đơn ứng tuyển vào tin tuyển dụng của bạn</p>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-warning">@Model.ErrorMessage</div>
+    }
+    else if (Model.Applicants.Count == 0)
+    {
+        <div class="employer-panel text-center py-5 text-muted">
+            Chưa có ứng viên nào apply.
+        </div>
+    }
+    else
+    {
+        <div class="d-flex flex-column gap-3">
+            @foreach (var app in Model.Applicants)
+            {
+                <div class="employer-panel">
+                    <h3 class="h6 mb-1 fw-semibold">@app.ApplicantName</h3>
+                    <p class="text-muted small mb-3">
+                        @app.JobTitle • @ApplicantsModel.FormatRelativeTime(app.AppliedAt)
+                        · Trạng thái: @app.Status
+                    </p>
+                    <div class="d-flex flex-wrap gap-2">
+                        @if (!string.IsNullOrWhiteSpace(app.ResumeUrl))
+                        {
+                            <a href="@app.ResumeUrl" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary">
+                                Xem CV
+                            </a>
+                        }
+                        <button type="button" class="btn btn-sm btn-outline-secondary" disabled title="Tính năng đặt lịch phỏng vấn sẽ bổ sung sau">
+                            Đặt lịch PV
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

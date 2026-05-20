@@ -40,11 +40,9 @@ public class Job
     [MaxLength(32)]
     public string PostingStatus { get; set; } = null!;
 
-    [Column("start_date")]
-    public DateTime StartDate { get; set; }
-
-    [Column("end_date")]
-    public DateTime EndDate { get; set; }
+    [Column("working_hours")]
+    [MaxLength(50)]
+    public string? WorkingHours { get; set; }
 
     [Column("expiry_date")]
     public DateTime ExpiryDate { get; set; }

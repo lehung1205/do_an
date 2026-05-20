@@ -35,16 +35,28 @@
                 }
                 <div class="collapse navbar-collapse" id="mainNav">
                     <ul class="navbar-nav me-auto align-items-lg-center gap-lg-1">
-                        <li class="nav-item">
-                            <a class="nav-link" asp-page="/Jobs/Index">Việc làm</a>
-                        </li>
                         @if (isLoggedIn && isEmployer)
                         {
                             <li class="nav-item">
-                                <a class="nav-link" asp-page="/Employer/PostJob">Đăng bài</a>
+                                <a class="nav-link" asp-page="/Index">Dashboard</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" asp-page="/Employer/BuyPackages">Mua gói</a>
+                                <a class="nav-link" asp-page="/Employer/Jobs">Tin tuyển dụng</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-page="/Employer/Applicants">Ứng viên</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-page="/Employer/PostJob">Đăng tin</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-page="/Employer/BuyPackages">Gói dịch vụ</a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-page="/Jobs/Index">Việc làm</a>
                             </li>
                         }
                     </ul>

@@ -10,7 +10,6 @@ public class JobDto
     public int Salary { get; set; }
     public string Location { get; set; } = null!;
     public string PostingStatus { get; set; } = null!;
-    public DateTime StartDate { get; set; }
-    public DateTime EndDate { get; set; }
+    public string? WorkingHours { get; set; }
     public DateTime ExpiryDate { get; set; }
 }

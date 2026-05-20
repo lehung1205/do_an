@@ -27,6 +27,10 @@
                     <div class="d-flex flex-wrap gap-3 mb-4 text-muted">
                         <span><i class="bi bi-geo-alt"></i> @Model.Job.Location</span>
                         <span><i class="bi bi-currency-dollar"></i> @Model.Job.Salary.ToString("N0") VNĐ</span>
+                        @if (!string.IsNullOrWhiteSpace(Model.Job.WorkingHours))
+                        {
+                            <span><i class="bi bi-clock"></i> @Model.Job.WorkingHours</span>
+                        }
                     </div>
 
                     <hr />
@@ -53,9 +57,12 @@
                         </div>
                     }
 
-                    <div class="mt-5">
-                        <button class="btn btn-primary btn-lg px-5">Ứng tuyển ngay</button>
-                    </div>
+                    @if (Model.ShowApplyButton)
+                    {
+                        <div class="mt-5">
+                            <button class="btn btn-primary btn-lg px-5">Ứng tuyển ngay</button>
+                        </div>
+                    }
                 </div>
             </div>
         </div>
@@ -68,7 +75,8 @@
                         <li class="mb-2"><strong>Mức lương:</strong> @Model.Job.Salary.ToString("N0") VNĐ</li>
                         <li class="mb-2"><strong>Mã nhà tuyển dụng:</strong> @Model.Job.EmployerId</li>
                         <li class="mb-2"><strong>Địa điểm:</strong> @Model.Job.Location</li>
-                        <li class="mb-2"><strong>Hết hạn:</strong> @Model.Job.ExpiryDate.ToString("dd/MM/yyyy")</li>
+                        <li class="mb-2"><strong>Thời gian làm việc:</strong> @(string.IsNullOrWhiteSpace(Model.Job.WorkingHours) ? "—" : Model.Job.WorkingHours)</li>
+                        <li class="mb-2"><strong>Hết hạn tin:</strong> @Model.Job.ExpiryDate.ToLocalTime().ToString("dd/MM/yyyy")</li>
                     </ul>
                 </div>
             </div>

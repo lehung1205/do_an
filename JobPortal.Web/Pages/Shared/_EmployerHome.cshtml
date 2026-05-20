@@ -1,0 +1,185 @@
+@model JobPortal.Web.Pages.IndexModel
+
+@if (Model.EmployerDashboard != null)
+{
+    var dash = Model.EmployerDashboard;
+    <div class="employer-dashboard">
+        <section class="employer-welcome py-4">
+            <div class="container">
+                <div class="employer-welcome__card rounded-4 p-4 p-md-5">
+                    <h1 class="employer-welcome__title mb-2">
+                        Xin chào, @dash.CompanyName <span aria-hidden="true">👋</span>
+                    </h1>
+                    <p class="employer-welcome__subtitle text-muted mb-4">
+                        @if (dash.NewApplicantsToday > 0)
+                        {
+                            <text>Hôm nay bạn có <strong class="text-primary">@dash.NewApplicantsToday</strong> ứng viên mới</text>
+                        }
+                        else
+                        {
+                            <text>Chưa có ứng viên mới hôm nay — hãy đăng tin để thu hút CV</text>
+                        }
+                    </p>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a asp-page="/Employer/PostJob" class="btn btn-primary">
+                            <i class="bi bi-plus-lg me-1"></i> Đăng tin tuyển dụng
+                        </a>
+                        <a asp-page="/Employer/Applicants" class="btn btn-outline-primary">
+                            <i class="bi bi-people me-1"></i> Xem ứng viên
+                        </a>
+                        <a asp-page="/Employer/BuyPackages" class="btn btn-outline-secondary">
+                            <i class="bi bi-bag-heart me-1"></i> Nâng cấp gói
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="employer-stats py-2 pb-4">
+            <div class="container">
+                <div class="row g-3">
+                    <div class="col-6 col-lg-3">
+                        <div class="employer-stat-card text-center h-100">
+                            <div class="employer-stat-card__value">@dash.Stats.OpenJobs</div>
+                            <div class="employer-stat-card__label">Job mở</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-lg-3">
+                        <div class="employer-stat-card text-center h-100">
+                            <div class="employer-stat-card__value">@dash.Stats.NewCvCount</div>
+                            <div class="employer-stat-card__label">CV mới</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-lg-3">
+                        <div class="employer-stat-card text-center h-100">
+                            <div class="employer-stat-card__value">@dash.Stats.TotalCvCount</div>
+                            <div class="employer-stat-card__label">Tổng CV</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-lg-3">
+                        <div class="employer-stat-card text-center h-100">
+                            <div class="employer-stat-card__value">@dash.Stats.ExpiringSoonCount</div>
+                            <div class="employer-stat-card__label">Sắp hết hạn</div>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-muted small text-center mt-3 mb-0">
+                    Còn <strong>@dash.PostingLimit</strong> lượt đăng bài
+                </p>
+            </div>
+        </section>
+
+        <section class="employer-section py-4">
+            <div class="container">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="employer-section__title mb-0">Tin tuyển dụng gần đây</h2>
+                    <a asp-page="/Employer/Jobs" class="employer-section__link small text-decoration-none">
+                        Xem tất cả <i class="bi bi-chevron-right"></i>
+                    </a>
+                </div>
+                @if (dash.RecentJobs.Count == 0)
+                {
+                    <div class="employer-panel text-center py-5 text-muted">
+                        <i class="bi bi-briefcase display-6 d-block mb-2"></i>
+                        Chưa có tin tuyển dụng. <a asp-page="/Employer/PostJob">Đăng tin đầu tiên</a>
+                    </div>
+                }
+                else
+                {
+                    <div class="d-flex flex-column gap-3">
+                        @foreach (var job in dash.RecentJobs)
+                        {
+                            var isRecruiting = string.Equals(job.PostingStatus, "recruiting", StringComparison.OrdinalIgnoreCase);
+                            <div class="employer-panel">
+                                <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-2">
+                                    <h3 class="h6 mb-0 fw-semibold">@job.Title</h3>
+                                    <span class="badge @(isRecruiting ? "employer-badge--open" : "employer-badge--draft")">
+                                        @IndexModel.FormatJobStatus(job.PostingStatus)
+                                    </span>
+                                </div>
+                                <p class="text-muted small mb-3">
+                                    @job.ApplicantCount ứng viên@(string.IsNullOrWhiteSpace(job.WorkingHours) ? "" : $" • {job.WorkingHours}")
+                                </p>
+                                <div class="d-flex flex-wrap gap-2">
+                                    @if (isRecruiting)
+                                    {
+                                        <a asp-page="/Employer/Applicants" class="btn btn-sm btn-outline-primary">Xem CV</a>
+                                        <a asp-page="/Jobs/Detail" asp-route-id="@job.Id" class="btn btn-sm btn-outline-secondary">Chi tiết</a>
+                                    }
+                                    else
+                                    {
+                                        <a asp-page="/Employer/PostJob" class="btn btn-sm btn-primary">Tiếp tục chỉnh sửa</a>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </section>
+
+        <section class="employer-section py-4 bg-light">
+            <div class="container">
+                <h2 class="employer-section__title mb-3">Ứng viên mới apply</h2>
+                @if (dash.RecentApplications.Count == 0)
+                {
+                    <div class="employer-panel text-center py-4 text-muted small">
+                        Chưa có đơn ứng tuyển nào.
+                    </div>
+                }
+                else
+                {
+                    <div class="d-flex flex-column gap-3">
+                        @foreach (var app in dash.RecentApplications)
+                        {
+                            <div class="employer-panel">
+                                <h3 class="h6 mb-1 fw-semibold">@app.ApplicantName</h3>
+                                <p class="text-muted small mb-3">
+                                    @app.JobTitle • @IndexModel.FormatRelativeTime(app.AppliedAt)
+                                </p>
+                                <div class="d-flex flex-wrap gap-2">
+                                    @if (!string.IsNullOrWhiteSpace(app.ResumeUrl))
+                                    {
+                                        <a href="@app.ResumeUrl" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary">
+                                            Xem CV
+                                        </a>
+                                    }
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" disabled title="Tính năng đặt lịch phỏng vấn sẽ bổ sung sau">
+                                        Đặt lịch PV
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </section>
+
+        @if (dash.Notifications.Count > 0)
+        {
+            <section class="employer-section py-4 pb-5">
+                <div class="container">
+                    <h2 class="employer-section__title mb-3">Thông báo</h2>
+                    <div class="employer-panel employer-notifications">
+                        <ul class="list-unstyled mb-0">
+                            @foreach (var n in dash.Notifications)
+                            {
+                                <li class="employer-notification employer-notification--@n.Type py-2">
+                                    @if (n.Type == "warning")
+                                    {
+                                        <i class="bi bi-exclamation-triangle text-warning me-2"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-star text-primary me-2"></i>
+                                    }
+                                    @n.Message
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </section>
+        }
+    </div>
+}

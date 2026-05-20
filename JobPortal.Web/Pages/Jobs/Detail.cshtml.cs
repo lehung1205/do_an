@@ -18,6 +18,9 @@ public class DetailModel : PageModel
 
     public IReadOnlyList<ImageDto> JobImages { get; set; } = Array.Empty<ImageDto>();
 
+    /// <summary>Hiện nút ứng tuyển cho ứng viên (và khách); ẩn với employer/admin.</summary>
+    public bool ShowApplyButton { get; set; }
+
     public async Task<IActionResult> OnGetAsync(long id)
     {
         var job = await _api.GetApiDataAsync<JobDto>($"/api/jobs/{id}");
@@ -28,6 +31,11 @@ public class DetailModel : PageModel
 
         Job = job;
         JobImages = await _api.GetApiDataAsync<List<ImageDto>>($"/api/images/job/{id}") ?? new List<ImageDto>();
+
+        var role = HttpContext.Session.GetString("UserRole");
+        ShowApplyButton = !string.Equals(role, "EMPLOYER", StringComparison.Ordinal)
+            && !string.Equals(role, "ADMIN", StringComparison.Ordinal);
+
         return Page();
     }
 }

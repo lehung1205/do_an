@@ -281,22 +281,42 @@ public sealed class AuthService : IAuthService
         user.PhoneNumber = phone;
         user.UpdatedAt = now;
 
-        if (user.EmployerProfile != null)
+        if (user.JobSeekerProfile != null)
         {
-            user.EmployerProfile.Name = user.Name;
-            user.EmployerProfile.Phone = phone;
-            user.EmployerProfile.UpdatedAt = now;
+            var j = user.JobSeekerProfile;
+            j.Name = user.Name;
+            j.Phone = phone;
+            j.DateOfBirth = request.DateOfBirth;
+            j.Gender = request.Gender;
+            j.Description = TrimOrNull(request.Description);
+            j.PermanentAddress = TrimOrNull(request.PermanentAddress);
+            j.TemporaryAddress = TrimOrNull(request.TemporaryAddress);
+            j.IdCard = TrimOrNull(request.IdCard);
+            j.IdCardIssueDate = TrimOrNull(request.IdCardIssueDate);
+            j.IdCardIssuePlace = TrimOrNull(request.IdCardIssuePlace);
+            j.BankName = TrimOrNull(request.BankName);
+            j.AccountNumber = TrimOrNull(request.BankAccountNumber);
+            j.UpdatedAt = now;
         }
-        else if (user.JobSeekerProfile != null)
+        else if (user.EmployerProfile != null)
         {
-            user.JobSeekerProfile.Name = user.Name;
-            user.JobSeekerProfile.Phone = phone;
-            user.JobSeekerProfile.UpdatedAt = now;
+            var e = user.EmployerProfile;
+            e.Name = user.Name;
+            e.Phone = phone;
+            e.DateOfBirth = request.DateOfBirth;
+            e.Gender = request.Gender;
+            e.Description = TrimOrNull(request.Description);
+            e.IdCard = TrimOrNull(request.IdCard);
+            e.UpdatedAt = now;
         }
         else if (user.AdminProfile != null)
         {
-            user.AdminProfile.Name = user.Name;
-            user.AdminProfile.UpdatedAt = now;
+            var a = user.AdminProfile;
+            a.Name = user.Name;
+            a.Phone = phone;
+            a.BankName = TrimOrNull(request.BankName);
+            a.AccountNumber = TrimOrNull(request.BankAccountNumber);
+            a.UpdatedAt = now;
         }
 
         if (request.ProfileImage != null)
@@ -429,6 +449,9 @@ public sealed class AuthService : IAuthService
 
         return profile;
     }
+
+    private static string? TrimOrNull(string? value) =>
+        string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 
     private static string NormalizeEmail(string email)
     {

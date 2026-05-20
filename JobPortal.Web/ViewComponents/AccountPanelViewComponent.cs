@@ -73,11 +73,7 @@ public class AccountPanelViewComponent : ViewComponent
             DeleteResumeFormAction = Url.Page("/Account/Index", pageHandler: "DeleteResume") ?? "/Account/Index?handler=DeleteResume",
             AntiForgeryFieldName = tokens.FormFieldName,
             AntiForgeryRequestToken = tokens.RequestToken ?? string.Empty,
-            EditInput = new IndexModel.EditInputModel
-            {
-                Name = profile.Name,
-                PhoneNumber = profile.PhoneNumber
-            },
+            EditInput = IndexModel.CreateEditInputFromProfile(profile),
             ResumeInput = resumeInput
         };
 

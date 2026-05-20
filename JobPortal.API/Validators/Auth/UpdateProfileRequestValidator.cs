@@ -24,5 +24,18 @@ public class UpdateProfileRequestValidator : AbstractValidator<UpdateProfileRequ
                          (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps))
             .WithMessage("Profile image must be a valid http or https URL.")
             .When(x => !string.IsNullOrWhiteSpace(x.ProfileImage));
+
+        RuleFor(x => x.Gender)
+            .InclusiveBetween((byte)0, (byte)2).WithMessage("Gender must be 0, 1, or 2.")
+            .When(x => x.Gender.HasValue);
+
+        RuleFor(x => x.Description).MaximumLength(65535).When(x => !string.IsNullOrWhiteSpace(x.Description));
+        RuleFor(x => x.PermanentAddress).MaximumLength(500).When(x => !string.IsNullOrWhiteSpace(x.PermanentAddress));
+        RuleFor(x => x.TemporaryAddress).MaximumLength(500).When(x => !string.IsNullOrWhiteSpace(x.TemporaryAddress));
+        RuleFor(x => x.IdCard).MaximumLength(20).When(x => !string.IsNullOrWhiteSpace(x.IdCard));
+        RuleFor(x => x.IdCardIssueDate).MaximumLength(50).When(x => !string.IsNullOrWhiteSpace(x.IdCardIssueDate));
+        RuleFor(x => x.IdCardIssuePlace).MaximumLength(255).When(x => !string.IsNullOrWhiteSpace(x.IdCardIssuePlace));
+        RuleFor(x => x.BankName).MaximumLength(255).When(x => !string.IsNullOrWhiteSpace(x.BankName));
+        RuleFor(x => x.BankAccountNumber).MaximumLength(50).When(x => !string.IsNullOrWhiteSpace(x.BankAccountNumber));
     }
 }

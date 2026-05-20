@@ -60,6 +60,14 @@ public class IndexModel : PageModel
         ModelState.Clear();
         editInput ??= new EditInputModel();
 
+        var current = await _api.GetApiDataAsync<ProfileResponse>("/api/auth/me");
+        if (current == null)
+        {
+            TempData["AccountErrorMessage"] = "Không tải được thông tin tài khoản.";
+            TempData["AccountTab"] = "edit";
+            return RedirectBack(returnUrl, openAccount: true, tab: "edit");
+        }
+
         var validationError = ValidateEditInput(editInput);
         if (validationError != null)
         {
@@ -72,14 +80,6 @@ public class IndexModel : PageModel
         if (avatarErr != null)
         {
             TempData["AccountErrorMessage"] = avatarErr;
-            TempData["AccountTab"] = "edit";
-            return RedirectBack(returnUrl, openAccount: true, tab: "edit");
-        }
-
-        var current = await _api.GetApiDataAsync<ProfileResponse>("/api/auth/me");
-        if (current == null)
-        {
-            TempData["AccountErrorMessage"] = "Không tải được thông tin tài khoản.";
             TempData["AccountTab"] = "edit";
             return RedirectBack(returnUrl, openAccount: true, tab: "edit");
         }
@@ -100,12 +100,7 @@ public class IndexModel : PageModel
 
         var response = await _api.PutApiResponseAsync<UpdateProfileRequest, ProfileResponse>(
             "/api/auth/me",
-            new UpdateProfileRequest
-            {
-                Name = editInput.Name.Trim(),
-                PhoneNumber = string.IsNullOrWhiteSpace(editInput.PhoneNumber) ? null : editInput.PhoneNumber.Trim(),
-                ProfileImage = profileImageUrl
-            });
+            BuildUpdateRequest(current, editInput, profileImageUrl));
 
         if (response is not { Success: true, Data: not null })
         {
@@ -253,6 +248,47 @@ public class IndexModel : PageModel
         _ => role
     };
 
+    private static UpdateProfileRequest BuildUpdateRequest(
+        ProfileResponse current,
+        EditInputModel edit,
+        string? profileImageUrl)
+    {
+        var req = new UpdateProfileRequest
+        {
+            Name = edit.Name.Trim(),
+            PhoneNumber = string.IsNullOrWhiteSpace(edit.PhoneNumber) ? null : edit.PhoneNumber.Trim(),
+            ProfileImage = profileImageUrl
+        };
+
+        if (string.Equals(current.Role, "JOB_SEEKER", StringComparison.Ordinal))
+        {
+            req.DateOfBirth = edit.DateOfBirth;
+            req.Gender = edit.Gender;
+            req.Description = edit.Description;
+            req.PermanentAddress = edit.PermanentAddress;
+            req.TemporaryAddress = edit.TemporaryAddress;
+            req.IdCard = edit.IdCard;
+            req.IdCardIssueDate = edit.IdCardIssueDate;
+            req.IdCardIssuePlace = edit.IdCardIssuePlace;
+            req.BankName = edit.BankName;
+            req.BankAccountNumber = edit.BankAccountNumber;
+        }
+        else if (string.Equals(current.Role, "EMPLOYER", StringComparison.Ordinal))
+        {
+            req.DateOfBirth = edit.DateOfBirth;
+            req.Gender = edit.Gender;
+            req.Description = edit.Description;
+            req.IdCard = edit.IdCard;
+        }
+        else if (string.Equals(current.Role, "ADMIN", StringComparison.Ordinal))
+        {
+            req.BankName = edit.BankName;
+            req.BankAccountNumber = edit.BankAccountNumber;
+        }
+
+        return req;
+    }
+
     private static string? ValidateEditInput(EditInputModel input)
     {
         if (string.IsNullOrWhiteSpace(input.Name))
@@ -270,8 +306,59 @@ public class IndexModel : PageModel
             return "Số điện thoại không được vượt quá 20 ký tự.";
         }
 
+        if (input.Gender is < 0 or > 2)
+        {
+            return "Giới tính không hợp lệ.";
+        }
+
+        if (input.PermanentAddress?.Length > 500 || input.TemporaryAddress?.Length > 500)
+        {
+            return "Địa chỉ không được vượt quá 500 ký tự.";
+        }
+
+        if (input.IdCard?.Length > 20)
+        {
+            return "Số CMND/CCCD không được vượt quá 20 ký tự.";
+        }
+
+        if (input.IdCardIssueDate?.Length > 50)
+        {
+            return "Ngày cấp không được vượt quá 50 ký tự.";
+        }
+
+        if (input.IdCardIssuePlace?.Length > 255)
+        {
+            return "Nơi cấp không được vượt quá 255 ký tự.";
+        }
+
+        if (input.BankName?.Length > 255)
+        {
+            return "Tên ngân hàng không được vượt quá 255 ký tự.";
+        }
+
+        if (input.BankAccountNumber?.Length > 50)
+        {
+            return "Số tài khoản không được vượt quá 50 ký tự.";
+        }
+
         return null;
     }
+
+    public static EditInputModel CreateEditInputFromProfile(ProfileResponse profile) => new()
+    {
+        Name = profile.Name,
+        PhoneNumber = profile.PhoneNumber ?? profile.ProfilePhone,
+        DateOfBirth = profile.DateOfBirth,
+        Gender = profile.Gender,
+        Description = profile.Description,
+        PermanentAddress = profile.PermanentAddress,
+        TemporaryAddress = profile.TemporaryAddress,
+        IdCard = profile.IdCard,
+        IdCardIssueDate = profile.IdCardIssueDate,
+        IdCardIssuePlace = profile.IdCardIssuePlace,
+        BankName = profile.BankName,
+        BankAccountNumber = profile.BankAccountNumber
+    };
 
     private static string? ValidateAvatarFile(IFormFile? file)
     {
@@ -431,6 +518,26 @@ public class IndexModel : PageModel
         public string Name { get; set; } = string.Empty;
 
         public string? PhoneNumber { get; set; }
+
+        public DateOnly? DateOfBirth { get; set; }
+
+        public byte? Gender { get; set; }
+
+        public string? Description { get; set; }
+
+        public string? PermanentAddress { get; set; }
+
+        public string? TemporaryAddress { get; set; }
+
+        public string? IdCard { get; set; }
+
+        public string? IdCardIssueDate { get; set; }
+
+        public string? IdCardIssuePlace { get; set; }
+
+        public string? BankName { get; set; }
+
+        public string? BankAccountNumber { get; set; }
     }
 
     public class PasswordInputModel

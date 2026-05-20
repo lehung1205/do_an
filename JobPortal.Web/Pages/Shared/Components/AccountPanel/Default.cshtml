@@ -85,27 +85,13 @@
                     <dd class="col-7 mb-2">@AccountPanelViewModel.FormatDateTimeNullable(Model.Profile.UpdatedAt)</dd>
                     <dt class="col-5 text-muted">Trạng thái tài khoản</dt>
                     <dd class="col-7 mb-2">@AccountPanelViewModel.FormatAccountStatus(Model.Profile.AccountStatus)</dd>
-                    @if (Model.Profile.JobSeekerId is long sid)
+                    @if (!Model.IsAdmin)
                     {
-                        <dt class="col-5 text-muted">Mã hồ sơ ứng viên</dt>
-                        <dd class="col-7 mb-2">@sid</dd>
+                        <dt class="col-5 text-muted">Ngày sinh</dt>
+                        <dd class="col-7 mb-2">@AccountPanelViewModel.FormatDateOnly(Model.Profile.DateOfBirth)</dd>
+                        <dt class="col-5 text-muted">Giới tính</dt>
+                        <dd class="col-7 mb-2">@AccountPanelViewModel.FormatGender(Model.Profile.Gender)</dd>
                     }
-                    @if (Model.Profile.EmployerId is long eid)
-                    {
-                        <dt class="col-5 text-muted">Mã hồ sơ NTD</dt>
-                        <dd class="col-7 mb-2">@eid</dd>
-                    }
-                    @if (Model.Profile.AdminId is long aid)
-                    {
-                        <dt class="col-5 text-muted">Mã quản trị</dt>
-                        <dd class="col-7 mb-2">@aid</dd>
-                    }
-                    <dt class="col-5 text-muted">Xác thực email</dt>
-                    <dd class="col-7 mb-2">@AccountPanelViewModel.FormatDateTimeNullable(Model.Profile.EmailVerifiedAt)</dd>
-                    <dt class="col-5 text-muted">Ngày sinh</dt>
-                    <dd class="col-7 mb-2">@AccountPanelViewModel.FormatDateOnly(Model.Profile.DateOfBirth)</dd>
-                    <dt class="col-5 text-muted">Giới tính</dt>
-                    <dd class="col-7 mb-2">@AccountPanelViewModel.FormatGender(Model.Profile.Gender)</dd>
                     @if (!string.IsNullOrWhiteSpace(Model.Profile.Description))
                     {
                         <dt class="col-5 text-muted align-top pt-1">Giới thiệu</dt>
@@ -132,20 +118,20 @@
                     {
                         <dt class="col-5 text-muted">CMND/CCCD</dt>
                         <dd class="col-7 mb-2">@AccountPanelViewModel.DashIfEmpty(Model.Profile.IdCard)</dd>
-                        <dt class="col-5 text-muted">Hạn đăng bài</dt>
+                        <dt class="col-5 text-muted">Số lượt đăng bài</dt>
                         <dd class="col-7 mb-2">@(Model.Profile.PostingLimit is int pl ? pl.ToString() : "—")</dd>
                     }
-                    @if (string.Equals(Model.Profile.Role, "ADMIN", StringComparison.Ordinal))
+                    @if (Model.IsAdmin)
                     {
                         <dt class="col-5 text-muted">Ngân hàng</dt>
                         <dd class="col-7 mb-2">@AccountPanelViewModel.DashIfEmpty(Model.Profile.BankName)</dd>
                         <dt class="col-5 text-muted">Số tài khoản</dt>
                         <dd class="col-7 mb-2">@AccountPanelViewModel.DashIfEmpty(Model.Profile.BankAccountNumber)</dd>
-                        <dt class="col-5 text-muted">Số điện thoại (hồ sơ)</dt>
+                        <dt class="col-5 text-muted">Số điện thoại</dt>
                         <dd class="col-7 mb-2">@AccountPanelViewModel.DashIfEmpty(Model.Profile.ProfilePhone)</dd>
                     }
                     @if (!string.IsNullOrWhiteSpace(Model.Profile.ProfilePhone)
-                        && !string.Equals(Model.Profile.Role, "ADMIN", StringComparison.Ordinal)
+                        && !Model.IsAdmin
                         && !string.Equals(Model.Profile.PhoneNumber, Model.Profile.ProfilePhone, StringComparison.Ordinal))
                     {
                         <dt class="col-5 text-muted">SĐT trên hồ sơ</dt>
@@ -187,6 +173,87 @@
                         <input type="text" class="form-control" id="EditInput_PhoneNumber" name="EditInput.PhoneNumber"
                                value="@Model.EditInput.PhoneNumber" maxlength="20" placeholder="0901234567" />
                     </div>
+                    @if (!Model.IsAdmin)
+                    {
+                        <div class="mb-3">
+                            <label class="form-label" for="EditInput_DateOfBirth">Ngày sinh</label>
+                            <input type="date" class="form-control" id="EditInput_DateOfBirth" name="EditInput.DateOfBirth"
+                                   value="@AccountPanelViewModel.FormatDateOnlyInput(Model.EditInput.DateOfBirth)" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="EditInput_Gender">Giới tính</label>
+                            <select asp-for="EditInput.Gender" class="form-select" id="EditInput_Gender">
+                                <option value="">— Chưa chọn —</option>
+                                <option value="1">Nam</option>
+                                <option value="2">Nữ</option>
+                                <option value="0">Khác</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="EditInput_Description">Giới thiệu</label>
+                            <textarea class="form-control" id="EditInput_Description" name="EditInput.Description" rows="3">@Model.EditInput.Description</textarea>
+                        </div>
+                    }
+                    @if (Model.IsJobSeeker)
+                    {
+                        <div class="mb-3">
+                            <label class="form-label" for="EditInput_PermanentAddress">Địa chỉ thường trú</label>
+                            <input type="text" class="form-control" id="EditInput_PermanentAddress" name="EditInput.PermanentAddress"
+                                   value="@Model.EditInput.PermanentAddress" maxlength="500" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="EditInput_TemporaryAddress">Địa chỉ tạm trú</label>
+                            <input type="text" class="form-control" id="EditInput_TemporaryAddress" name="EditInput.TemporaryAddress"
+                                   value="@Model.EditInput.TemporaryAddress" maxlength="500" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="EditInput_IdCard">CMND/CCCD</label>
+                            <input type="text" class="form-control" id="EditInput_IdCard" name="EditInput.IdCard"
+                                   value="@Model.EditInput.IdCard" maxlength="20" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="EditInput_IdCardIssueDate">Ngày cấp</label>
+                            <input type="text" class="form-control" id="EditInput_IdCardIssueDate" name="EditInput.IdCardIssueDate"
+                                   value="@Model.EditInput.IdCardIssueDate" maxlength="50" placeholder="VD: 01/01/2020" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="EditInput_IdCardIssuePlace">Nơi cấp</label>
+                            <input type="text" class="form-control" id="EditInput_IdCardIssuePlace" name="EditInput.IdCardIssuePlace"
+                                   value="@Model.EditInput.IdCardIssuePlace" maxlength="255" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="EditInput_BankName">Ngân hàng</label>
+                            <input type="text" class="form-control" id="EditInput_BankName" name="EditInput.BankName"
+                                   value="@Model.EditInput.BankName" maxlength="255" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="EditInput_BankAccountNumber">Số tài khoản</label>
+                            <input type="text" class="form-control" id="EditInput_BankAccountNumber" name="EditInput.BankAccountNumber"
+                                   value="@Model.EditInput.BankAccountNumber" maxlength="50" />
+                        </div>
+                    }
+                    @if (Model.IsEmployer)
+                    {
+                        <div class="mb-3">
+                            <label class="form-label" for="EditInput_IdCard">CMND/CCCD</label>
+                            <input type="text" class="form-control" id="EditInput_IdCard" name="EditInput.IdCard"
+                                   value="@Model.EditInput.IdCard" maxlength="20" />
+                        </div>
+                        <p class="text-muted small mb-3">Số lượt đăng bài chỉ thay đổi khi mua gói, không chỉnh sửa tại đây.</p>
+                    }
+                    @if (Model.IsAdmin)
+                    {
+                        <div class="mb-3">
+                            <label class="form-label" for="EditInput_BankName">Ngân hàng</label>
+                            <input type="text" class="form-control" id="EditInput_BankName" name="EditInput.BankName"
+                                   value="@Model.EditInput.BankName" maxlength="255" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="EditInput_BankAccountNumber">Số tài khoản</label>
+                            <input type="text" class="form-control" id="EditInput_BankAccountNumber" name="EditInput.BankAccountNumber"
+                                   value="@Model.EditInput.BankAccountNumber" maxlength="50" />
+                        </div>
+                    }
                     <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
                 </form>
             </div>

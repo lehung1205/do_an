@@ -25,6 +25,14 @@ public class AccountPanelViewModel
 
     public bool IsJobSeeker => string.Equals(Profile.Role, "JOB_SEEKER", StringComparison.Ordinal);
 
+    public bool IsAdmin => string.Equals(Profile.Role, "ADMIN", StringComparison.Ordinal);
+
+    public bool IsEmployer => string.Equals(Profile.Role, "EMPLOYER", StringComparison.Ordinal);
+
+    /// <summary>Giá trị cho input type="date" (yyyy-MM-dd).</summary>
+    public static string? FormatDateOnlyInput(DateOnly? value) =>
+        value?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+
     public static string FormatRole(string role) => IndexModel.FormatRole(role);
 
     public static string GetInitials(string? name)

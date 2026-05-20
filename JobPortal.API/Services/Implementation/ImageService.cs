@@ -22,6 +22,12 @@ public class ImageService : IImageService
         return _mapper.Map<IReadOnlyList<ImageDto>>(items);
     }
 
+    public async Task<IReadOnlyList<ImageDto>> GetImagesByJobIdAsync(long jobId, CancellationToken cancellationToken = default)
+    {
+        var items = await _repository.GetByJobIdAsync(jobId, cancellationToken);
+        return _mapper.Map<IReadOnlyList<ImageDto>>(items);
+    }
+
     public async Task<ImageDto> GetImageByIdAsync(long id, CancellationToken cancellationToken = default)
     {
         var entity = await _repository.GetByIdAsync(id, cancellationToken);

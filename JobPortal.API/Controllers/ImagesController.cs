@@ -23,6 +23,13 @@ public class ImagesController : ControllerBase
         return Ok(ApiResponse<IReadOnlyList<ImageDto>>.SuccessResponse(items, "Images retrieved successfully."));
     }
 
+    [HttpGet("job/{jobId:long}")]
+    public async Task<IActionResult> GetImagesByJob(long jobId, CancellationToken cancellationToken)
+    {
+        var items = await _imageService.GetImagesByJobIdAsync(jobId, cancellationToken);
+        return Ok(ApiResponse<IReadOnlyList<ImageDto>>.SuccessResponse(items, "Images retrieved successfully."));
+    }
+
     [HttpGet("{id:long}")]
     public async Task<IActionResult> GetImage(long id, CancellationToken cancellationToken)
     {

@@ -17,8 +17,9 @@
         <div class="alert alert-danger">@Model.ErrorMessage</div>
     }
 
-    <form method="post" class="card border-0 shadow-sm">
+    <form method="post" enctype="multipart/form-data" class="card border-0 shadow-sm">
         <div class="card-body">
+            @Html.AntiForgeryToken()
             <div class="mb-3">
                 <label asp-for="Input.Title" class="form-label">Tiêu đề</label>
                 <input asp-for="Input.Title" class="form-control" maxlength="255" required />
@@ -46,6 +47,11 @@
                     <label asp-for="Input.Location" class="form-label">Địa điểm</label>
                     <input asp-for="Input.Location" class="form-control" maxlength="255" required />
                 </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Hình ảnh công việc (tuỳ chọn)</label>
+                <input type="file" name="JobImages" class="form-control" accept="image/jpeg,image/png,image/gif,image/webp" multiple />
+                <div class="form-text">JPG, PNG, GIF, WebP — tối đa 8 ảnh, mỗi ảnh tối đa 5 MB.</div>
             </div>
             <button type="submit" class="btn btn-primary">
                 <i class="bi bi-send me-1"></i> Đăng tin

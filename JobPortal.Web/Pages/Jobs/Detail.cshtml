@@ -36,6 +36,23 @@
                         <div style="white-space: pre-wrap;">@Model.Job.Description</div>
                     </div>
 
+                    @if (Model.JobImages.Count > 0)
+                    {
+                        <div class="mt-4">
+                            <h4 class="mb-3">Hình ảnh</h4>
+                            <div class="row g-2">
+                                @foreach (var img in Model.JobImages)
+                                {
+                                    <div class="col-6 col-md-4">
+                                        <a href="@img.Url" target="_blank" rel="noopener noreferrer" class="d-block border rounded overflow-hidden">
+                                            <img src="@img.Url" alt="@(img.Name ?? "Ảnh tin")" class="img-fluid w-100 object-fit-cover" style="aspect-ratio:4/3;max-height:200px;" loading="lazy" />
+                                        </a>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+
                     <div class="mt-5">
                         <button class="btn btn-primary btn-lg px-5">Ứng tuyển ngay</button>
                     </div>

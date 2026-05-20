@@ -67,4 +67,27 @@ public class ApplicationRepository : IApplicationRepository
         _context.Applications.RemoveRange(applications);
         await _context.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task<bool> ExistsForJobSeekerAndJobAsync(
+        long jobSeekerId,
+        long jobId,
+        CancellationToken cancellationToken = default)
+    {
+        return await _context.Applications
+            .AsNoTracking()
+            .AnyAsync(a => a.JobSeekerId == jobSeekerId && a.JobId == jobId, cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<Application>> GetByJobSeekerIdAsync(
+        long jobSeekerId,
+        CancellationToken cancellationToken = default)
+    {
+        return await _context.Applications
+            .AsNoTracking()
+            .Where(a => a.JobSeekerId == jobSeekerId)
+            .OrderByDescending(a => a.AppliedAt)
+            .Include(a => a.Job)
+            .Include(a => a.Resume)
+            .ToListAsync(cancellationToken);
+    }
 }

@@ -1,9 +1,16 @@
 @page
 @model JobPortal.Web.Pages.IndexModel
 @{
-    ViewData["Title"] = "Trang chủ";
+    ViewData["Title"] = Model.IsEmployerHome ? "Dashboard" : "Trang chủ";
     var isLoggedIn = !string.IsNullOrEmpty(HttpContext.Session.GetString("JwtToken"));
 }
+
+@if (Model.IsEmployerHome)
+{
+    <partial name="Shared/_EmployerHome" model="Model" />
+}
+else
+{
 
 <section class="home-hero">
     <div class="home-hero__bg" aria-hidden="true"></div>
@@ -205,3 +212,5 @@
         </div>
     </div>
 </section>
+
+}

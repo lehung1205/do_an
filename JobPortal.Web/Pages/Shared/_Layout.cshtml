@@ -35,17 +35,35 @@
                 }
                 <div class="collapse navbar-collapse" id="mainNav">
                     <ul class="navbar-nav me-auto align-items-lg-center gap-lg-1">
-                        <li class="nav-item">
-                            <a class="nav-link" asp-page="/Jobs/Index">Việc làm</a>
-                        </li>
                         @if (isLoggedIn && isEmployer)
                         {
                             <li class="nav-item">
-                                <a class="nav-link" asp-page="/Employer/PostJob">Đăng bài</a>
+                                <a class="nav-link" asp-page="/Index">Dashboard</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" asp-page="/Employer/BuyPackages">Mua gói</a>
+                                <a class="nav-link" asp-page="/Employer/Jobs">Tin tuyển dụng</a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-page="/Employer/Applicants">Ứng viên</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-page="/Employer/PostJob">Đăng tin</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-page="/Employer/BuyPackages">Gói dịch vụ</a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-page="/Jobs/Index">Việc làm</a>
+                            </li>
+                            @if (isLoggedIn && isJobSeeker)
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-page="/Applications/Index">Đơn ứng tuyển</a>
+                                </li>
+                            }
                         }
                     </ul>
                     <ul class="navbar-nav align-items-lg-center gap-2 nav-auth">
@@ -86,6 +104,11 @@
                                     </li>
                                     @if (isJobSeeker)
                                     {
+                                        <li>
+                                            <a class="dropdown-item" asp-page="/Applications/Index">
+                                                <i class="bi bi-inbox me-2"></i> Đơn ứng tuyển
+                                            </a>
+                                        </li>
                                         <li>
                                             <button type="button" class="dropdown-item"
                                                     data-account-open data-account-tab="resume">

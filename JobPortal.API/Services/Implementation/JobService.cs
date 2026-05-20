@@ -14,12 +14,18 @@ public class JobService : IJobService
     private const int MaxPageSize = 100;
     private readonly IJobRepository _repository;
     private readonly IEmployerRepository _employerRepository;
+    private readonly IJobExpiryService _jobExpiryService;
     private readonly IMapper _mapper;
 
-    public JobService(IJobRepository repository, IEmployerRepository employerRepository, IMapper mapper)
+    public JobService(
+        IJobRepository repository,
+        IEmployerRepository employerRepository,
+        IJobExpiryService jobExpiryService,
+        IMapper mapper)
     {
         _repository = repository;
         _employerRepository = employerRepository;
+        _jobExpiryService = jobExpiryService;
         _mapper = mapper;
     }
 
@@ -27,7 +33,9 @@ public class JobService : IJobService
     {
         ValidatePagination(page, pageSize);
 
-        var (items, totalCount) = await _repository.GetPagedAsync(page, pageSize, cancellationToken);
+        await _jobExpiryService.CloseExpiredJobsAsync(cancellationToken);
+
+        var (items, totalCount) = await _repository.GetPagedAsync(page, pageSize, recruitingOnly: true, cancellationToken);
         var dtos = _mapper.Map<IReadOnlyList<JobDto>>(items);
 
         return new PagedResult<JobDto>
@@ -42,6 +50,8 @@ public class JobService : IJobService
 
     public async Task<JobDto> GetJobByIdAsync(long id, CancellationToken cancellationToken = default)
     {
+        await _jobExpiryService.CloseExpiredJobsAsync(cancellationToken);
+
         var entity = await _repository.GetByIdAsync(id, cancellationToken);
         if (entity == null)
         {

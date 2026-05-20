@@ -14,9 +14,30 @@ public class JobRepository : IJobRepository
         _context = context;
     }
 
-    public async Task<(IReadOnlyList<Job> Items, int TotalCount)> GetPagedAsync(int page, int pageSize, CancellationToken cancellationToken = default)
+    public async Task<int> CloseExpiredRecruitingJobsAsync(CancellationToken cancellationToken = default)
+    {
+        var now = DateTime.UtcNow;
+        return await _context.Jobs
+            .Where(j =>
+                j.PostingStatus == "recruiting" &&
+                j.ExpiryDate < now)
+            .ExecuteUpdateAsync(
+                setters => setters.SetProperty(j => j.PostingStatus, "closed"),
+                cancellationToken);
+    }
+
+    public async Task<(IReadOnlyList<Job> Items, int TotalCount)> GetPagedAsync(
+        int page,
+        int pageSize,
+        bool recruitingOnly = false,
+        CancellationToken cancellationToken = default)
     {
         var query = _context.Jobs.AsNoTracking();
+        if (recruitingOnly)
+        {
+            query = query.Where(j => j.PostingStatus == "recruiting");
+        }
+
         var totalCount = await query.CountAsync(cancellationToken);
         var items = await query
             .OrderByDescending(j => j.Id)

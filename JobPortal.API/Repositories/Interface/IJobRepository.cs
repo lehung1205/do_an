@@ -4,7 +4,12 @@ namespace JobPortal.API.Repositories.Interface;
 
 public interface IJobRepository
 {
-    Task<(IReadOnlyList<Job> Items, int TotalCount)> GetPagedAsync(int page, int pageSize, CancellationToken cancellationToken = default);
+    Task<(IReadOnlyList<Job> Items, int TotalCount)> GetPagedAsync(
+        int page,
+        int pageSize,
+        bool recruitingOnly = false,
+        CancellationToken cancellationToken = default);
+    Task<int> CloseExpiredRecruitingJobsAsync(CancellationToken cancellationToken = default);
     Task<Job?> GetByIdAsync(long id, CancellationToken cancellationToken = default);
     Task AddAsync(Job entity, CancellationToken cancellationToken = default);
     Task UpdateAsync(Job entity, CancellationToken cancellationToken = default);

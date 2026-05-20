@@ -92,8 +92,7 @@ public class PostJobModel : PageModel
             Salary = Input.Salary,
             Location = Input.Location.Trim(),
             PostingStatus = "recruiting",
-            StartDate = now,
-            EndDate = now.AddMonths(3),
+            WorkingHours = string.IsNullOrWhiteSpace(Input.WorkingHours) ? null : Input.WorkingHours.Trim(),
             ExpiryDate = now.AddMonths(2)
         };
 
@@ -249,6 +248,11 @@ public class PostJobModel : PageModel
             return "Địa điểm quá dài.";
         }
 
+        if (input.WorkingHours?.Length > 50)
+        {
+            return "Thời gian làm việc không quá 50 ký tự.";
+        }
+
         return null;
     }
 
@@ -288,5 +292,7 @@ public class PostJobModel : PageModel
         public int Salary { get; set; }
 
         public string Location { get; set; } = string.Empty;
+
+        public string? WorkingHours { get; set; }
     }
 }

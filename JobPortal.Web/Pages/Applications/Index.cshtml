@@ -1,0 +1,64 @@
+@page
+@model JobPortal.Web.Pages.Applications.IndexModel
+@{
+    ViewData["Title"] = "Đơn ứng tuyển của tôi";
+}
+
+<div class="container mt-5 mb-5">
+    <h1 class="h3 mb-4">Đơn ứng tuyển của tôi</h1>
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger">@Model.ErrorMessage</div>
+    }
+    else if (Model.Applications.Count == 0)
+    {
+        <div class="alert alert-light border text-center py-5">
+            <p class="mb-3 text-muted">Bạn chưa ứng tuyển việc làm nào.</p>
+            <a asp-page="/Jobs/Index" class="btn btn-primary">Xem việc làm</a>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>Việc làm</th>
+                        <th>Địa điểm</th>
+                        <th>Lương (VNĐ)</th>
+                        <th>Hồ sơ</th>
+                        <th>Ngày nộp</th>
+                        <th>Trạng thái</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var app in Model.Applications)
+                    {
+                        <tr>
+                            <td class="fw-semibold">@app.JobTitle</td>
+                            <td>@app.JobLocation</td>
+                            <td>@app.JobSalary.ToString("N0")</td>
+                            <td>
+                                @if (!string.IsNullOrWhiteSpace(app.ResumeUrl))
+                                {
+                                    <a href="@app.ResumeUrl" target="_blank" rel="noopener noreferrer">@app.ResumeTitle</a>
+                                }
+                                else
+                                {
+                                    @app.ResumeTitle
+                                }
+                            </td>
+                            <td>@app.AppliedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+                            <td><span class="badge @IndexModel.StatusBadgeClass(app.Status)">@IndexModel.FormatStatus(app.Status)</span></td>
+                            <td>
+                                <a asp-page="/Jobs/Detail" asp-route-id="@app.JobId" class="btn btn-sm btn-outline-primary">Xem tin</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

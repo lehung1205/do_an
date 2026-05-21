@@ -15,6 +15,10 @@ public class JobGridCardModel
     public int? ApplicantCount { get; init; }
     public string? WorkingHours { get; init; }
     public bool ShowEmployerActions { get; init; }
+    public string? ListStatusFilter { get; init; }
+    public string? ListSearch { get; init; }
+    public int ListPageNumber { get; init; } = 1;
+    public int ListPageSize { get; init; } = 9;
 
     public static JobGridCardModel FromJobDto(JobDto job) => new()
     {
@@ -41,7 +45,12 @@ public class JobGridCardModel
         ApplicantCount = job.ApplicantCount
     };
 
-    public static JobGridCardModel FromEmployerManageJob(EmployerDashboardJobDto job) => new()
+    public static JobGridCardModel FromEmployerManageJob(
+        EmployerDashboardJobDto job,
+        string? statusFilter,
+        string? search,
+        int pageNumber,
+        int pageSize) => new()
     {
         Id = job.Id,
         Title = job.Title,
@@ -53,6 +62,10 @@ public class JobGridCardModel
         ThumbnailUrl = job.ThumbnailUrl,
         ApplicantCount = job.ApplicantCount,
         WorkingHours = job.WorkingHours,
-        ShowEmployerActions = true
+        ShowEmployerActions = true,
+        ListStatusFilter = statusFilter,
+        ListSearch = search,
+        ListPageNumber = pageNumber,
+        ListPageSize = pageSize
     };
 }

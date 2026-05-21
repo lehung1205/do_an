@@ -197,6 +197,59 @@ public class EmployerDashboardService : IEmployerDashboardService
         };
     }
 
+    public async Task<EmployerDashboardJobDto> CloseJobForUserAsync(
+        long userId,
+        long jobId,
+        CancellationToken cancellationToken = default)
+    {
+        var employer = await _context.Employers
+            .FirstOrDefaultAsync(e => e.UserId == userId, cancellationToken);
+
+        if (employer == null)
+        {
+            throw new NotFoundException("Employer profile not found for this user.");
+        }
+
+        var job = await _context.Jobs
+            .Include(j => j.Images)
+            .Include(j => j.Applications)
+            .FirstOrDefaultAsync(j => j.Id == jobId && j.EmployerId == employer.Id, cancellationToken);
+
+        if (job == null)
+        {
+            throw new NotFoundException($"Job with id {jobId} was not found.");
+        }
+
+        if (!string.Equals(job.PostingStatus, "recruiting", StringComparison.OrdinalIgnoreCase))
+        {
+            if (string.Equals(job.PostingStatus, "closed", StringComparison.OrdinalIgnoreCase))
+            {
+                return MapJobDto(ToJobRow(job));
+            }
+
+            throw new BadRequestException("Chỉ có thể đóng tin đang tuyển.");
+        }
+
+        job.PostingStatus = "closed";
+        await _context.SaveChangesAsync(cancellationToken);
+
+        return MapJobDto(ToJobRow(job));
+    }
+
+    private static JobRow ToJobRow(Job job) => new()
+    {
+        Id = job.Id,
+        Title = job.Title,
+        Description = job.Description,
+        Location = job.Location,
+        Salary = job.Salary,
+        PostingStatus = job.PostingStatus,
+        WorkingHours = job.WorkingHours,
+        ExpiryDate = job.ExpiryDate,
+        ApplicantCount = job.Applications.Count,
+        ThumbnailUrl = job.Images.OrderBy(i => i.Id).Select(i => i.Url).FirstOrDefault()
+    };
+
     private static string? NormalizePostingStatusFilter(string? status)
     {
         if (string.IsNullOrWhiteSpace(status) || string.Equals(status, "all", StringComparison.OrdinalIgnoreCase))

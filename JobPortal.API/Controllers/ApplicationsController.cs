@@ -53,6 +53,30 @@ public class ApplicationsController : ControllerBase
         return Ok(ApiResponse<MyApplicationDto>.SuccessResponse(created, "Application submitted successfully."));
     }
 
+    [HttpGet("me/accepted/work-progress")]
+    [Authorize(Roles = "JOB_SEEKER")]
+    public async Task<IActionResult> GetMyAcceptedWorkProgressList(
+        [FromQuery] string? q,
+        CancellationToken cancellationToken)
+    {
+        var userId = GetCurrentUserId();
+        var items = await _applicationService.GetMyAcceptedWorkProgressListAsync(userId, q, cancellationToken);
+        return Ok(ApiResponse<IReadOnlyList<SeekerWorkProgressListItemDto>>.SuccessResponse(
+            items,
+            "Accepted applications work progress list retrieved successfully."));
+    }
+
+    [HttpGet("me/{id:long}/work-progress")]
+    [Authorize(Roles = "JOB_SEEKER")]
+    public async Task<IActionResult> GetMyApplicationWorkProgress(long id, CancellationToken cancellationToken)
+    {
+        var userId = GetCurrentUserId();
+        var detail = await _applicationService.GetMyApplicationWorkProgressAsync(userId, id, cancellationToken);
+        return Ok(ApiResponse<SeekerApplicationWorkProgressDto>.SuccessResponse(
+            detail,
+            "Application work progress retrieved successfully."));
+    }
+
     [HttpGet("{id:long}")]
     public async Task<IActionResult> GetApplication(long id, CancellationToken cancellationToken)
     {

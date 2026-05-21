@@ -19,6 +19,11 @@ public interface IEmployerDashboardService
         int pageSize = 9,
         CancellationToken cancellationToken = default);
 
+    Task<EmployerDashboardJobDto> CloseJobForUserAsync(
+        long userId,
+        long jobId,
+        CancellationToken cancellationToken = default);
+
     Task<EmployerDashboardApplicationDto> UpdateApplicationStatusAsync(
         long userId,
         long applicationId,

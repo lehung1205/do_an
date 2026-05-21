@@ -15,11 +15,19 @@
         </a>
     </div>
 
+    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+    {
+        <div class="alert alert-success">@Model.SuccessMessage</div>
+    }
+    @if (!string.IsNullOrEmpty(Model.ActionErrorMessage))
+    {
+        <div class="alert alert-warning">@Model.ActionErrorMessage</div>
+    }
     @if (!string.IsNullOrEmpty(Model.ErrorMessage))
     {
         <div class="alert alert-warning">@Model.ErrorMessage</div>
     }
-    else
+    @if (string.IsNullOrEmpty(Model.ErrorMessage))
     {
         <form method="get" class="employer-panel mb-4">
             <div class="row g-3 align-items-end">
@@ -91,7 +99,7 @@
                 @foreach (var job in Model.Jobs)
                 {
                     <div class="col d-flex">
-                        <partial name="Shared/_JobGridCard" model="JobPortal.Web.Models.JobGridCardModel.FromEmployerManageJob(job)" />
+                        <partial name="Shared/_JobGridCard" model="JobPortal.Web.Models.JobGridCardModel.FromEmployerManageJob(job, Model.StatusFilter, Model.Search, Model.CurrentPage, Model.PageSize)" />
                     </div>
                 }
             </div>

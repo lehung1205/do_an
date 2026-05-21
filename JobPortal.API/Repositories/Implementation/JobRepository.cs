@@ -43,6 +43,7 @@ public class JobRepository : IJobRepository
             .OrderByDescending(j => j.Id)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
+            .Include(j => j.Employer)
             .Include(j => j.Images.OrderBy(i => i.Id).Take(1))
             .ToListAsync(cancellationToken);
 
@@ -52,6 +53,7 @@ public class JobRepository : IJobRepository
     public async Task<Job?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
     {
         return await _context.Jobs
+            .Include(j => j.Employer)
             .Include(j => j.Images.OrderBy(i => i.Id).Take(1))
             .FirstOrDefaultAsync(j => j.Id == id, cancellationToken);
     }

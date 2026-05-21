@@ -15,4 +15,14 @@ public interface IApplicationService
     Task<IReadOnlyList<MyApplicationDto>> GetMyApplicationsAsync(long userId, CancellationToken cancellationToken = default);
 
     Task<bool> HasAppliedToJobAsync(long userId, long jobId, CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<SeekerWorkProgressListItemDto>> GetMyAcceptedWorkProgressListAsync(
+        long userId,
+        string? search = null,
+        CancellationToken cancellationToken = default);
+
+    Task<SeekerApplicationWorkProgressDto> GetMyApplicationWorkProgressAsync(
+        long userId,
+        long applicationId,
+        CancellationToken cancellationToken = default);
 }

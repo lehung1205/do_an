@@ -52,8 +52,13 @@
                             </td>
                             <td>@app.AppliedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
                             <td><span class="badge @IndexModel.StatusBadgeClass(app.Status)">@IndexModel.FormatStatus(app.Status)</span></td>
-                            <td>
+                            <td class="text-nowrap">
                                 <a asp-page="/Jobs/Detail" asp-route-id="@app.JobId" class="btn btn-sm btn-outline-primary">Xem tin</a>
+                                @if (string.Equals(app.Status, "accepted", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    <a asp-page="/Applications/WorkProgress/Detail" asp-route-applicationId="@app.Id"
+                                       class="btn btn-sm btn-primary ms-1">Tiến độ</a>
+                                }
                             </td>
                         </tr>
                     }

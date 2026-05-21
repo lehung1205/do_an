@@ -79,7 +79,10 @@ public class JobService : IJobService
 
         var entity = _mapper.Map<Job>(jobDto);
         await _repository.AddAsync(entity, cancellationToken);
-        return _mapper.Map<JobDto>(entity);
+
+        var created = await _repository.GetByIdAsync(entity.Id, cancellationToken)
+            ?? entity;
+        return _mapper.Map<JobDto>(created);
     }
 
     public async Task UpdateJobAsync(long id, JobDto jobDto, CancellationToken cancellationToken = default)

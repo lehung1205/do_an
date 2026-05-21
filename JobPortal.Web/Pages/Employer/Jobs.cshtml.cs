@@ -16,6 +16,8 @@ public class JobsModel : PageModel
 
     public List<EmployerDashboardJobDto> Jobs { get; set; } = new();
     public string? ErrorMessage { get; set; }
+    public string? ActionErrorMessage { get; set; }
+    public string? SuccessMessage { get; set; }
     public string? StatusFilter { get; set; }
     public string? Search { get; set; }
     public int CurrentPage { get; set; } = 1;
@@ -49,6 +51,8 @@ public class JobsModel : PageModel
 
         StatusFilter = NormalizeStatusFilter(status);
         Search = string.IsNullOrWhiteSpace(q) ? null : q.Trim();
+        SuccessMessage = TempData["JobManageSuccessMessage"] as string;
+        ActionErrorMessage = TempData["JobManageErrorMessage"] as string;
 
         var query = new List<string>
         {
@@ -91,6 +95,57 @@ public class JobsModel : PageModel
         }
 
         return Page();
+    }
+
+    public async Task<IActionResult> OnPostCloseJobAsync(
+        long jobId,
+        string? status,
+        string? q,
+        int pageNumber = 1,
+        int pageSize = DefaultPageSize)
+    {
+        var redirect = RequireEmployer();
+        if (redirect != null)
+        {
+            return redirect;
+        }
+
+        if (pageNumber < 1)
+        {
+            pageNumber = 1;
+        }
+
+        if (pageSize < 1)
+        {
+            pageSize = DefaultPageSize;
+        }
+
+        var response = await _api.PostApiResponseAsync<object, EmployerDashboardJobDto>(
+            $"/api/employers/me/jobs/{jobId}/close",
+            new { });
+
+        if (response is not { Success: true })
+        {
+            TempData["JobManageErrorMessage"] = response?.Message
+                ?? response?.Errors.FirstOrDefault()?.Message
+                ?? "Không thể đóng tin tuyển dụng.";
+        }
+        else
+        {
+            var title = response.Data?.Title;
+            TempData["JobManageSuccessMessage"] = string.IsNullOrWhiteSpace(title)
+                ? "Đã đóng tin tuyển dụng."
+                : $"Đã đóng tin \"{title}\".";
+        }
+
+        var statusFilter = NormalizeStatusFilter(status);
+        return RedirectToPage(new
+        {
+            status = string.IsNullOrEmpty(statusFilter) ? "all" : statusFilter,
+            q = string.IsNullOrWhiteSpace(q) ? null : q.Trim(),
+            pageNumber,
+            pageSize
+        });
     }
 
     private static string? NormalizeStatusFilter(string? status)

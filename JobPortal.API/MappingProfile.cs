@@ -11,6 +11,7 @@ public class MappingProfile : Profile
         CreateMap<Job, JobDto>()
             .ForMember(d => d.Id, o => o.MapFrom(s => s.Id))
             .ForMember(d => d.EmployerId, o => o.MapFrom(s => s.EmployerId))
+            .ForMember(d => d.EmployerName, o => o.MapFrom(s => s.Employer.Name))
             .ForMember(d => d.CategoryId, o => o.MapFrom(s => s.CategoryId))
             .ForMember(d => d.Title, o => o.MapFrom(s => s.Title))
             .ForMember(d => d.Description, o => o.MapFrom(s => s.Description))

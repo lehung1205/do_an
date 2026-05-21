@@ -73,6 +73,16 @@ public class EmployerDashboardController : ControllerBase
             "Job closed successfully."));
     }
 
+    [HttpGet("applications/{id:long}/applicant-profile")]
+    public async Task<IActionResult> GetApplicantProfile(long id, CancellationToken cancellationToken)
+    {
+        var userId = GetCurrentUserId();
+        var profile = await _dashboardService.GetApplicantProfileForEmployerAsync(userId, id, cancellationToken);
+        return Ok(ApiResponse<ApplicantProfileForEmployerDto>.SuccessResponse(
+            profile,
+            "Applicant profile retrieved successfully."));
+    }
+
     [HttpGet("applications")]
     public async Task<IActionResult> GetApplications(CancellationToken cancellationToken)
     {

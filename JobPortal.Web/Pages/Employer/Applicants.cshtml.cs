@@ -68,6 +68,46 @@ public class ApplicantsModel : PageModel
         return RedirectToPage(new { filter = Filter });
     }
 
+    public async Task<IActionResult> OnGetApplicantProfileAsync(long applicationId)
+    {
+        var redirect = RequireEmployer();
+        if (redirect != null)
+        {
+            return redirect;
+        }
+
+        if (applicationId <= 0)
+        {
+            return NotFound();
+        }
+
+        var profile = await _api.GetApiDataAsync<ApplicantProfileForEmployerDto>(
+            $"/api/employers/me/applications/{applicationId}/applicant-profile");
+
+        if (profile == null)
+        {
+            return NotFound();
+        }
+
+        return new JsonResult(new
+        {
+            profile.ApplicationId,
+            profile.Name,
+            profile.ProfileImage,
+            profile.Email,
+            profile.Phone,
+            dateOfBirth = FormatDateOnly(profile.DateOfBirth),
+            gender = FormatGender(profile.Gender),
+            profile.Description,
+            permanentAddress = DashIfEmpty(profile.PermanentAddress),
+            temporaryAddress = DashIfEmpty(profile.TemporaryAddress),
+            profile.JobTitle,
+            appliedAt = FormatRelativeTime(profile.AppliedAt),
+            profile.ResumeTitle,
+            applicationStatus = FormatStatus(profile.ApplicationStatus)
+        });
+    }
+
     public async Task<IActionResult> OnGetViewCvAsync(long applicationId, string? filter)
     {
         var redirect = RequireEmployer();
@@ -160,10 +200,19 @@ public class ApplicantsModel : PageModel
         "submitted" => "Mới nộp",
         "pending" => "Chờ xử lý",
         "reviewed" => "Đã xem",
-        "accepted" => "Chấp nhận",
+        "accepted" => "Đã chấp nhận",
         "rejected" => "Từ chối",
         _ => status
     };
+
+    public static string FormatGender(byte? gender) =>
+        global::JobPortal.Web.Models.AccountPanelViewModel.FormatGender(gender);
+
+    public static string FormatDateOnly(DateOnly? value) =>
+        global::JobPortal.Web.Models.AccountPanelViewModel.FormatDateOnly(value);
+
+    public static string DashIfEmpty(string? value) =>
+        global::JobPortal.Web.Models.AccountPanelViewModel.DashIfEmpty(value);
 
     public static string StatusBadgeClass(string status) => status.ToLowerInvariant() switch
     {

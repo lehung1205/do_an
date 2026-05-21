@@ -11,6 +11,11 @@ public interface IEmployerDashboardService
         long userId,
         CancellationToken cancellationToken = default);
 
+    Task<ApplicantProfileForEmployerDto> GetApplicantProfileForEmployerAsync(
+        long userId,
+        long applicationId,
+        CancellationToken cancellationToken = default);
+
     Task<PagedResult<EmployerDashboardJobDto>> GetJobsForUserAsync(
         long userId,
         string? status = null,

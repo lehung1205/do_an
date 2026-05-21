@@ -40,6 +40,7 @@ public class EmployerDashboardApplicationDto
     public string ApplicantName { get; set; } = null!;
     public string? ApplicantEmail { get; set; }
     public string? ApplicantPhone { get; set; }
+    public string? ApplicantProfileImage { get; set; }
     public string JobTitle { get; set; } = null!;
     public DateTime AppliedAt { get; set; }
     public long ResumeId { get; set; }

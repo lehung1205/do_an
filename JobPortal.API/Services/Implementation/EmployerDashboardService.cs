@@ -280,6 +280,56 @@ public class EmployerDashboardService : IEmployerDashboardService
         return applications.Select(MapApplicationDto).ToList();
     }
 
+    public async Task<ApplicantProfileForEmployerDto> GetApplicantProfileForEmployerAsync(
+        long userId,
+        long applicationId,
+        CancellationToken cancellationToken = default)
+    {
+        await _jobExpiryService.CloseExpiredJobsAsync(cancellationToken);
+
+        var employer = await _context.Employers
+            .AsNoTracking()
+            .FirstOrDefaultAsync(e => e.UserId == userId, cancellationToken);
+
+        if (employer == null)
+        {
+            throw new NotFoundException("Employer profile not found for this user.");
+        }
+
+        var application = await _context.Applications
+            .AsNoTracking()
+            .Include(a => a.JobSeeker)
+            .Include(a => a.Job)
+            .Include(a => a.Resume)
+            .FirstOrDefaultAsync(
+                a => a.Id == applicationId && a.Job.EmployerId == employer.Id,
+                cancellationToken);
+
+        if (application == null)
+        {
+            throw new NotFoundException($"Application with id {applicationId} was not found.");
+        }
+
+        var seeker = application.JobSeeker;
+        return new ApplicantProfileForEmployerDto
+        {
+            ApplicationId = application.Id,
+            Name = seeker.Name,
+            ProfileImage = seeker.ProfileImage,
+            Email = seeker.Email,
+            Phone = seeker.Phone,
+            DateOfBirth = seeker.DateOfBirth,
+            Gender = seeker.Gender,
+            Description = seeker.Description,
+            PermanentAddress = seeker.PermanentAddress,
+            TemporaryAddress = seeker.TemporaryAddress,
+            JobTitle = application.Job.Title,
+            AppliedAt = application.AppliedAt,
+            ResumeTitle = application.Resume.Title,
+            ApplicationStatus = application.Status
+        };
+    }
+
     public async Task<EmployerDashboardApplicationDto> UpdateApplicationStatusAsync(
         long userId,
         long applicationId,
@@ -640,6 +690,7 @@ public class EmployerDashboardService : IEmployerDashboardService
         ApplicantName = a.ApplicantName,
         ApplicantEmail = a.ApplicantEmail,
         ApplicantPhone = a.ApplicantPhone,
+        ApplicantProfileImage = a.ApplicantProfileImage,
         JobTitle = a.JobTitle,
         AppliedAt = a.AppliedAt,
         ResumeId = a.ResumeId,
@@ -709,6 +760,7 @@ public class EmployerDashboardService : IEmployerDashboardService
                 ApplicantName = a.JobSeeker.Name,
                 ApplicantEmail = a.JobSeeker.Email,
                 ApplicantPhone = a.JobSeeker.Phone,
+                ApplicantProfileImage = a.JobSeeker.ProfileImage,
                 JobTitle = a.Job.Title,
                 ResumeId = a.ResumeId,
                 ResumeTitle = a.Resume.Title,
@@ -746,6 +798,7 @@ public class EmployerDashboardService : IEmployerDashboardService
         public string ApplicantName { get; init; } = null!;
         public string? ApplicantEmail { get; init; }
         public string? ApplicantPhone { get; init; }
+        public string? ApplicantProfileImage { get; init; }
         public string JobTitle { get; init; } = null!;
         public long ResumeId { get; init; }
         public string ResumeTitle { get; init; } = null!;

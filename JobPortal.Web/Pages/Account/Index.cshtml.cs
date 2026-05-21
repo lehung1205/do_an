@@ -12,9 +12,14 @@ namespace JobPortal.Web.Pages.Account;
 public class IndexModel : PageModel
 {
     private const long MaxAvatarBytes = 2 * 1024 * 1024;
+    private const long MaxResumePdfBytes = 10 * 1024 * 1024;
     private static readonly HashSet<string> AllowedAvatarExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
         ".jpg", ".jpeg", ".png", ".gif", ".webp"
+    };
+    private static readonly HashSet<string> AllowedResumeExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".pdf"
     };
 
     private readonly ApiService _api;
@@ -164,6 +169,7 @@ public class IndexModel : PageModel
 
     public async Task<IActionResult> OnPostAddResumeAsync(
         [Bind(Prefix = "ResumeInput")] ResumeInputModel? resumeInput,
+        IFormFile? resumeFile,
         [FromForm] string? returnUrl)
     {
         var redirect = RequireLogin();
@@ -175,13 +181,29 @@ public class IndexModel : PageModel
         ModelState.Clear();
         resumeInput ??= new ResumeInputModel();
 
-        var validationError = ValidateResumeInput(resumeInput);
+        var validationError = ValidateResumeInput(resumeInput, resumeFile);
         if (validationError != null)
         {
             TempData["AccountErrorMessage"] = validationError;
             TempData["AccountTab"] = "resume";
             TempData["ResumeInputTitle"] = resumeInput.Title;
-            TempData["ResumeInputUrl"] = resumeInput.Url;
+            return RedirectBack(returnUrl, openAccount: true, tab: "resume");
+        }
+
+        var profile = await _api.GetApiDataAsync<ProfileResponse>("/api/auth/me");
+        if (profile == null)
+        {
+            TempData["AccountErrorMessage"] = "Không tải được thông tin tài khoản.";
+            TempData["AccountTab"] = "resume";
+            return RedirectBack(returnUrl, openAccount: true, tab: "resume");
+        }
+
+        var saved = await TrySaveResumePdfAsync(profile.Id, resumeFile!);
+        if (saved.Error != null)
+        {
+            TempData["AccountErrorMessage"] = saved.Error;
+            TempData["AccountTab"] = "resume";
+            TempData["ResumeInputTitle"] = resumeInput.Title;
             return RedirectBack(returnUrl, openAccount: true, tab: "resume");
         }
 
@@ -190,21 +212,21 @@ public class IndexModel : PageModel
             new CreateResumeRequest
             {
                 Title = resumeInput.Title.Trim(),
-                Url = resumeInput.Url.Trim()
+                Url = saved.Url!
             });
 
         if (response is not { Success: true })
         {
+            TryDeleteResumeFile(saved.Url);
             TempData["AccountErrorMessage"] = response?.Message
                 ?? response?.Errors.FirstOrDefault()?.Message
                 ?? "Thêm hồ sơ thất bại.";
             TempData["AccountTab"] = "resume";
             TempData["ResumeInputTitle"] = resumeInput.Title;
-            TempData["ResumeInputUrl"] = resumeInput.Url;
             return RedirectBack(returnUrl, openAccount: true, tab: "resume");
         }
 
-        TempData["AccountSuccessMessage"] = "Đã thêm hồ sơ (CV) thành công.";
+        TempData["AccountSuccessMessage"] = "Đã tải lên và lưu CV (PDF) thành công.";
         TempData["AccountTab"] = "resume";
         return RedirectBack(returnUrl, openAccount: true, tab: "resume");
     }
@@ -224,6 +246,9 @@ public class IndexModel : PageModel
             return RedirectBack(returnUrl, openAccount: true, tab: "resume");
         }
 
+        var resumes = await _api.GetApiDataAsync<List<ResumeDto>>("/api/resumes/me");
+        var resumeUrl = resumes?.FirstOrDefault(r => r.Id == resumeId)?.Url;
+
         var response = await _api.DeleteApiResponseAsync<object>($"/api/resumes/me/{resumeId}");
 
         if (response is not { Success: true })
@@ -234,6 +259,8 @@ public class IndexModel : PageModel
             TempData["AccountTab"] = "resume";
             return RedirectBack(returnUrl, openAccount: true, tab: "resume");
         }
+
+        TryDeleteResumeFile(resumeUrl);
 
         TempData["AccountSuccessMessage"] = "Đã xóa hồ sơ. Các đơn ứng tuyển dùng hồ sơ này cũng đã được gỡ bỏ.";
         TempData["AccountTab"] = "resume";
@@ -442,7 +469,7 @@ public class IndexModel : PageModel
         return null;
     }
 
-    private static string? ValidateResumeInput(ResumeInputModel input)
+    private static string? ValidateResumeInput(ResumeInputModel input, IFormFile? file)
     {
         if (string.IsNullOrWhiteSpace(input.Title))
         {
@@ -454,23 +481,139 @@ public class IndexModel : PageModel
             return "Tiêu đề không được vượt quá 255 ký tự.";
         }
 
-        if (string.IsNullOrWhiteSpace(input.Url))
+        return ValidateResumePdfFile(file);
+    }
+
+    private static string? ValidateResumePdfFile(IFormFile? file)
+    {
+        if (file == null || file.Length == 0)
         {
-            return "Vui lòng nhập liên kết CV (URL).";
+            return "Vui lòng chọn file CV (PDF).";
         }
 
-        if (input.Url.Length > 500)
+        if (file.Length > MaxResumePdfBytes)
         {
-            return "Liên kết không được vượt quá 500 ký tự.";
+            return "File CV không được vượt quá 10 MB.";
         }
 
-        if (!Uri.TryCreate(input.Url.Trim(), UriKind.Absolute, out var uri) ||
-            (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+        var ext = Path.GetExtension(file.FileName);
+        if (string.IsNullOrEmpty(ext) || !AllowedResumeExtensions.Contains(ext))
         {
-            return "Liên kết phải là URL http hoặc https hợp lệ.";
+            return "Chỉ chấp nhận file PDF (.pdf).";
+        }
+
+        var contentType = file.ContentType?.Trim() ?? string.Empty;
+        if (!string.IsNullOrEmpty(contentType) &&
+            !contentType.Equals("application/pdf", StringComparison.OrdinalIgnoreCase) &&
+            !contentType.Equals("application/octet-stream", StringComparison.OrdinalIgnoreCase))
+        {
+            return "File phải có định dạng PDF.";
         }
 
         return null;
+    }
+
+    private async Task<(string? Url, string? Error)> TrySaveResumePdfAsync(long userId, IFormFile file)
+    {
+        var webRoot = _env.WebRootPath;
+        if (string.IsNullOrEmpty(webRoot))
+        {
+            return (null, "Thư mục wwwroot không khả dụng.");
+        }
+
+        var ext = Path.GetExtension(file.FileName);
+        if (string.IsNullOrEmpty(ext) || !AllowedResumeExtensions.Contains(ext))
+        {
+            return (null, "Chỉ chấp nhận file PDF (.pdf).");
+        }
+
+        var storedName = $"{Guid.NewGuid():N}{ext}";
+        var dir = Path.Combine(webRoot, "uploads", "resumes", userId.ToString());
+        Directory.CreateDirectory(dir);
+        var physicalPath = Path.Combine(dir, storedName);
+
+        try
+        {
+            await using (var stream = System.IO.File.Create(physicalPath))
+            {
+                await file.CopyToAsync(stream);
+            }
+        }
+        catch
+        {
+            return (null, "Không lưu được file CV.");
+        }
+
+        var relativeUrlPath = $"{Request.PathBase}/uploads/resumes/{userId}/{storedName}".Replace("//", "/");
+        if (!relativeUrlPath.StartsWith('/'))
+        {
+            relativeUrlPath = "/" + relativeUrlPath;
+        }
+
+        var publicUrl = $"{Request.Scheme}://{Request.Host}{relativeUrlPath}";
+        if (publicUrl.Length > 500)
+        {
+            try
+            {
+                System.IO.File.Delete(physicalPath);
+            }
+            catch
+            {
+                // ignore cleanup errors
+            }
+
+            return (null, "URL file CV quá dài. Vui lòng liên hệ quản trị.");
+        }
+
+        return (publicUrl, null);
+    }
+
+    private void TryDeleteResumeFile(string? resumeUrl)
+    {
+        if (string.IsNullOrWhiteSpace(resumeUrl))
+        {
+            return;
+        }
+
+        var webRoot = _env.WebRootPath;
+        if (string.IsNullOrEmpty(webRoot))
+        {
+            return;
+        }
+
+        if (!Uri.TryCreate(resumeUrl.Trim(), UriKind.Absolute, out var uri))
+        {
+            return;
+        }
+
+        var path = uri.AbsolutePath;
+        const string prefix = "/uploads/resumes/";
+        var idx = path.IndexOf(prefix, StringComparison.OrdinalIgnoreCase);
+        if (idx < 0)
+        {
+            return;
+        }
+
+        var relative = path[idx..].TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
+        var physicalPath = Path.Combine(webRoot, relative);
+        var fullRoot = Path.GetFullPath(webRoot);
+        var fullFile = Path.GetFullPath(physicalPath);
+        if (!fullFile.StartsWith(fullRoot, StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        try
+        {
+            if (System.IO.File.Exists(fullFile))
+            {
+                System.IO.File.Delete(fullFile);
+            }
+        }
+        catch
+        {
+            // ignore cleanup errors
+        }
     }
 
     private IActionResult? RequireLogin()
@@ -552,7 +695,5 @@ public class IndexModel : PageModel
     public class ResumeInputModel
     {
         public string Title { get; set; } = string.Empty;
-
-        public string Url { get; set; } = string.Empty;
     }
 }

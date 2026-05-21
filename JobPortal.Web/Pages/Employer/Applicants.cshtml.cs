@@ -68,7 +68,7 @@ public class ApplicantsModel : PageModel
         return RedirectToPage(new { filter = Filter });
     }
 
-    public async Task<IActionResult> OnPostViewCvAsync(long applicationId, string? filter)
+    public async Task<IActionResult> OnGetViewCvAsync(long applicationId, string? filter)
     {
         var redirect = RequireEmployer();
         if (redirect != null)

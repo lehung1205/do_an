@@ -52,11 +52,6 @@ public class AccountPanelViewComponent : ViewComponent
             {
                 resumeInput.Title = t;
             }
-
-            if (tempData.TryGetValue("ResumeInputUrl", out var resumeUrl) && resumeUrl is string u)
-            {
-                resumeInput.Url = u;
-            }
         }
 
         var model = new AccountPanelViewModel

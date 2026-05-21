@@ -94,6 +94,16 @@
             </div>
         }
 
+        @if (Model.ReviewContext != null)
+        {
+            ViewData["ReviewFormPage"] = "/Applications/WorkProgress/Detail";
+            ViewData["ReviewApplicationId"] = Model.ApplicationId;
+            ViewData["ReviewPanelTitle"] = "Đánh giá nhà tuyển dụng";
+            ViewData["ReceivedReviewLabel"] = "Đánh giá từ nhà tuyển dụng:";
+            ViewData["CommentPlaceholder"] = "Chia sẻ trải nghiệm làm việc với công ty...";
+            <partial name="Shared/_ApplicationReviewPanel" model="Model.ReviewContext" />
+        }
+
         <div class="mt-4 d-flex flex-wrap gap-2">
             <a asp-page="/Applications/WorkProgress/Index" class="btn btn-outline-secondary">
                 <i class="bi bi-arrow-left me-1"></i> Danh sách tiến độ

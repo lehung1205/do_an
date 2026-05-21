@@ -80,6 +80,16 @@ public class AppDbContext : DbContext
             .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<Review>()
+            .HasOne(d => d.Application)
+            .WithMany()
+            .HasForeignKey(d => d.ApplicationId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Review>()
+            .HasIndex(r => new { r.ApplicationId, r.ReviewType })
+            .IsUnique();
+
+        modelBuilder.Entity<Review>()
             .HasOne(d => d.Job)
             .WithMany(c => c.Reviews)
             .HasForeignKey(d => d.JobId)

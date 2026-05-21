@@ -150,6 +150,17 @@
                             </button>
                         </form>
                     }
+
+                    @if (Model.ReviewContext != null)
+                    {
+                        ViewData["ReviewFormPage"] = "/Employer/WorkProgress/Detail";
+                        ViewData["ReviewApplicationId"] = Model.ApplicationId;
+                        ViewData["ReviewPanelTitle"] = "Đánh giá ứng viên";
+                        ViewData["ReceivedReviewLabel"] = "Đánh giá từ ứng viên:";
+                        ViewData["CommentPlaceholder"] = "Chia sẻ trải nghiệm làm việc với ứng viên...";
+                        ViewData["ReviewPanelClass"] = "card border-0 shadow-sm mt-4";
+                        <partial name="Shared/_ApplicationReviewPanel" model="Model.ReviewContext" />
+                    }
                 </div>
             </div>
         </div>

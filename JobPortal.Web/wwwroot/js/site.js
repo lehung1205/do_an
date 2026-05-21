@@ -4,6 +4,7 @@
     edit: "account-tab-edit-btn",
     password: "account-tab-password-btn",
     resume: "account-tab-resume-btn",
+    reviews: "account-tab-reviews-btn",
   };
 
   function showAccountTab(tabName) {

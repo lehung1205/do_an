@@ -10,6 +10,12 @@ public class Review
     [Column("id")]
     public long Id { get; set; }
 
+    [Column("application_id")]
+    public long ApplicationId { get; set; }
+
+    [ForeignKey(nameof(ApplicationId))]
+    public Application Application { get; set; } = null!;
+
     [Column("job_id")]
     public long JobId { get; set; }
 

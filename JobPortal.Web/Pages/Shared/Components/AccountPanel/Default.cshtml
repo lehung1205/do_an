@@ -47,6 +47,15 @@
                     </button>
                 </li>
             }
+            @if (Model.IsJobSeeker || Model.IsEmployer)
+            {
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="account-tab-reviews-btn" data-bs-toggle="tab"
+                            data-bs-target="#account-tab-reviews" type="button" role="tab">
+                        <i class="bi bi-star me-1"></i> Đánh giá
+                    </button>
+                </li>
+            }
         </ul>
 
         <div class="tab-content flex-grow-1 p-3 overflow-auto">
@@ -336,6 +345,16 @@
                             <i class="bi bi-plus-lg me-1"></i> Thêm hồ sơ
                         </button>
                     </form>
+                </div>
+            }
+
+            @if (Model.IsJobSeeker || Model.IsEmployer)
+            {
+                <div class="tab-pane fade" id="account-tab-reviews" role="tabpanel">
+                    @if (Model.ReviewsPanel != null)
+                    {
+                        <partial name="Shared/_AccountReceivedReviewsTab" model="Model.ReviewsPanel" />
+                    }
                 </div>
             }
         </div>

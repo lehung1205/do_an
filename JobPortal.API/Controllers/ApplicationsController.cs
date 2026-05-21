@@ -3,6 +3,7 @@ using System.Security.Claims;
 using JobPortal.API.DTOs;
 using JobPortal.API.DTOs.Common;
 using JobPortal.API.Services;
+using JobPortal.API.Services.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,10 +14,14 @@ namespace JobPortal.API.Controllers;
 public class ApplicationsController : ControllerBase
 {
     private readonly IApplicationService _applicationService;
+    private readonly IApplicationReviewService _applicationReviewService;
 
-    public ApplicationsController(IApplicationService applicationService)
+    public ApplicationsController(
+        IApplicationService applicationService,
+        IApplicationReviewService applicationReviewService)
     {
         _applicationService = applicationService;
+        _applicationReviewService = applicationReviewService;
     }
 
     [HttpGet]
@@ -53,6 +58,17 @@ public class ApplicationsController : ControllerBase
         return Ok(ApiResponse<MyApplicationDto>.SuccessResponse(created, "Application submitted successfully."));
     }
 
+    [HttpGet("me/reviews-received")]
+    [Authorize(Roles = "JOB_SEEKER")]
+    public async Task<IActionResult> GetMyReceivedReviews(CancellationToken cancellationToken)
+    {
+        var userId = GetCurrentUserId();
+        var summary = await _applicationReviewService.GetSeekerReceivedReviewsAsync(userId, cancellationToken);
+        return Ok(ApiResponse<SeekerReceivedReviewsSummaryDto>.SuccessResponse(
+            summary,
+            "Received reviews retrieved successfully."));
+    }
+
     [HttpGet("me/accepted/work-progress")]
     [Authorize(Roles = "JOB_SEEKER")]
     public async Task<IActionResult> GetMyAcceptedWorkProgressList(
@@ -75,6 +91,31 @@ public class ApplicationsController : ControllerBase
         return Ok(ApiResponse<SeekerApplicationWorkProgressDto>.SuccessResponse(
             detail,
             "Application work progress retrieved successfully."));
+    }
+
+    [HttpGet("me/{id:long}/reviews")]
+    [Authorize(Roles = "JOB_SEEKER")]
+    public async Task<IActionResult> GetMyApplicationReviewContext(long id, CancellationToken cancellationToken)
+    {
+        var userId = GetCurrentUserId();
+        var context = await _applicationReviewService.GetSeekerReviewContextAsync(userId, id, cancellationToken);
+        return Ok(ApiResponse<ApplicationReviewContextDto>.SuccessResponse(
+            context,
+            "Review context retrieved successfully."));
+    }
+
+    [HttpPost("me/{id:long}/reviews")]
+    [Authorize(Roles = "JOB_SEEKER")]
+    public async Task<IActionResult> SubmitMyApplicationReview(
+        long id,
+        [FromBody] CreateApplicationReviewRequest request,
+        CancellationToken cancellationToken)
+    {
+        var userId = GetCurrentUserId();
+        var created = await _applicationReviewService.SubmitSeekerReviewAsync(userId, id, request, cancellationToken);
+        return Ok(ApiResponse<ApplicationReviewViewDto>.SuccessResponse(
+            created,
+            "Review submitted successfully."));
     }
 
     [HttpGet("{id:long}")]

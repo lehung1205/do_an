@@ -1,0 +1,99 @@
+@page
+@model JobPortal.Web.Pages.Applications.WorkProgress.DetailModel
+@{
+    ViewData["Title"] = "Chi tiết tiến độ";
+}
+
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a asp-page="/Applications/WorkProgress/Index">Tiến độ làm việc</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Chi tiết</li>
+        </ol>
+    </nav>
+
+    @if (Model.Progress == null)
+    {
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="alert alert-warning">@Model.ErrorMessage</div>
+        }
+        <a asp-page="/Applications/WorkProgress/Index" class="btn btn-outline-secondary">Quay lại</a>
+    }
+    else
+    {
+        var p = Model.Progress;
+
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <div class="d-flex flex-wrap justify-content-between gap-2">
+                    <div class="min-w-0">
+                        <h2 class="h5 mb-1">@p.JobTitle</h2>
+                        <p class="text-muted small mb-1">
+                            <i class="bi bi-building me-1"></i>@p.CompanyName
+                        </p>
+                        <p class="text-muted small mb-0">
+                            <i class="bi bi-geo-alt me-1"></i>@p.JobLocation
+                            · <i class="bi bi-cash-stack me-1"></i>@p.JobSalary
+                            · Ứng tuyển @DetailModel.FormatRelativeTime(p.AppliedAt)
+                        </p>
+                    </div>
+                    @if (p.CurrentStep != null)
+                    {
+                        <span class="badge @JobPortal.Web.Helpers.WorkProgressCatalog.BadgeClass(p.CurrentStep.Status) fs-6">
+                            Hiện tại: @p.CurrentStep.Title
+                        </span>
+                    }
+                </div>
+            </div>
+        </div>
+
+        @if (p.IsProgressLocked)
+        {
+            <div class="alert alert-secondary">
+                <i class="bi bi-lock-fill me-1"></i>
+                Công việc đã kết thúc (trạng thái <strong>Đã hủy</strong>). Bạn chỉ có thể xem lịch sử tiến độ.
+            </div>
+        }
+
+        <h3 class="h6 mb-3">Lịch sử tiến độ</h3>
+        @if (p.Steps.Count == 0)
+        {
+            <div class="card border-0 shadow-sm text-muted small py-4 text-center">
+                Nhà tuyển dụng chưa cập nhật bước tiến độ nào.
+            </div>
+        }
+        else
+        {
+            <div class="d-flex flex-column gap-3">
+                @foreach (var step in p.Steps)
+                {
+                    <div class="card border-0 shadow-sm border-start border-4 border-primary">
+                        <div class="card-body ps-3">
+                            <div class="d-flex flex-wrap justify-content-between gap-2 mb-1">
+                                <span class="fw-semibold">@step.Title</span>
+                                <span class="badge @JobPortal.Web.Helpers.WorkProgressCatalog.BadgeClass(step.Status)">
+                                    @JobPortal.Web.Helpers.WorkProgressCatalog.FormatStatus(step.Status)
+                                </span>
+                            </div>
+                            <p class="text-muted small mb-0">
+                                <i class="bi bi-clock me-1"></i>@step.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                            </p>
+                            @if (!string.IsNullOrWhiteSpace(step.Notes))
+                            {
+                                <p class="small mb-0 mt-2" style="white-space: pre-wrap;">@step.Notes</p>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+        <div class="mt-4 d-flex flex-wrap gap-2">
+            <a asp-page="/Applications/WorkProgress/Index" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i> Danh sách tiến độ
+            </a>
+            <a asp-page="/Jobs/Detail" asp-route-id="@p.JobId" class="btn btn-outline-primary">Xem tin tuyển dụng</a>
+        </div>
+    }
+</div>

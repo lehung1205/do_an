@@ -16,6 +16,8 @@ public class DetailModel : PageModel
 
     public JobDto Job { get; set; } = null!;
 
+    public EmployerPublicProfileDto? EmployerProfile { get; set; }
+
     public IReadOnlyList<ImageDto> JobImages { get; set; } = Array.Empty<ImageDto>();
 
     /// <summary>Hiện nút ứng tuyển cho ứng viên (và khách); ẩn với employer/admin.</summary>
@@ -53,6 +55,8 @@ public class DetailModel : PageModel
         }
 
         Job = job;
+        EmployerProfile = await _api.GetApiDataAsync<EmployerPublicProfileDto>(
+            $"/api/employers/{job.EmployerId}/public-profile");
         JobImages = await _api.GetApiDataAsync<List<ImageDto>>($"/api/images/job/{id}") ?? new List<ImageDto>();
 
         var role = HttpContext.Session.GetString("UserRole");
@@ -73,7 +77,7 @@ public class DetailModel : PageModel
         {
             Resumes = await _api.GetApiDataAsync<List<ResumeDto>>("/api/resumes/me") ?? new List<ResumeDto>();
             HasApplied = await _api.GetApiDataAsync<bool>($"/api/applications/me/job/{id}/applied") == true;
-            if (Resumes.Count == 1)
+            if (Resumes.Count > 0 && SelectedResumeId <= 0)
             {
                 SelectedResumeId = Resumes[0].Id;
             }
@@ -127,6 +131,9 @@ public class DetailModel : PageModel
 
     public static string FormatPostingStatus(string status) =>
         global::JobPortal.Web.Pages.IndexModel.FormatJobStatus(status);
+
+    public static string FormatGender(byte? gender) =>
+        global::JobPortal.Web.Models.AccountPanelViewModel.FormatGender(gender);
 
     public static string StatusBadgeClass(string status) => status.Trim().ToLowerInvariant() switch
     {

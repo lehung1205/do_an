@@ -30,6 +30,15 @@ public class EmployersController : ControllerBase
         return Ok(ApiResponse<EmployerDto>.SuccessResponse(item, "Employer retrieved successfully."));
     }
 
+    [HttpGet("{id:long}/public-profile")]
+    public async Task<IActionResult> GetEmployerPublicProfile(long id, CancellationToken cancellationToken)
+    {
+        var profile = await _employerService.GetEmployerPublicProfileAsync(id, cancellationToken);
+        return Ok(ApiResponse<EmployerPublicProfileDto>.SuccessResponse(
+            profile,
+            "Employer public profile retrieved successfully."));
+    }
+
     [HttpPost]
     public async Task<IActionResult> CreateEmployer([FromBody] CreateEmployerDto dto, CancellationToken cancellationToken)
     {

@@ -40,6 +40,28 @@ public class EmployerService : IEmployerService
         return _mapper.Map<EmployerDto>(entity);
     }
 
+    public async Task<EmployerPublicProfileDto> GetEmployerPublicProfileAsync(
+        long id,
+        CancellationToken cancellationToken = default)
+    {
+        var entity = await _repository.GetByIdAsync(id, cancellationToken);
+        if (entity == null)
+        {
+            throw new NotFoundException($"Employer with id {id} was not found.");
+        }
+
+        return new EmployerPublicProfileDto
+        {
+            Id = entity.Id,
+            Name = entity.Name,
+            Description = entity.Description,
+            Image = entity.Image,
+            Phone = entity.Phone,
+            Email = entity.Email,
+            Gender = entity.Gender
+        };
+    }
+
     public async Task<EmployerDto> CreateEmployerAsync(CreateEmployerDto dto, CancellationToken cancellationToken = default)
     {
         var normalizedEmail = dto.Email.Trim().ToLowerInvariant();

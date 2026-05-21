@@ -1,0 +1,103 @@
+@page
+@model JobPortal.Web.Pages.Applications.WorkProgress.IndexModel
+@{
+    ViewData["Title"] = "Tiến độ làm việc";
+}
+
+<div class="container py-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+        <div>
+            <h2 class="mb-1"><i class="bi bi-graph-up-arrow me-2"></i>Tiến độ làm việc</h2>
+            <p class="text-muted mb-0">Theo dõi tiến độ các công việc part-time đã được nhà tuyển dụng chấp nhận</p>
+        </div>
+        <a asp-page="/Applications/Index" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-inbox me-1"></i> Đơn ứng tuyển
+        </a>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-warning">@Model.ErrorMessage</div>
+    }
+    else
+    {
+        <form method="get" class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-9">
+                        <label class="form-label" for="q">Tìm kiếm</label>
+                        <input type="search" class="form-control" id="q" name="q" value="@Model.Search"
+                               placeholder="Tên công việc, công ty, địa điểm..." maxlength="200" />
+                    </div>
+                    <div class="col-md-3 d-flex gap-2">
+                        <button type="submit" class="btn btn-primary flex-grow-1">
+                            <i class="bi bi-search me-1"></i> Tìm
+                        </button>
+                        <a asp-page="/Applications/WorkProgress/Index" class="btn btn-outline-secondary" title="Xóa bộ lọc">
+                            <i class="bi bi-x-lg"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        @if (Model.Items.Count == 0)
+        {
+            <div class="card border-0 shadow-sm text-center py-5 text-muted">
+                @if (Model.HasActiveFilter)
+                {
+                    <i class="bi bi-funnel display-6 d-block mb-2"></i>
+                    <p class="mb-2">Không có công việc phù hợp bộ lọc.</p>
+                    <a asp-page="/Applications/WorkProgress/Index" class="btn btn-sm btn-outline-primary">Xóa bộ lọc</a>
+                }
+                else
+                {
+                    <i class="bi bi-briefcase display-6 d-block mb-2"></i>
+                    <p class="mb-2">Chưa có công việc nào được chấp nhận.</p>
+                    <a asp-page="/Applications/Index" class="btn btn-sm btn-primary">Xem đơn ứng tuyển</a>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="d-flex flex-column gap-3">
+                @foreach (var item in Model.Items)
+                {
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-2">
+                                <div class="min-w-0">
+                                    <h3 class="h6 mb-1 fw-semibold">@item.JobTitle</h3>
+                                    <p class="text-muted small mb-0">
+                                        <i class="bi bi-building me-1"></i>@item.CompanyName
+                                        · <i class="bi bi-geo-alt me-1"></i>@item.JobLocation
+                                        · Ứng tuyển @IndexModel.FormatRelativeTime(item.AppliedAt)
+                                    </p>
+                                </div>
+                                @if (!string.IsNullOrWhiteSpace(item.CurrentWorkStatus))
+                                {
+                                    <span class="badge @JobPortal.Web.Helpers.WorkProgressCatalog.BadgeClass(item.CurrentWorkStatus)">
+                                        @(item.CurrentWorkTitle ?? JobPortal.Web.Helpers.WorkProgressCatalog.FormatStatus(item.CurrentWorkStatus))
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Chưa có tiến độ</span>
+                                }
+                            </div>
+                            <p class="text-muted small mb-3">
+                                @item.StepCount bước tiến độ
+                                @(item.LastProgressAt.HasValue ? $" · Cập nhật {IndexModel.FormatRelativeTime(item.LastProgressAt.Value)}" : "")
+                                @(item.IsProgressLocked ? " · Đã kết thúc" : "")
+                            </p>
+                            <a asp-page="/Applications/WorkProgress/Detail" asp-route-applicationId="@item.ApplicationId"
+                               class="btn btn-sm btn-primary">
+                                <i class="bi bi-eye me-1"></i> Xem tiến độ
+                            </a>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    }
+</div>

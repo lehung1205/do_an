@@ -62,3 +62,33 @@ public class CreateWorkProgressStepRequest
     public string Status { get; set; } = null!;
     public string? Notes { get; set; }
 }
+
+public class SeekerWorkProgressListItemDto
+{
+    public long ApplicationId { get; set; }
+    public long JobId { get; set; }
+    public string JobTitle { get; set; } = null!;
+    public string CompanyName { get; set; } = null!;
+    public string JobLocation { get; set; } = null!;
+    public DateTime AppliedAt { get; set; }
+    public string? CurrentWorkStatus { get; set; }
+    public string? CurrentWorkTitle { get; set; }
+    public DateTime? LastProgressAt { get; set; }
+    public int StepCount { get; set; }
+    public bool IsProgressLocked { get; set; }
+}
+
+public class SeekerApplicationWorkProgressDto
+{
+    public long ApplicationId { get; set; }
+    public long JobId { get; set; }
+    public string JobTitle { get; set; } = null!;
+    public string CompanyName { get; set; } = null!;
+    public string JobLocation { get; set; } = null!;
+    public string JobSalary { get; set; } = null!;
+    public DateTime AppliedAt { get; set; }
+    public string ApplicationStatus { get; set; } = null!;
+    public IReadOnlyList<WorkProgressStepDto> Steps { get; set; } = Array.Empty<WorkProgressStepDto>();
+    public WorkProgressStepDto? CurrentStep { get; set; }
+    public bool IsProgressLocked { get; set; }
+}

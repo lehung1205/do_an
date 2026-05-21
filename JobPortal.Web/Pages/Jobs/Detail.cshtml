@@ -19,7 +19,23 @@
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div>
                             <h1 class="h2 mb-1">@Model.Job.Title</h1>
-                            <p class="text-primary h5 mb-0">Nhà tuyển dụng #@Model.Job.EmployerId</p>
+                            @if (Model.EmployerProfile != null)
+                            {
+                                <button type="button"
+                                        class="btn btn-link employer-profile-trigger p-0 h5 mb-0 text-start"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#employerProfileModal"
+                                        aria-label="Xem thông tin @Model.Job.EmployerName">
+                                    <i class="bi bi-building me-1"></i>@Model.Job.EmployerName
+                                    <i class="bi bi-info-circle ms-1 small opacity-75"></i>
+                                </button>
+                            }
+                            else
+                            {
+                                <p class="text-primary h5 mb-0">
+                                    <i class="bi bi-building me-1"></i>@Model.Job.EmployerName
+                                </p>
+                            }
                         </div>
                         <span class="badge @DetailModel.StatusBadgeClass(Model.Job.PostingStatus) p-2">
                             @DetailModel.FormatPostingStatus(Model.Job.PostingStatus)
@@ -83,71 +99,106 @@
 
                     @if (Model.ShowApplyButton)
                     {
-                        <div class="mt-5">
-                            @if (Model.HasApplied)
-                            {
-                                <span class="badge bg-success fs-6 px-4 py-2">
-                                    <i class="bi bi-check-circle me-1"></i> Đã ứng tuyển
-                                </span>
-                                <a asp-page="/Applications/Index" class="btn btn-outline-primary ms-2">Xem đơn của tôi</a>
-                            }
-                            else if (!Model.IsRecruiting)
-                            {
-                                <p class="text-muted mb-0">
-                                    @(Model.IsClosed ? "Tin tuyển dụng đã đóng, không nhận hồ sơ mới." : "Tin tuyển dụng hiện không nhận hồ sơ.")
-                                </p>
-                            }
-                            else if (!Model.IsLoggedIn)
-                            {
-                                <a asp-page="/Auth/Login"
-                                   asp-route-returnUrl="@Model.ReturnUrl"
-                                   class="btn btn-primary btn-lg px-5">
-                                    Đăng nhập để ứng tuyển
-                                </a>
-                            }
-                            else if (!Model.IsJobSeeker)
-                            {
-                                <p class="text-muted mb-0">Chỉ tài khoản ứng viên mới có thể ứng tuyển.</p>
-                            }
-                            else if (Model.Resumes.Count == 0)
-                            {
-                                <p class="text-muted">Bạn cần thêm ít nhất một hồ sơ (CV) trước khi ứng tuyển.</p>
-                                <a asp-page="/Index"
-                                   asp-route-openAccount="true"
-                                   asp-route-accountTab="resume"
-                                   asp-route-returnUrl="@Model.ReturnUrl"
-                                   class="btn btn-primary btn-lg mt-2">
-                                    Thêm hồ sơ (CV)
-                                </a>
-                            }
-                            else
-                            {
-                                <form method="post" asp-page-handler="Apply" asp-route-id="@Model.Job.Id" class="apply-form">
-                                    @if (Model.Resumes.Count > 1)
-                                    {
-                                        <div class="mb-3" style="max-width: 400px;">
-                                            <label class="form-label fw-semibold" for="SelectedResumeId">Chọn hồ sơ (CV)</label>
-                                            <select asp-for="SelectedResumeId" id="SelectedResumeId" class="form-select form-select-lg" required>
-                                                <option value="">-- Chọn CV --</option>
-                                                @foreach (var cv in Model.Resumes)
-                                                {
-                                                    <option value="@cv.Id">@cv.Title</option>
-                                                }
-                                            </select>
-                                        </div>
-                                    }
-                                    else
-                                    {
-                                        <input type="hidden" asp-for="SelectedResumeId" />
-                                        <p class="text-muted small mb-2">
-                                            Hồ sơ: <strong>@Model.Resumes[0].Title</strong>
+                        <div class="apply-panel mt-5">
+                            <div class="apply-panel__header">
+                                <h4 class="apply-panel__title mb-0">
+                                    <i class="bi bi-send-check me-2"></i>Ứng tuyển
+                                </h4>
+                            </div>
+                            <div class="apply-panel__body">
+                                @if (Model.HasApplied)
+                                {
+                                    <div class="d-flex flex-wrap align-items-center gap-3">
+                                        <span class="badge bg-success fs-6 px-3 py-2">
+                                            <i class="bi bi-check-circle me-1"></i> Đã ứng tuyển
+                                        </span>
+                                        <a asp-page="/Applications/Index" class="btn btn-outline-primary">
+                                            Xem đơn của tôi
+                                        </a>
+                                    </div>
+                                }
+                                else if (!Model.IsRecruiting)
+                                {
+                                    <p class="text-muted mb-0">
+                                        @(Model.IsClosed ? "Tin tuyển dụng đã đóng, không nhận hồ sơ mới." : "Tin tuyển dụng hiện không nhận hồ sơ.")
+                                    </p>
+                                }
+                                else if (!Model.IsLoggedIn)
+                                {
+                                    <p class="text-muted mb-3">Đăng nhập tài khoản ứng viên để nộp hồ sơ cho tin này.</p>
+                                    <a asp-page="/Auth/Login"
+                                       asp-route-returnUrl="@Model.ReturnUrl"
+                                       class="btn btn-primary btn-lg">
+                                        <i class="bi bi-box-arrow-in-right me-1"></i> Đăng nhập để ứng tuyển
+                                    </a>
+                                }
+                                else if (!Model.IsJobSeeker)
+                                {
+                                    <p class="text-muted mb-0">Chỉ tài khoản ứng viên mới có thể ứng tuyển.</p>
+                                }
+                                else if (Model.Resumes.Count == 0)
+                                {
+                                    <p class="text-muted mb-3">Bạn cần tải lên ít nhất một hồ sơ (CV) trước khi ứng tuyển.</p>
+                                    <a asp-page="/Index"
+                                       asp-route-openAccount="true"
+                                       asp-route-accountTab="resume"
+                                       asp-route-returnUrl="@Model.ReturnUrl"
+                                       class="btn btn-primary btn-lg">
+                                        <i class="bi bi-file-earmark-plus me-1"></i> Thêm hồ sơ (CV)
+                                    </a>
+                                }
+                                else
+                                {
+                                    <form method="post" asp-page-handler="Apply" asp-route-id="@Model.Job.Id" class="apply-form">
+                                        <p class="apply-panel__hint text-muted small mb-3">
+                                            @(Model.Resumes.Count > 1
+                                                ? "Chọn hồ sơ CV bạn muốn gửi cho nhà tuyển dụng."
+                                                : "Hồ sơ dưới đây sẽ được gửi kèm đơn ứng tuyển.")
                                         </p>
-                                    }
-                                    <button type="submit" class="btn btn-primary btn-lg px-5">
-                                        <i class="bi bi-send me-1"></i> Ứng tuyển ngay
-                                    </button>
-                                </form>
-                            }
+
+                                        <div class="row g-3 mb-4">
+                                            @foreach (var cv in Model.Resumes)
+                                            {
+                                                <div class="@(Model.Resumes.Count > 1 ? "col-sm-6" : "col-12")">
+                                                    <label class="apply-cv-option">
+                                                        <input type="radio"
+                                                               class="apply-cv-option__input"
+                                                               asp-for="SelectedResumeId"
+                                                               value="@cv.Id" />
+                                                        <span class="apply-cv-option__card">
+                                                            <span class="apply-cv-option__icon" aria-hidden="true">
+                                                                <i class="bi bi-file-earmark-pdf"></i>
+                                                            </span>
+                                                            <span class="apply-cv-option__content">
+                                                                <span class="apply-cv-option__title">@cv.Title</span>
+                                                                @if (!string.IsNullOrWhiteSpace(cv.Url))
+                                                                {
+                                                                    <a href="@cv.Url"
+                                                                       target="_blank"
+                                                                       rel="noopener noreferrer"
+                                                                       class="apply-cv-option__link small"
+                                                                       onclick="event.stopPropagation();">
+                                                                        Xem CV <i class="bi bi-box-arrow-up-right ms-1"></i>
+                                                                    </a>
+                                                                }
+                                                            </span>
+                                                            <span class="apply-cv-option__check" aria-hidden="true">
+                                                                <i class="bi bi-check-lg"></i>
+                                                            </span>
+                                                        </span>
+                                                    </label>
+                                                </div>
+                                            }
+                                        </div>
+
+                                        <div class="apply-panel__actions">
+                                            <button type="submit" class="btn btn-primary btn-lg">
+                                                <i class="bi bi-send me-1"></i> Ứng tuyển ngay
+                                            </button>
+                                        </div>
+                                    </form>
+                                }
+                            </div>
                         </div>
                     }
                 </div>
@@ -160,7 +211,22 @@
                     <h5 class="card-title mb-3">Thông tin tóm tắt</h5>
                     <ul class="list-unstyled mb-0">
                         <li class="mb-2"><strong>Mức lương:</strong> @Model.Job.Salary</li>
-                        <li class="mb-2"><strong>Mã nhà tuyển dụng:</strong> @Model.Job.EmployerId</li>
+                        <li class="mb-2">
+                            <strong>Nhà tuyển dụng:</strong>
+                            @if (Model.EmployerProfile != null)
+                            {
+                                <button type="button"
+                                        class="btn btn-link employer-profile-trigger p-0 align-baseline"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#employerProfileModal">
+                                    @Model.Job.EmployerName
+                                </button>
+                            }
+                            else
+                            {
+                                @Model.Job.EmployerName
+                            }
+                        </li>
                         <li class="mb-2"><strong>Địa điểm:</strong> @Model.Job.Location</li>
                         <li class="mb-2"><strong>Thời gian làm việc:</strong> @(string.IsNullOrWhiteSpace(Model.Job.WorkingHours) ? "—" : Model.Job.WorkingHours)</li>
                         <li class="mb-2"><strong>Hết hạn tin:</strong> @Model.Job.ExpiryDate.ToLocalTime().ToString("dd/MM/yyyy")</li>
@@ -170,6 +236,89 @@
         </div>
     </div>
 </div>
+
+@if (Model.EmployerProfile != null)
+{
+    var emp = Model.EmployerProfile;
+    <div class="modal fade" id="employerProfileModal" tabindex="-1" aria-labelledby="employerProfileModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title" id="employerProfileModalLabel">Thông tin nhà tuyển dụng</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body pt-2">
+                    <div class="employer-profile-modal">
+                        <div class="employer-profile-modal__header d-flex gap-3 align-items-start mb-4">
+                            @if (!string.IsNullOrWhiteSpace(emp.Image))
+                            {
+                                <img src="@emp.Image" alt="" class="employer-profile-modal__avatar rounded-circle object-fit-cover" width="72" height="72" />
+                            }
+                            else
+                            {
+                                <div class="employer-profile-modal__avatar employer-profile-modal__avatar--placeholder rounded-circle" aria-hidden="true">
+                                    <i class="bi bi-building"></i>
+                                </div>
+                            }
+                            <div class="min-w-0">
+                                <h6 class="fw-bold mb-1 fs-5">@emp.Name</h6>
+                                <p class="text-muted small mb-0">Đơn vị đăng tin tuyển dụng này</p>
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            @if (!string.IsNullOrWhiteSpace(emp.Description))
+                            {
+                                <div class="col-12">
+                                    <label class="form-label text-muted small mb-1">Giới thiệu</label>
+                                    <div class="employer-profile-modal__field p-3 rounded" style="white-space: pre-wrap;">@emp.Description</div>
+                                </div>
+                            }
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small mb-1">Email liên hệ</label>
+                                <div class="employer-profile-modal__field p-2 px-3 rounded">
+                                    @if (!string.IsNullOrWhiteSpace(emp.Email))
+                                    {
+                                        <a href="mailto:@emp.Email">@emp.Email</a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">—</span>
+                                    }
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small mb-1">Số điện thoại</label>
+                                <div class="employer-profile-modal__field p-2 px-3 rounded">
+                                    @if (!string.IsNullOrWhiteSpace(emp.Phone))
+                                    {
+                                        <a href="tel:@emp.Phone">@emp.Phone</a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">—</span>
+                                    }
+                                </div>
+                            </div>
+                            @if (emp.Gender is not null)
+                            {
+                                <div class="col-md-6">
+                                    <label class="form-label text-muted small mb-1">Giới tính (người đại diện)</label>
+                                    <div class="employer-profile-modal__field p-2 px-3 rounded">
+                                        @DetailModel.FormatGender(emp.Gender)
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 
 <style>
     .job-description {

@@ -6,7 +6,7 @@ public class MyApplicationDto
     public long JobId { get; set; }
     public string JobTitle { get; set; } = null!;
     public string JobLocation { get; set; } = null!;
-    public int JobSalary { get; set; }
+    public string JobSalary { get; set; } = null!;
     public string JobPostingStatus { get; set; } = null!;
     public long ResumeId { get; set; }
     public string ResumeTitle { get; set; } = null!;

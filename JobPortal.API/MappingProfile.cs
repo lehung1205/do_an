@@ -47,9 +47,12 @@ public class MappingProfile : Profile
             .ForMember(d => d.PaymentHistories, o => o.Ignore());
 
         CreateMap<Process, ProcessDto>();
+        CreateMap<Process, WorkProgressStepDto>();
         CreateMap<ProcessDto, Process>()
             .ForMember(d => d.Id, o => o.Ignore())
-            .ForMember(d => d.Application, o => o.Ignore());
+            .ForMember(d => d.Application, o => o.Ignore())
+            .ForMember(d => d.CreatedAt, o => o.Ignore())
+            .ForMember(d => d.UpdatedAt, o => o.Ignore());
 
         CreateMap<Application, ApplicationDto>();
         CreateMap<ApplicationDto, Application>()

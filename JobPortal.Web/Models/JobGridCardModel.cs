@@ -8,7 +8,7 @@ public class JobGridCardModel
     public string Title { get; init; } = "";
     public string Description { get; init; } = "";
     public string Location { get; init; } = "";
-    public int Salary { get; init; }
+    public string Salary { get; init; } = null!;
     public string PostingStatus { get; init; } = "";
     public DateTime ExpiryDate { get; init; }
     public string? ThumbnailUrl { get; init; }

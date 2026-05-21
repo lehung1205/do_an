@@ -25,7 +25,7 @@ public class EmployerDashboardJobDto
     public string Title { get; set; } = null!;
     public string Description { get; set; } = null!;
     public string Location { get; set; } = null!;
-    public int Salary { get; set; }
+    public string Salary { get; set; } = null!;
     public string PostingStatus { get; set; } = null!;
     public int ApplicantCount { get; set; }
     public string? WorkingHours { get; set; }

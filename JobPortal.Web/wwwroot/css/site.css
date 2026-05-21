@@ -160,6 +160,43 @@ main {
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.45);
 }
 
+.work-progress-avatar {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, var(--jp-primary), var(--jp-accent));
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+}
+
+.work-progress-avatar--lg {
+  width: 3.75rem;
+  height: 3.75rem;
+}
+
+.work-progress-avatar__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.work-progress-avatar__placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: #fff;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.work-progress-avatar--lg .work-progress-avatar__placeholder {
+  font-size: 1.35rem;
+}
+
 .btn-primary,
 .home-btn-primary {
   background: linear-gradient(135deg, var(--jp-primary), var(--jp-primary-dark));

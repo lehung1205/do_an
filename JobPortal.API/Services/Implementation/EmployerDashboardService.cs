@@ -1,6 +1,9 @@
 using JobPortal.API.Data;
 using JobPortal.API.DTOs;
+using JobPortal.API.DTOs.Common;
 using JobPortal.API.Exceptions;
+using JobPortal.API.Helpers;
+using JobPortal.API.Models;
 using JobPortal.API.Services.Interface;
 using Microsoft.EntityFrameworkCore;
 
@@ -210,6 +213,11 @@ public class EmployerDashboardService : IEmployerDashboardService
         application.Status = status;
         await _context.SaveChangesAsync(cancellationToken);
 
+        if (status == "accepted")
+        {
+            await SeedInitialWorkProgressAsync(application.Id, cancellationToken);
+        }
+
         return MapApplicationDto(new ApplicationRow
         {
             Id = application.Id,
@@ -225,6 +233,277 @@ public class EmployerDashboardService : IEmployerDashboardService
             ResumeUrl = application.Resume.Url
         });
     }
+
+    public async Task<IReadOnlyList<WorkProgressJobOptionDto>> GetWorkProgressJobOptionsAsync(
+        long userId,
+        CancellationToken cancellationToken = default)
+    {
+        await _jobExpiryService.CloseExpiredJobsAsync(cancellationToken);
+
+        var employerId = await GetEmployerIdForUserAsync(userId, cancellationToken);
+
+        return await _context.Applications
+            .AsNoTracking()
+            .Where(a => a.Job.EmployerId == employerId && a.Status == "accepted")
+            .GroupBy(a => new { a.JobId, a.Job.Title })
+            .Select(g => new WorkProgressJobOptionDto
+            {
+                JobId = g.Key.JobId,
+                JobTitle = g.Key.Title,
+                AcceptedCount = g.Count()
+            })
+            .OrderByDescending(j => j.AcceptedCount)
+            .ThenBy(j => j.JobTitle)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<PagedResult<EmployerAcceptedApplicationDto>> GetAcceptedApplicationsWithProgressAsync(
+        long userId,
+        long? jobId = null,
+        string? search = null,
+        int page = 1,
+        int pageSize = 9,
+        CancellationToken cancellationToken = default)
+    {
+        await _jobExpiryService.CloseExpiredJobsAsync(cancellationToken);
+
+        if (page < 1)
+        {
+            page = 1;
+        }
+
+        if (pageSize < 1 || pageSize > 50)
+        {
+            pageSize = 9;
+        }
+
+        var employerId = await GetEmployerIdForUserAsync(userId, cancellationToken);
+
+        var query = _context.Applications
+            .AsNoTracking()
+            .Where(a => a.Job.EmployerId == employerId && a.Status == "accepted");
+
+        if (jobId is > 0)
+        {
+            query = query.Where(a => a.JobId == jobId.Value);
+        }
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var term = search.Trim();
+            query = query.Where(a =>
+                a.JobSeeker.Name.Contains(term) ||
+                a.Job.Title.Contains(term));
+        }
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var applications = await query
+            .OrderByDescending(a => a.AppliedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(a => new
+            {
+                a.Id,
+                a.JobId,
+                a.AppliedAt,
+                ApplicantName = a.JobSeeker.Name,
+                ApplicantProfileImage = a.JobSeeker.ProfileImage,
+                JobTitle = a.Job.Title,
+                Steps = a.Processes
+                    .OrderByDescending(p => p.CreatedAt)
+                    .ThenByDescending(p => p.Id)
+                    .Select(p => new { p.Status, p.Title, p.CreatedAt })
+                    .ToList()
+            })
+            .ToListAsync(cancellationToken);
+
+        var items = applications.Select(a =>
+        {
+            var latest = a.Steps.FirstOrDefault();
+            return new EmployerAcceptedApplicationDto
+            {
+                ApplicationId = a.Id,
+                JobId = a.JobId,
+                ApplicantName = a.ApplicantName,
+                ApplicantProfileImage = a.ApplicantProfileImage,
+                JobTitle = a.JobTitle,
+                AppliedAt = a.AppliedAt,
+                CurrentWorkStatus = latest?.Status,
+                CurrentWorkTitle = latest?.Title,
+                LastProgressAt = latest?.CreatedAt,
+                StepCount = a.Steps.Count,
+                IsProgressLocked = latest != null && WorkProgressCatalog.IsLockedStatus(latest.Status)
+            };
+        }).ToList();
+
+        return new PagedResult<EmployerAcceptedApplicationDto>
+        {
+            Items = items,
+            Page = page,
+            PageSize = pageSize,
+            TotalCount = totalCount,
+            TotalPages = totalCount == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)pageSize)
+        };
+    }
+
+    public async Task<ApplicationWorkProgressDto> GetApplicationWorkProgressAsync(
+        long userId,
+        long applicationId,
+        CancellationToken cancellationToken = default)
+    {
+        await _jobExpiryService.CloseExpiredJobsAsync(cancellationToken);
+
+        var application = await GetAcceptedApplicationForEmployerAsync(userId, applicationId, cancellationToken);
+
+        var steps = await _context.Processes
+            .AsNoTracking()
+            .Where(p => p.ApplicationId == applicationId)
+            .OrderByDescending(p => p.CreatedAt)
+            .ThenByDescending(p => p.Id)
+            .ToListAsync(cancellationToken);
+
+        var stepDtos = steps.Select(MapWorkProgressStep).ToList();
+        var currentStep = stepDtos.FirstOrDefault();
+
+        return new ApplicationWorkProgressDto
+        {
+            ApplicationId = application.Id,
+            JobId = application.JobId,
+            ApplicantName = application.JobSeeker.Name,
+            ApplicantProfileImage = application.JobSeeker.ProfileImage,
+            ApplicantEmail = application.JobSeeker.Email,
+            ApplicantPhone = application.JobSeeker.Phone,
+            JobTitle = application.Job.Title,
+            AppliedAt = application.AppliedAt,
+            ApplicationStatus = application.Status,
+            Steps = stepDtos,
+            CurrentStep = currentStep,
+            IsProgressLocked = WorkProgressCatalog.IsLockedStatus(currentStep?.Status)
+        };
+    }
+
+    public async Task<WorkProgressStepDto> AddWorkProgressStepAsync(
+        long userId,
+        long applicationId,
+        CreateWorkProgressStepRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        await _jobExpiryService.CloseExpiredJobsAsync(cancellationToken);
+
+        await GetAcceptedApplicationForEmployerAsync(userId, applicationId, cancellationToken);
+
+        var latestStep = await _context.Processes
+            .AsNoTracking()
+            .Where(p => p.ApplicationId == applicationId)
+            .OrderByDescending(p => p.CreatedAt)
+            .ThenByDescending(p => p.Id)
+            .Select(p => p.Status)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (WorkProgressCatalog.IsLockedStatus(latestStep))
+        {
+            throw new BadRequestException("Công việc đã hủy, không thể cập nhật tiến độ thêm.");
+        }
+
+        var status = request.Status.Trim().ToLowerInvariant();
+        if (!WorkProgressCatalog.IsValidStatus(status))
+        {
+            throw new BadRequestException("Trạng thái tiến độ không hợp lệ.");
+        }
+
+        var now = DateTime.UtcNow;
+        var entity = new Process
+        {
+            ApplicationId = applicationId,
+            Status = status,
+            Title = WorkProgressCatalog.GetTitle(status),
+            Notes = string.IsNullOrWhiteSpace(request.Notes) ? null : request.Notes.Trim(),
+            CreatedAt = now,
+            UpdatedAt = null
+        };
+
+        _context.Processes.Add(entity);
+        await _context.SaveChangesAsync(cancellationToken);
+
+        return MapWorkProgressStep(entity);
+    }
+
+    private async Task SeedInitialWorkProgressAsync(long applicationId, CancellationToken cancellationToken)
+    {
+        var hasSteps = await _context.Processes
+            .AnyAsync(p => p.ApplicationId == applicationId, cancellationToken);
+
+        if (hasSteps)
+        {
+            return;
+        }
+
+        _context.Processes.Add(new Process
+        {
+            ApplicationId = applicationId,
+            Status = "confirmed",
+            Title = WorkProgressCatalog.GetTitle("confirmed"),
+            CreatedAt = DateTime.UtcNow
+        });
+
+        await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task<long> GetEmployerIdForUserAsync(long userId, CancellationToken cancellationToken)
+    {
+        var employerId = await _context.Employers
+            .AsNoTracking()
+            .Where(e => e.UserId == userId)
+            .Select(e => e.Id)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (employerId == 0)
+        {
+            throw new NotFoundException("Employer profile not found for this user.");
+        }
+
+        return employerId;
+    }
+
+    private async Task<Application> GetAcceptedApplicationForEmployerAsync(
+        long userId,
+        long applicationId,
+        CancellationToken cancellationToken)
+    {
+        var employerId = await GetEmployerIdForUserAsync(userId, cancellationToken);
+
+        var application = await _context.Applications
+            .AsNoTracking()
+            .Include(a => a.Job)
+            .Include(a => a.JobSeeker)
+            .FirstOrDefaultAsync(
+                a => a.Id == applicationId && a.Job.EmployerId == employerId,
+                cancellationToken);
+
+        if (application == null)
+        {
+            throw new NotFoundException($"Application with id {applicationId} was not found.");
+        }
+
+        if (!string.Equals(application.Status, "accepted", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new BadRequestException("Chỉ quản lý tiến độ cho ứng viên đã được chấp nhận.");
+        }
+
+        return application;
+    }
+
+    private static WorkProgressStepDto MapWorkProgressStep(Process p) => new()
+    {
+        Id = p.Id,
+        ApplicationId = p.ApplicationId,
+        Status = p.Status,
+        Title = p.Title,
+        Notes = p.Notes,
+        CreatedAt = p.CreatedAt,
+        UpdatedAt = p.UpdatedAt
+    };
 
     private static EmployerDashboardApplicationDto MapApplicationDto(ApplicationRow a) => new()
     {
@@ -322,7 +601,7 @@ public class EmployerDashboardService : IEmployerDashboardService
         public string Title { get; init; } = null!;
         public string Description { get; init; } = null!;
         public string Location { get; init; } = null!;
-        public int Salary { get; init; }
+        public string Salary { get; init; } = null!;
         public string PostingStatus { get; init; } = null!;
         public string? WorkingHours { get; init; }
         public DateTime ExpiryDate { get; init; }

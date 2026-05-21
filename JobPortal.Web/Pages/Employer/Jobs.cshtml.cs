@@ -50,7 +50,7 @@ public class JobsModel : PageModel
 
     public static string FormatJobStatus(string status) => global::JobPortal.Web.Pages.IndexModel.FormatJobStatus(status);
 
-    public static string FormatSalary(int salary) => global::JobPortal.Web.Pages.IndexModel.FormatSalary(salary);
+    public static string FormatSalary(string? salary) => global::JobPortal.Web.Pages.IndexModel.FormatSalary(salary);
 
     public static string FormatRelativeTime(DateTime utc) => global::JobPortal.Web.Pages.IndexModel.FormatRelativeTime(utc);
 }

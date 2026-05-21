@@ -1,0 +1,184 @@
+@page
+@model JobPortal.Web.Pages.Employer.WorkProgress.IndexModel
+@{
+    ViewData["Title"] = "Tiến độ làm việc";
+}
+
+<div class="container py-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+        <div>
+            <h2 class="mb-1"><i class="bi bi-graph-up-arrow me-2"></i>Tiến độ làm việc</h2>
+            <p class="text-muted mb-0">Theo dõi việc part-time ngắn hạn: xác nhận, đang làm, nghiệm thu, hoàn tất</p>
+        </div>
+        <a asp-page="/Employer/Applicants" asp-route-filter="accepted" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-people me-1"></i> Danh sách ứng viên
+        </a>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-warning">@Model.ErrorMessage</div>
+    }
+
+    @if (Model.HasAnyAccepted)
+    {
+        <form method="get" class="employer-panel mb-4">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label" for="jobId">Công việc</label>
+                    <select class="form-select" id="jobId" name="jobId">
+                        <option value="">Tất cả công việc</option>
+                        @foreach (var job in Model.JobOptions)
+                        {
+                            if (Model.JobId == job.JobId)
+                            {
+                                <option value="@job.JobId" selected>@job.JobTitle (@job.AcceptedCount)</option>
+                            }
+                            else
+                            {
+                                <option value="@job.JobId">@job.JobTitle (@job.AcceptedCount)</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-5">
+                    <label class="form-label" for="q">Tìm kiếm</label>
+                    <input type="search" class="form-control" id="q" name="q" value="@Model.Search"
+                           placeholder="Tên ứng viên hoặc tên công việc..." maxlength="200" />
+                </div>
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary flex-grow-1">
+                        <i class="bi bi-search me-1"></i> Lọc
+                    </button>
+                    <a asp-page="/Employer/WorkProgress/Index" class="btn btn-outline-secondary" title="Xóa bộ lọc">
+                        <i class="bi bi-x-lg"></i>
+                    </a>
+                </div>
+            </div>
+            <input type="hidden" name="pageNumber" value="1" />
+            <input type="hidden" name="pageSize" value="@Model.PageSize" />
+        </form>
+    }
+
+    @if (!Model.HasAnyAccepted)
+    {
+        <div class="employer-panel text-center py-5 text-muted">
+            <i class="bi bi-person-check display-6 d-block mb-2"></i>
+            <p class="mb-2">Chưa có ứng viên nào được chấp nhận.</p>
+            <a asp-page="/Employer/Applicants" class="btn btn-sm btn-primary">Đi tới duyệt CV</a>
+        </div>
+    }
+    else if (Model.Accepted.Count == 0)
+    {
+        <div class="employer-panel text-center py-5 text-muted">
+            <i class="bi bi-funnel display-6 d-block mb-2"></i>
+            <p class="mb-2">Không có kết quả phù hợp bộ lọc.</p>
+            <a asp-page="/Employer/WorkProgress/Index" class="btn btn-sm btn-outline-primary">Xóa bộ lọc</a>
+        </div>
+    }
+    else
+    {
+        <p class="text-muted small mb-3">
+            Hiển thị @Model.Accepted.Count / @Model.TotalCount ứng viên
+            @(Model.JobId.HasValue ? " · đã lọc theo công việc" : "")
+            @(!string.IsNullOrEmpty(Model.Search) ? $" · từ khóa \"{Model.Search}\"" : "")
+        </p>
+
+        <div class="d-flex flex-column gap-3">
+            @foreach (var item in Model.Accepted)
+            {
+                <div class="employer-panel">
+                    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+                        <div class="d-flex gap-3 flex-grow-1 min-w-0">
+                            <div class="work-progress-avatar flex-shrink-0" aria-hidden="true">
+                                @if (!string.IsNullOrWhiteSpace(item.ApplicantProfileImage))
+                                {
+                                    <img src="@item.ApplicantProfileImage" alt="" class="work-progress-avatar__img" loading="lazy" />
+                                }
+                                else
+                                {
+                                    <span class="work-progress-avatar__placeholder">
+                                        @(string.IsNullOrWhiteSpace(item.ApplicantName) ? "?" : char.ToUpperInvariant(item.ApplicantName[0]))
+                                    </span>
+                                }
+                            </div>
+                            <div class="min-w-0">
+                                <h3 class="h6 mb-1 fw-semibold">@item.ApplicantName</h3>
+                                <p class="text-muted small mb-0">
+                                    <strong>@item.JobTitle</strong>
+                                    · Ứng tuyển @IndexModel.FormatRelativeTime(item.AppliedAt)
+                                </p>
+                            </div>
+                        </div>
+                        @if (!string.IsNullOrWhiteSpace(item.CurrentWorkStatus))
+                        {
+                            <span class="badge @JobPortal.Web.Helpers.WorkProgressCatalog.BadgeClass(item.CurrentWorkStatus)">
+                                @(item.CurrentWorkTitle ?? JobPortal.Web.Helpers.WorkProgressCatalog.FormatStatus(item.CurrentWorkStatus))
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Chưa có tiến độ</span>
+                        }
+                    </div>
+                    <p class="text-muted small mb-3">
+                        @item.StepCount bước tiến độ
+                        @(item.LastProgressAt.HasValue ? $" · Cập nhật {IndexModel.FormatRelativeTime(item.LastProgressAt.Value)}" : "")
+                    </p>
+                    <a asp-page="/Employer/WorkProgress/Detail" asp-route-applicationId="@item.ApplicationId"
+                       class="btn btn-sm btn-primary">
+                        <i class="bi bi-kanban me-1"></i> Quản lý tiến độ
+                    </a>
+                </div>
+            }
+        </div>
+
+        @if (Model.ShowPagination)
+        {
+            <nav class="mt-4" aria-label="Phân trang tiến độ làm việc">
+                <ul class="pagination justify-content-center flex-wrap mb-0">
+                    <li class="page-item @(Model.CurrentPage <= 1 ? "disabled" : "")">
+                        <a class="page-link"
+                           asp-page="/Employer/WorkProgress/Index"
+                           asp-route-pageNumber="@(Model.CurrentPage - 1)"
+                           asp-route-pageSize="@Model.PageSize"
+                           asp-route-jobId="@Model.JobId"
+                           asp-route-q="@Model.Search"
+                           aria-label="Trang trước">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
+                    @for (var i = 1; i <= Model.TotalPages; i++)
+                    {
+                        <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                            <a class="page-link"
+                               asp-page="/Employer/WorkProgress/Index"
+                               asp-route-pageNumber="@i"
+                               asp-route-pageSize="@Model.PageSize"
+                               asp-route-jobId="@Model.JobId"
+                               asp-route-q="@Model.Search">@i</a>
+                        </li>
+                    }
+                    <li class="page-item @(Model.CurrentPage >= Model.TotalPages ? "disabled" : "")">
+                        <a class="page-link"
+                           asp-page="/Employer/WorkProgress/Index"
+                           asp-route-pageNumber="@(Model.CurrentPage + 1)"
+                           asp-route-pageSize="@Model.PageSize"
+                           asp-route-jobId="@Model.JobId"
+                           asp-route-q="@Model.Search"
+                           aria-label="Trang sau">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+                <p class="text-muted small text-center mt-2 mb-0">
+                    Trang @Model.CurrentPage / @Model.TotalPages · @Model.TotalCount ứng viên
+                </p>
+            </nav>
+        }
+        else if (Model.TotalCount > 0)
+        {
+            <p class="text-muted small text-center mt-3 mb-0">Trang 1 / 1 · @Model.TotalCount ứng viên</p>
+        }
+    }
+</div>

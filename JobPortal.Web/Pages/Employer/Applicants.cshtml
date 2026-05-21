@@ -143,11 +143,17 @@
                                 </button>
                             </form>
                         }
+                        else if (isFinalAccepted)
+                        {
+                            <a asp-page="/Employer/WorkProgress/Detail" asp-route-applicationId="@app.Id"
+                               class="btn btn-sm btn-primary">
+                                <i class="bi bi-kanban me-1"></i> Quản lý tiến độ
+                            </a>
+                            <span class="small text-muted align-self-center">Đã chấp nhận</span>
+                        }
                         else
                         {
-                            <span class="small text-muted align-self-center">
-                                @(isFinalAccepted ? "Đã chấp nhận — không thể đổi quyết định." : "Đã từ chối — không thể đổi quyết định.")
-                            </span>
+                            <span class="small text-muted align-self-center">Đã từ chối — không thể đổi quyết định.</span>
                         }
 
                         <a asp-page="/Jobs/Detail" asp-route-id="@app.JobId" class="btn btn-sm btn-outline-secondary">Xem tin</a>

@@ -47,6 +47,7 @@ public class PostJobModel : PageModel
         }
 
         Categories = await _api.GetApiDataAsync<List<CategoryDto>>("/api/categories") ?? new();
+        SuccessMessage = TempData["PostJobSuccessMessage"] as string;
         return Page();
     }
 
@@ -89,7 +90,7 @@ public class PostJobModel : PageModel
             CategoryId = Input.CategoryId,
             Title = Input.Title.Trim(),
             Description = Input.Description.Trim(),
-            Salary = Input.Salary,
+            Salary = Input.Salary.Trim(),
             Location = Input.Location.Trim(),
             PostingStatus = "recruiting",
             WorkingHours = string.IsNullOrWhiteSpace(Input.WorkingHours) ? null : Input.WorkingHours.Trim(),
@@ -108,13 +109,11 @@ public class PostJobModel : PageModel
         var newJobId = response.Data.Id;
         var imageNotes = await SaveJobImagesAndRegisterAsync(newJobId);
 
-        SuccessMessage = string.IsNullOrEmpty(imageNotes)
+        TempData["PostJobSuccessMessage"] = string.IsNullOrEmpty(imageNotes)
             ? "Đã đăng tin tuyển dụng thành công."
             : $"Đã đăng tin tuyển dụng thành công. {imageNotes}";
 
-        Input = new JobPostInput();
-        JobImages = new List<IFormFile>();
-        return Page();
+        return RedirectToPage();
     }
 
     private async Task<string> SaveJobImagesAndRegisterAsync(long jobId)
@@ -233,9 +232,14 @@ public class PostJobModel : PageModel
             return "Vui lòng chọn ngành / danh mục.";
         }
 
-        if (input.Salary < 0)
+        if (string.IsNullOrWhiteSpace(input.Salary))
         {
-            return "Mức lương không hợp lệ.";
+            return "Vui lòng nhập mức lương.";
+        }
+
+        if (input.Salary.Trim().Length > 255)
+        {
+            return "Mức lương không quá 255 ký tự.";
         }
 
         if (string.IsNullOrWhiteSpace(input.Location))
@@ -289,7 +293,7 @@ public class PostJobModel : PageModel
 
         public long CategoryId { get; set; }
 
-        public int Salary { get; set; }
+        public string Salary { get; set; } = string.Empty;
 
         public string Location { get; set; } = string.Empty;
 

@@ -30,7 +30,8 @@ public class Job
     public string Description { get; set; } = null!;
 
     [Column("salary")]
-    public int Salary { get; set; }
+    [MaxLength(255)]
+    public string Salary { get; set; } = null!;
 
     [Column("location")]
     [MaxLength(255)]

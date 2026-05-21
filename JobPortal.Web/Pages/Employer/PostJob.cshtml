@@ -40,8 +40,10 @@
             </div>
             <div class="row g-3 mb-3">
                 <div class="col-md-6">
-                    <label asp-for="Input.Salary" class="form-label">Lương (VNĐ / tháng)</label>
-                    <input asp-for="Input.Salary" class="form-control" type="number" min="0" step="100000" required />
+                    <label asp-for="Input.Salary" class="form-label">Mức lương</label>
+                    <input asp-for="Input.Salary" class="form-control" maxlength="255" required
+                           placeholder="VD: 200.000đ/ngày, 50k/giờ, Thỏa thuận" />
+                    <div class="form-text">Nhập tự do theo ngày, giờ hoặc thỏa thuận.</div>
                 </div>
                 <div class="col-md-6">
                     <label asp-for="Input.Location" class="form-label">Địa điểm</label>

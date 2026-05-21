@@ -104,7 +104,21 @@ public class ApplicantsModel : PageModel
             profile.JobTitle,
             appliedAt = FormatRelativeTime(profile.AppliedAt),
             profile.ResumeTitle,
-            applicationStatus = FormatStatus(profile.ApplicationStatus)
+            applicationStatus = FormatStatus(profile.ApplicationStatus),
+            reviews = new
+            {
+                averageRating = profile.Reviews.AverageRating,
+                totalCount = profile.Reviews.TotalCount,
+                items = profile.Reviews.Items.Select(i => new
+                {
+                    i.Id,
+                    i.ApplicationId,
+                    i.Rating,
+                    i.Comment,
+                    i.EmployerName,
+                    i.JobTitle
+                })
+            }
         });
     }
 

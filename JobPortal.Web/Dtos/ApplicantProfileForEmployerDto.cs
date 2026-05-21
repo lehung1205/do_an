@@ -16,4 +16,5 @@ public class ApplicantProfileForEmployerDto
     public DateTime AppliedAt { get; set; }
     public string ResumeTitle { get; set; } = null!;
     public string ApplicationStatus { get; set; } = null!;
+    public SeekerReceivedReviewsSummaryDto Reviews { get; set; } = new();
 }

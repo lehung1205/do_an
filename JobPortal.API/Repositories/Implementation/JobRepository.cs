@@ -30,12 +30,32 @@ public class JobRepository : IJobRepository
         int page,
         int pageSize,
         bool recruitingOnly = false,
+        string? search = null,
+        string? location = null,
         CancellationToken cancellationToken = default)
     {
         var query = _context.Jobs.AsNoTracking();
         if (recruitingOnly)
         {
             query = query.Where(j => j.PostingStatus == "recruiting");
+        }
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var term = search.Trim();
+            query = query.Where(j =>
+                j.Title.Contains(term) ||
+                j.Description.Contains(term) ||
+                j.Location.Contains(term) ||
+                j.Salary.Contains(term) ||
+                (j.WorkingHours != null && j.WorkingHours.Contains(term)) ||
+                j.Employer.Name.Contains(term));
+        }
+
+        if (!string.IsNullOrWhiteSpace(location))
+        {
+            var loc = location.Trim();
+            query = query.Where(j => j.Location.Contains(loc));
         }
 
         var totalCount = await query.CountAsync(cancellationToken);

@@ -27,6 +27,14 @@ public class ReceivedReviewsPanelModel
         };
 
     public static ReceivedReviewsPanelModel FromEmployer(Dtos.EmployerReceivedReviewsSummaryDto summary) =>
+        FromEmployer(summary, includeWorkProgressLink: true);
+
+    public static ReceivedReviewsPanelModel FromEmployerPublic(Dtos.EmployerReceivedReviewsSummaryDto summary) =>
+        FromEmployer(summary, includeWorkProgressLink: false);
+
+    private static ReceivedReviewsPanelModel FromEmployer(
+        Dtos.EmployerReceivedReviewsSummaryDto summary,
+        bool includeWorkProgressLink) =>
         new()
         {
             AverageRating = summary.AverageRating,
@@ -40,7 +48,7 @@ public class ReceivedReviewsPanelModel
                 Comment = i.Comment,
                 PrimaryLabel = i.ApplicantName,
                 SecondaryLabel = i.JobTitle,
-                WorkProgressPage = "/Employer/WorkProgress/Detail"
+                WorkProgressPage = includeWorkProgressLink ? "/Employer/WorkProgress/Detail" : ""
             }).ToList()
         };
 }

@@ -46,13 +46,16 @@
                 </div>
                 @if (!string.IsNullOrWhiteSpace(item.Comment))
                 {
-                    <p class="small mb-2" style="white-space: pre-wrap;">@item.Comment</p>
+                    <p class="small @(string.IsNullOrEmpty(item.WorkProgressPage) ? "mb-0" : "mb-2")" style="white-space: pre-wrap;">@item.Comment</p>
                 }
-                <a asp-page="@item.WorkProgressPage"
-                   asp-route-applicationId="@item.ApplicationId"
-                   class="small text-decoration-none">
-                    <i class="bi bi-arrow-right-circle me-1"></i> Xem tiến độ công việc
-                </a>
+                @if (!string.IsNullOrEmpty(item.WorkProgressPage))
+                {
+                    <a asp-page="@item.WorkProgressPage"
+                       asp-route-applicationId="@item.ApplicationId"
+                       class="small text-decoration-none">
+                        <i class="bi bi-arrow-right-circle me-1"></i> Xem tiến độ công việc
+                    </a>
+                }
             </div>
         }
     </div>

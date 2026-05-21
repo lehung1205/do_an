@@ -39,6 +39,24 @@
                 @Model.Title
             </a>
         </h3>
+        @if (!Model.ShowEmployerActions && !string.IsNullOrWhiteSpace(Model.EmployerName))
+        {
+            <div class="job-grid-card__employer small mb-2">
+                <span class="text-muted text-truncate d-inline-block align-middle me-1" style="max-width: 55%;">
+                    <i class="bi bi-building me-1"></i>@Model.EmployerName
+                </span>
+                <partial name="Shared/_RatingStars"
+                         model="JobPortal.Web.Models.RatingStarsModel.FromEmployer(Model.EmployerAverageRating, Model.EmployerReviewCount)" />
+            </div>
+        }
+        else if (Model.ShowEmployerActions)
+        {
+            <div class="job-grid-card__employer small mb-2">
+                <span class="text-muted me-1">Đánh giá công ty</span>
+                <partial name="Shared/_RatingStars"
+                         model="JobPortal.Web.Models.RatingStarsModel.FromEmployer(Model.EmployerAverageRating, Model.EmployerReviewCount)" />
+            </div>
+        }
         <p class="text-muted small job-grid-card__desc">@Model.Description</p>
         <ul class="list-unstyled small mb-0 job-card__meta job-grid-card__meta mt-auto">
             <li class="mb-1 text-truncate">

@@ -5,6 +5,8 @@ public class JobDto
     public long Id { get; set; }
     public long EmployerId { get; set; }
     public string EmployerName { get; set; } = null!;
+    public double? EmployerAverageRating { get; set; }
+    public int EmployerReviewCount { get; set; }
     public long CategoryId { get; set; }
     public string Title { get; set; } = null!;
     public string Description { get; set; } = null!;

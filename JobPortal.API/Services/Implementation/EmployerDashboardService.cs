@@ -39,8 +39,12 @@ public class EmployerDashboardService : IEmployerDashboardService
         var expiringThreshold = now.AddDays(3);
 
         var jobs = await QueryJobsAsync(employer.Id, cancellationToken);
+        var employerRating = await LoadEmployerRatingForEmployerAsync(employer.Id, cancellationToken);
 
         var applications = await QueryApplicationsAsync(employer.Id, take: 10, cancellationToken);
+        var seekerRatings = await LoadSeekerRatingsAsync(
+            applications.Select(a => a.JobSeekerId),
+            cancellationToken);
 
         var allApplicationsQuery = _context.Applications.AsNoTracking()
             .Where(a => a.Job.EmployerId == employer.Id);
@@ -108,8 +112,8 @@ public class EmployerDashboardService : IEmployerDashboardService
                 TotalCvCount = totalCv,
                 ExpiringSoonCount = expiringSoon
             },
-            RecentJobs = jobs.Take(5).Select(MapJobDto).ToList(),
-            RecentApplications = applications.Select(MapApplicationDto).ToList(),
+            RecentJobs = jobs.Take(5).Select(j => MapJobDto(j, employerRating)).ToList(),
+            RecentApplications = applications.Select(a => MapApplicationDto(a, seekerRatings)).ToList(),
             Notifications = notifications
         };
     }
@@ -185,7 +189,8 @@ public class EmployerDashboardService : IEmployerDashboardService
             })
             .ToListAsync(cancellationToken);
 
-        var items = jobs.Select(MapJobDto).ToList();
+        var employerRating = await LoadEmployerRatingForEmployerAsync(employer.Id, cancellationToken);
+        var items = jobs.Select(j => MapJobDto(j, employerRating)).ToList();
 
         return new PagedResult<EmployerDashboardJobDto>
         {
@@ -220,11 +225,13 @@ public class EmployerDashboardService : IEmployerDashboardService
             throw new NotFoundException($"Job with id {jobId} was not found.");
         }
 
+        var employerRating = await LoadEmployerRatingForEmployerAsync(employer.Id, cancellationToken);
+
         if (!string.Equals(job.PostingStatus, "recruiting", StringComparison.OrdinalIgnoreCase))
         {
             if (string.Equals(job.PostingStatus, "closed", StringComparison.OrdinalIgnoreCase))
             {
-                return MapJobDto(ToJobRow(job));
+                return MapJobDto(ToJobRow(job), employerRating);
             }
 
             throw new BadRequestException("Chỉ có thể đóng tin đang tuyển.");
@@ -233,7 +240,7 @@ public class EmployerDashboardService : IEmployerDashboardService
         job.PostingStatus = "closed";
         await _context.SaveChangesAsync(cancellationToken);
 
-        return MapJobDto(ToJobRow(job));
+        return MapJobDto(ToJobRow(job), employerRating);
     }
 
     private static JobRow ToJobRow(Job job) => new()
@@ -277,7 +284,10 @@ public class EmployerDashboardService : IEmployerDashboardService
         }
 
         var applications = await QueryApplicationsAsync(employer.Id, take: null, cancellationToken);
-        return applications.Select(MapApplicationDto).ToList();
+        var seekerRatings = await LoadSeekerRatingsAsync(
+            applications.Select(a => a.JobSeekerId),
+            cancellationToken);
+        return applications.Select(a => MapApplicationDto(a, seekerRatings)).ToList();
     }
 
     public async Task<ApplicantProfileForEmployerDto> GetApplicantProfileForEmployerAsync(
@@ -311,6 +321,28 @@ public class EmployerDashboardService : IEmployerDashboardService
         }
 
         var seeker = application.JobSeeker;
+
+        var reviewItems = await _context.Reviews
+            .AsNoTracking()
+            .Where(r =>
+                r.JobSeekerId == seeker.Id &&
+                r.ReviewType == ReviewCatalog.EmployerToSeeker)
+            .OrderByDescending(r => r.Id)
+            .Select(r => new SeekerReceivedReviewItemDto
+            {
+                Id = r.Id,
+                ApplicationId = r.ApplicationId,
+                Rating = r.Rating,
+                Comment = r.Comment,
+                EmployerName = r.Employer.Name,
+                JobTitle = r.Job.Title
+            })
+            .ToListAsync(cancellationToken);
+
+        double? averageRating = reviewItems.Count == 0
+            ? null
+            : Math.Round(reviewItems.Average(i => i.Rating), 1);
+
         return new ApplicantProfileForEmployerDto
         {
             ApplicationId = application.Id,
@@ -326,7 +358,13 @@ public class EmployerDashboardService : IEmployerDashboardService
             JobTitle = application.Job.Title,
             AppliedAt = application.AppliedAt,
             ResumeTitle = application.Resume.Title,
-            ApplicationStatus = application.Status
+            ApplicationStatus = application.Status,
+            Reviews = new SeekerReceivedReviewsSummaryDto
+            {
+                AverageRating = averageRating,
+                TotalCount = reviewItems.Count,
+                Items = reviewItems
+            }
         };
     }
 
@@ -362,6 +400,10 @@ public class EmployerDashboardService : IEmployerDashboardService
         var current = application.Status.Trim().ToLowerInvariant();
         var status = request.Status.Trim().ToLowerInvariant();
 
+        var seekerRatings = await LoadSeekerRatingsAsync(
+            new[] { application.JobSeekerId },
+            cancellationToken);
+
         if (current is "accepted" or "rejected")
         {
             if (status == current)
@@ -370,16 +412,18 @@ public class EmployerDashboardService : IEmployerDashboardService
                 {
                     Id = application.Id,
                     JobId = application.JobId,
+                    JobSeekerId = application.JobSeekerId,
                     AppliedAt = application.AppliedAt,
                     Status = application.Status,
                     ApplicantName = application.JobSeeker.Name,
                     ApplicantEmail = application.JobSeeker.Email,
                     ApplicantPhone = application.JobSeeker.Phone,
+                    ApplicantProfileImage = application.JobSeeker.ProfileImage,
                     JobTitle = application.Job.Title,
                     ResumeId = application.ResumeId,
                     ResumeTitle = application.Resume.Title,
                     ResumeUrl = application.Resume.Url
-                });
+                }, seekerRatings);
             }
 
             throw new BadRequestException(
@@ -400,16 +444,18 @@ public class EmployerDashboardService : IEmployerDashboardService
         {
             Id = application.Id,
             JobId = application.JobId,
+            JobSeekerId = application.JobSeekerId,
             AppliedAt = application.AppliedAt,
             Status = application.Status,
             ApplicantName = application.JobSeeker.Name,
             ApplicantEmail = application.JobSeeker.Email,
             ApplicantPhone = application.JobSeeker.Phone,
+            ApplicantProfileImage = application.JobSeeker.ProfileImage,
             JobTitle = application.Job.Title,
             ResumeId = application.ResumeId,
             ResumeTitle = application.Resume.Title,
             ResumeUrl = application.Resume.Url
-        });
+        }, seekerRatings);
     }
 
     public async Task<IReadOnlyList<WorkProgressJobOptionDto>> GetWorkProgressJobOptionsAsync(
@@ -683,22 +729,68 @@ public class EmployerDashboardService : IEmployerDashboardService
         UpdatedAt = p.UpdatedAt
     };
 
-    private static EmployerDashboardApplicationDto MapApplicationDto(ApplicationRow a) => new()
+    private static EmployerDashboardApplicationDto MapApplicationDto(
+        ApplicationRow a,
+        IReadOnlyDictionary<long, SeekerRatingSnapshot>? seekerRatings = null)
     {
-        Id = a.Id,
-        JobId = a.JobId,
-        ApplicantName = a.ApplicantName,
-        ApplicantEmail = a.ApplicantEmail,
-        ApplicantPhone = a.ApplicantPhone,
-        ApplicantProfileImage = a.ApplicantProfileImage,
-        JobTitle = a.JobTitle,
-        AppliedAt = a.AppliedAt,
-        ResumeId = a.ResumeId,
-        ResumeTitle = a.ResumeTitle,
-        ResumeUrl = a.ResumeUrl,
-        Status = a.Status,
-        IsUnread = IsUnreadStatus(a.Status)
-    };
+        SeekerRatingSnapshot? rating = null;
+        if (seekerRatings != null && seekerRatings.TryGetValue(a.JobSeekerId, out var snapshot))
+        {
+            rating = snapshot;
+        }
+
+        return new EmployerDashboardApplicationDto
+        {
+            Id = a.Id,
+            JobId = a.JobId,
+            ApplicantName = a.ApplicantName,
+            ApplicantEmail = a.ApplicantEmail,
+            ApplicantPhone = a.ApplicantPhone,
+            ApplicantProfileImage = a.ApplicantProfileImage,
+            ApplicantAverageRating = rating?.Average,
+            ApplicantReviewCount = rating?.Count ?? 0,
+            JobTitle = a.JobTitle,
+            AppliedAt = a.AppliedAt,
+            ResumeId = a.ResumeId,
+            ResumeTitle = a.ResumeTitle,
+            ResumeUrl = a.ResumeUrl,
+            Status = a.Status,
+            IsUnread = IsUnreadStatus(a.Status)
+        };
+    }
+
+    private async Task<Dictionary<long, SeekerRatingSnapshot>> LoadSeekerRatingsAsync(
+        IEnumerable<long> jobSeekerIds,
+        CancellationToken cancellationToken)
+    {
+        var ids = jobSeekerIds.Distinct().ToList();
+        if (ids.Count == 0)
+        {
+            return new Dictionary<long, SeekerRatingSnapshot>();
+        }
+
+        var rows = await _context.Reviews
+            .AsNoTracking()
+            .Where(r =>
+                r.ReviewType == ReviewCatalog.EmployerToSeeker &&
+                ids.Contains(r.JobSeekerId))
+            .GroupBy(r => r.JobSeekerId)
+            .Select(g => new
+            {
+                JobSeekerId = g.Key,
+                Average = g.Average(x => (double)x.Rating),
+                Count = g.Count()
+            })
+            .ToListAsync(cancellationToken);
+
+        return rows.ToDictionary(
+            x => x.JobSeekerId,
+            x => new SeekerRatingSnapshot
+            {
+                Average = Math.Round(x.Average, 1),
+                Count = x.Count
+            });
+    }
 
     private static bool IsUnreadStatus(string status)
     {
@@ -728,7 +820,9 @@ public class EmployerDashboardService : IEmployerDashboardService
             .ToListAsync(cancellationToken);
     }
 
-    private static EmployerDashboardJobDto MapJobDto(JobRow j) => new()
+    private static EmployerDashboardJobDto MapJobDto(
+        JobRow j,
+        EmployerRatingSnapshot? employerRating = null) => new()
     {
         Id = j.Id,
         Title = j.Title,
@@ -736,11 +830,54 @@ public class EmployerDashboardService : IEmployerDashboardService
         Location = j.Location,
         Salary = j.Salary,
         PostingStatus = j.PostingStatus,
+        EmployerAverageRating = employerRating?.Average,
+        EmployerReviewCount = employerRating?.Count ?? 0,
         ApplicantCount = j.ApplicantCount,
         WorkingHours = j.WorkingHours,
         ExpiryDate = j.ExpiryDate,
         ThumbnailUrl = j.ThumbnailUrl
     };
+
+    private async Task<EmployerRatingSnapshot?> LoadEmployerRatingForEmployerAsync(
+        long employerId,
+        CancellationToken cancellationToken)
+    {
+        var ratings = await LoadEmployerRatingsAsync(new[] { employerId }, cancellationToken);
+        return ratings.TryGetValue(employerId, out var rating) ? rating : null;
+    }
+
+    private async Task<Dictionary<long, EmployerRatingSnapshot>> LoadEmployerRatingsAsync(
+        IEnumerable<long> employerIds,
+        CancellationToken cancellationToken)
+    {
+        var ids = employerIds.Distinct().ToList();
+        if (ids.Count == 0)
+        {
+            return new Dictionary<long, EmployerRatingSnapshot>();
+        }
+
+        var rows = await _context.Reviews
+            .AsNoTracking()
+            .Where(r =>
+                r.ReviewType == ReviewCatalog.SeekerToEmployer &&
+                ids.Contains(r.EmployerId))
+            .GroupBy(r => r.EmployerId)
+            .Select(g => new
+            {
+                EmployerId = g.Key,
+                Average = g.Average(x => (double)x.Rating),
+                Count = g.Count()
+            })
+            .ToListAsync(cancellationToken);
+
+        return rows.ToDictionary(
+            x => x.EmployerId,
+            x => new EmployerRatingSnapshot
+            {
+                Average = Math.Round(x.Average, 1),
+                Count = x.Count
+            });
+    }
 
     private async Task<List<ApplicationRow>> QueryApplicationsAsync(
         long employerId,
@@ -755,6 +892,7 @@ public class EmployerDashboardService : IEmployerDashboardService
             {
                 Id = a.Id,
                 JobId = a.JobId,
+                JobSeekerId = a.JobSeekerId,
                 AppliedAt = a.AppliedAt,
                 Status = a.Status,
                 ApplicantName = a.JobSeeker.Name,
@@ -789,10 +927,23 @@ public class EmployerDashboardService : IEmployerDashboardService
         public string? ThumbnailUrl { get; init; }
     }
 
+    private sealed class SeekerRatingSnapshot
+    {
+        public double Average { get; init; }
+        public int Count { get; init; }
+    }
+
+    private sealed class EmployerRatingSnapshot
+    {
+        public double Average { get; init; }
+        public int Count { get; init; }
+    }
+
     private sealed class ApplicationRow
     {
         public long Id { get; init; }
         public long JobId { get; init; }
+        public long JobSeekerId { get; init; }
         public DateTime AppliedAt { get; init; }
         public string Status { get; init; } = null!;
         public string ApplicantName { get; init; } = null!;

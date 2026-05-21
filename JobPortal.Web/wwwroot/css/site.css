@@ -608,6 +608,61 @@ main {
   object-fit: cover;
 }
 
+.applicant-card__name-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.applicant-rating-stars,
+.rating-stars {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.1rem;
+  font-size: 0.8rem;
+  line-height: 1.2;
+}
+
+.applicant-rating-stars .bi-star,
+.applicant-rating-stars .bi-star-fill,
+.rating-stars .bi-star,
+.rating-stars .bi-star-fill {
+  font-size: 0.85rem;
+}
+
+.applicant-rating-stars__score,
+.rating-stars__score {
+  margin-left: 0.25rem;
+  font-weight: 600;
+  color: #b45309;
+}
+
+.applicant-rating-stars__count,
+.rating-stars__count {
+  font-size: 0.75rem;
+}
+
+.applicant-rating-stars--empty .bi-star,
+.rating-stars--empty .bi-star {
+  color: #cbd5e1;
+}
+
+.applicant-rating-stars--empty .applicant-rating-stars__count,
+.rating-stars--empty .rating-stars__count {
+  margin-left: 0.35rem;
+  font-size: 0.75rem;
+}
+
+.job-grid-card__employer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.5rem;
+}
+
 .applicant-profile-modal__avatar {
   width: 72px;
   height: 72px;
@@ -618,6 +673,25 @@ main {
   justify-content: center;
   font-size: 1.75rem;
   overflow: hidden;
+}
+
+.applicant-profile-modal__tabs .nav-link {
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+.applicant-profile-modal__tabs .nav-link.active {
+  color: var(--jp-primary);
+  font-weight: 600;
+}
+
+.applicant-profile-reviews-summary .display-6 {
+  line-height: 1.1;
+}
+
+.applicant-profile-review-item .bi-star,
+.applicant-profile-review-item .bi-star-fill {
+  font-size: 0.9rem;
 }
 
 .applicant-profile-modal__avatar-img {

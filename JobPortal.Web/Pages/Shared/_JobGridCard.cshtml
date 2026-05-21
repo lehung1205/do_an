@@ -1,0 +1,78 @@
+@model JobPortal.Web.Models.JobGridCardModel
+@{
+    var isRecruiting = string.Equals(Model.PostingStatus, "recruiting", StringComparison.OrdinalIgnoreCase);
+    var isClosed = string.Equals(Model.PostingStatus, "closed", StringComparison.OrdinalIgnoreCase);
+    var statusBadgeClass = Model.ShowEmployerActions
+        ? (isRecruiting ? "employer-badge--open" : isClosed ? "bg-secondary" : "employer-badge--draft")
+        : "home-badge-status";
+    var hasApplicantCount = Model.ApplicantCount is int;
+    var hasWorkingHours = Model.ShowEmployerActions && !string.IsNullOrWhiteSpace(Model.WorkingHours);
+    var metaLastClass = hasApplicantCount || hasWorkingHours ? "mb-1" : "";
+}
+
+<article class="job-card job-grid-card card border-0 shadow-sm h-100 w-100@(Model.ShowEmployerActions ? " job-grid-card--employer" : "")">
+    <div class="job-grid-card__media">
+        @if (!string.IsNullOrWhiteSpace(Model.ThumbnailUrl))
+        {
+            <img src="@Model.ThumbnailUrl"
+                 alt="@Model.Title"
+                 class="job-grid-card__img"
+                 loading="lazy" />
+        }
+        else
+        {
+            <div class="job-grid-card__placeholder" aria-hidden="true">
+                <i class="bi bi-briefcase"></i>
+            </div>
+        }
+        <span class="badge @statusBadgeClass job-grid-card__badge">
+            @JobPortal.Web.Pages.IndexModel.FormatJobStatus(Model.PostingStatus)
+        </span>
+    </div>
+    <div class="card-body position-relative d-flex flex-column">
+        <small class="text-muted job-grid-card__date">
+            <i class="bi bi-clock me-1"></i>Hết hạn @Model.ExpiryDate.ToLocalTime().ToString("dd/MM/yyyy")
+        </small>
+        <h3 class="h6 card-title job-grid-card__title">
+            <a asp-page="/Jobs/Detail" asp-route-id="@Model.Id"
+               class="job-card__title text-decoration-none @(Model.ShowEmployerActions ? "" : "stretched-link")">
+                @Model.Title
+            </a>
+        </h3>
+        <p class="text-muted small job-grid-card__desc">@Model.Description</p>
+        <ul class="list-unstyled small mb-0 job-card__meta job-grid-card__meta mt-auto">
+            <li class="mb-1 text-truncate">
+                <i class="bi bi-geo-alt text-primary me-1"></i>@Model.Location
+            </li>
+            <li class="@metaLastClass text-truncate">
+                <i class="bi bi-cash-stack text-primary me-1"></i>@JobPortal.Web.Pages.IndexModel.FormatSalary(Model.Salary)
+            </li>
+            @if (hasWorkingHours)
+            {
+                <li class="@(hasApplicantCount ? "mb-1" : "") text-truncate">
+                    <i class="bi bi-clock text-primary me-1"></i>@Model.WorkingHours
+                </li>
+            }
+            @if (Model.ApplicantCount is int applicantCount)
+            {
+                <li class="text-truncate">
+                    <i class="bi bi-people text-primary me-1"></i>@applicantCount ứng viên
+                </li>
+            }
+        </ul>
+        @if (Model.ShowEmployerActions)
+        {
+            <div class="job-grid-card__actions d-flex flex-wrap gap-2 mt-3">
+                @if (isRecruiting || isClosed)
+                {
+                    <a asp-page="/Employer/Applicants" class="btn btn-sm btn-outline-primary">Xem CV</a>
+                    <a asp-page="/Jobs/Detail" asp-route-id="@Model.Id" class="btn btn-sm btn-outline-secondary">Chi tiết</a>
+                }
+                else
+                {
+                    <a asp-page="/Employer/PostJob" class="btn btn-sm btn-primary">Tiếp tục chỉnh sửa</a>
+                }
+            </div>
+        }
+    </div>
+</article>

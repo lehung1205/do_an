@@ -17,7 +17,7 @@ public class JobsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetJobs([FromQuery] int page = 1, [FromQuery] int pageSize = 10, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> GetJobs([FromQuery] int page = 1, [FromQuery] int pageSize = 12, CancellationToken cancellationToken = default)
     {
         var pagedJobs = await _jobService.GetJobsPagedAsync(page, pageSize, cancellationToken);
         return Ok(ApiResponse<PagedResult<JobDto>>.SuccessResponse(pagedJobs, "Jobs retrieved successfully."));

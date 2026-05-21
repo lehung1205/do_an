@@ -68,10 +68,8 @@ public class IndexModel : PageModel
         FeaturedJobs = jobs.Take(6).ToList();
     }
 
-    public static string FormatSalary(int salary) =>
-        salary >= 1_000_000
-            ? $"{salary / 1_000_000} triệu VNĐ"
-            : $"{salary:N0} VNĐ";
+    public static string FormatSalary(string? salary) =>
+        string.IsNullOrWhiteSpace(salary) ? "—" : salary.Trim();
 
     public static string FormatStatus(string status) => status switch
     {

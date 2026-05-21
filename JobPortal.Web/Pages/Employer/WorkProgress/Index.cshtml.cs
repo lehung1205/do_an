@@ -4,29 +4,30 @@ using JobPortal.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace JobPortal.Web.Pages.Employer;
+namespace JobPortal.Web.Pages.Employer.WorkProgress;
 
-public class JobsModel : PageModel
+public class IndexModel : PageModel
 {
     public const int DefaultPageSize = 9;
 
     private readonly ApiService _api;
 
-    public JobsModel(ApiService api) => _api = api;
+    public IndexModel(ApiService api) => _api = api;
 
-    public List<EmployerDashboardJobDto> Jobs { get; set; } = new();
-    public string? ErrorMessage { get; set; }
-    public string? StatusFilter { get; set; }
-    public string? Search { get; set; }
+    public List<EmployerAcceptedApplicationDto> Accepted { get; set; } = new();
+    public List<WorkProgressJobOptionDto> JobOptions { get; set; } = new();
     public int CurrentPage { get; set; } = 1;
     public int PageSize { get; set; } = DefaultPageSize;
     public int TotalCount { get; set; }
     public int TotalPages { get; set; }
-    public bool HasActiveFilter => !string.IsNullOrEmpty(StatusFilter) || !string.IsNullOrEmpty(Search);
+    public long? JobId { get; set; }
+    public string? Search { get; set; }
+    public string? ErrorMessage { get; set; }
+    public bool HasAnyAccepted { get; set; }
     public bool ShowPagination => TotalPages > 1;
 
     public async Task<IActionResult> OnGetAsync(
-        string? status,
+        long? jobId,
         string? q,
         int pageNumber = 1,
         int pageSize = DefaultPageSize)
@@ -47,8 +48,11 @@ public class JobsModel : PageModel
             pageSize = DefaultPageSize;
         }
 
-        StatusFilter = NormalizeStatusFilter(status);
+        JobId = jobId is > 0 ? jobId : null;
         Search = string.IsNullOrWhiteSpace(q) ? null : q.Trim();
+
+        var jobOptionsTask = _api.GetApiDataAsync<List<WorkProgressJobOptionDto>>(
+            "/api/employers/me/applications/accepted/job-options");
 
         var query = new List<string>
         {
@@ -56,9 +60,9 @@ public class JobsModel : PageModel
             $"pageSize={pageSize}"
         };
 
-        if (!string.IsNullOrEmpty(StatusFilter))
+        if (JobId.HasValue)
         {
-            query.Add($"status={Uri.EscapeDataString(StatusFilter)}");
+            query.Add($"jobId={JobId.Value}");
         }
 
         if (!string.IsNullOrEmpty(Search))
@@ -66,19 +70,26 @@ public class JobsModel : PageModel
             query.Add($"q={Uri.EscapeDataString(Search)}");
         }
 
-        var paged = await _api.GetApiDataAsync<PagedResult<EmployerDashboardJobDto>>(
-            $"/api/employers/me/jobs?{string.Join("&", query)}");
+        var pagedTask = _api.GetApiDataAsync<PagedResult<EmployerAcceptedApplicationDto>>(
+            $"/api/employers/me/applications/accepted?{string.Join("&", query)}");
 
+        await Task.WhenAll(jobOptionsTask, pagedTask);
+
+        JobOptions = await jobOptionsTask ?? new();
+        HasAnyAccepted = JobOptions.Sum(j => j.AcceptedCount) > 0;
+
+        var paged = await pagedTask;
         if (paged == null)
         {
-            ErrorMessage = "Không tải được danh sách tin tuyển dụng.";
+            ErrorMessage = "Không tải được danh sách tiến độ làm việc.";
             return Page();
         }
 
-        Jobs = paged.Items.ToList();
+        Accepted = paged.Items.ToList();
         CurrentPage = paged.Page > 0 ? paged.Page : pageNumber;
         PageSize = paged.PageSize > 0 ? paged.PageSize : pageSize;
         TotalCount = paged.TotalCount;
+
         TotalPages = paged.TotalPages > 0
             ? paged.TotalPages
             : TotalCount == 0
@@ -93,22 +104,14 @@ public class JobsModel : PageModel
         return Page();
     }
 
-    private static string? NormalizeStatusFilter(string? status)
-    {
-        if (string.IsNullOrWhiteSpace(status) || string.Equals(status, "all", StringComparison.OrdinalIgnoreCase))
-        {
-            return null;
-        }
-
-        var normalized = status.Trim().ToLowerInvariant();
-        return normalized is "recruiting" or "closed" ? normalized : null;
-    }
+    public static string FormatRelativeTime(DateTime utc) =>
+        global::JobPortal.Web.Pages.IndexModel.FormatRelativeTime(utc);
 
     private IActionResult? RequireEmployer()
     {
         if (string.IsNullOrEmpty(HttpContext.Session.GetString("JwtToken")))
         {
-            return RedirectToPage("/Auth/Login", new { returnUrl = Url.Page("/Employer/Jobs") });
+            return RedirectToPage("/Auth/Login", new { returnUrl = Url.Page("/Employer/WorkProgress/Index") });
         }
 
         if (!string.Equals(HttpContext.Session.GetString("UserRole"), "EMPLOYER", StringComparison.Ordinal))
@@ -118,10 +121,4 @@ public class JobsModel : PageModel
 
         return null;
     }
-
-    public static string FormatJobStatus(string status) => global::JobPortal.Web.Pages.IndexModel.FormatJobStatus(status);
-
-    public static string FormatSalary(string? salary) => global::JobPortal.Web.Pages.IndexModel.FormatSalary(salary);
-
-    public static string FormatRelativeTime(DateTime utc) => global::JobPortal.Web.Pages.IndexModel.FormatRelativeTime(utc);
 }

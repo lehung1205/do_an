@@ -1,0 +1,152 @@
+@page
+@model JobPortal.Web.Pages.Employer.WorkProgress.DetailModel
+@{
+    ViewData["Title"] = "Chi tiết tiến độ";
+}
+
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a asp-page="/Employer/WorkProgress/Index">Tiến độ làm việc</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Chi tiết</li>
+        </ol>
+    </nav>
+
+    @if (Model.Progress == null)
+    {
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="alert alert-warning">@Model.ErrorMessage</div>
+        }
+        <a asp-page="/Employer/WorkProgress/Index" class="btn btn-outline-secondary">Quay lại</a>
+    }
+    else
+    {
+        var p = Model.Progress;
+
+        <div class="employer-panel mb-4">
+            <div class="d-flex flex-wrap justify-content-between gap-2 mb-2">
+                <div class="d-flex gap-3 flex-grow-1 min-w-0">
+                    <div class="work-progress-avatar work-progress-avatar--lg flex-shrink-0" aria-hidden="true">
+                        @if (!string.IsNullOrWhiteSpace(p.ApplicantProfileImage))
+                        {
+                            <img src="@p.ApplicantProfileImage" alt="" class="work-progress-avatar__img" loading="lazy" />
+                        }
+                        else
+                        {
+                            <span class="work-progress-avatar__placeholder">
+                                @(string.IsNullOrWhiteSpace(p.ApplicantName) ? "?" : char.ToUpperInvariant(p.ApplicantName[0]))
+                            </span>
+                        }
+                    </div>
+                    <div class="min-w-0">
+                    <h2 class="h5 mb-1">@p.ApplicantName</h2>
+                    <p class="text-muted small mb-0">
+                        <strong>@p.JobTitle</strong> · Ứng tuyển @DetailModel.FormatRelativeTime(p.AppliedAt)
+                    </p>
+                    @if (!string.IsNullOrWhiteSpace(p.ApplicantEmail) || !string.IsNullOrWhiteSpace(p.ApplicantPhone))
+                    {
+                        <p class="text-muted small mb-0 mt-1">
+                            @if (!string.IsNullOrWhiteSpace(p.ApplicantEmail))
+                            {
+                                <span><i class="bi bi-envelope me-1"></i>@p.ApplicantEmail</span>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(p.ApplicantPhone))
+                            {
+                                <span class="ms-2"><i class="bi bi-telephone me-1"></i>@p.ApplicantPhone</span>
+                            }
+                        </p>
+                    }
+                    </div>
+                </div>
+                @if (p.CurrentStep != null)
+                {
+                    <span class="badge @JobPortal.Web.Helpers.WorkProgressCatalog.BadgeClass(p.CurrentStep.Status) fs-6">
+                        Hiện tại: @p.CurrentStep.Title
+                    </span>
+                }
+            </div>
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+        {
+            <div class="alert alert-success">@Model.SuccessMessage</div>
+        }
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="alert alert-warning">@Model.ErrorMessage</div>
+        }
+
+        <div class="row g-4">
+            <div class="col-lg-7">
+                <h3 class="h6 mb-3">Lịch sử tiến độ</h3>
+                @if (p.Steps.Count == 0)
+                {
+                    <div class="employer-panel text-muted small py-4 text-center">
+                        Chưa có bước tiến độ nào.
+                    </div>
+                }
+                else
+                {
+                    <div class="d-flex flex-column gap-3">
+                        @foreach (var step in p.Steps)
+                        {
+                            <div class="employer-panel border-start border-4 border-primary ps-3">
+                                <div class="d-flex flex-wrap justify-content-between gap-2 mb-1">
+                                    <span class="fw-semibold">@step.Title</span>
+                                    <span class="badge @JobPortal.Web.Helpers.WorkProgressCatalog.BadgeClass(step.Status)">
+                                        @JobPortal.Web.Helpers.WorkProgressCatalog.FormatStatus(step.Status)
+                                    </span>
+                                </div>
+                                <p class="text-muted small mb-0">
+                                    <i class="bi bi-clock me-1"></i>@step.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                                </p>
+                                @if (!string.IsNullOrWhiteSpace(step.Notes))
+                                {
+                                    <p class="small mb-0 mt-2" style="white-space: pre-wrap;">@step.Notes</p>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+
+            <div class="col-lg-5">
+                <div class="employer-panel">
+                    <h3 class="h6 mb-3">Cập nhật tiến độ mới</h3>
+                    @if (p.IsProgressLocked)
+                    {
+                        <div class="alert alert-secondary mb-0">
+                            <i class="bi bi-lock-fill me-1"></i>
+                            Công việc đã ở trạng thái <strong>Đã hủy</strong>. Không thể thêm hoặc chỉnh sửa tiến độ nữa.
+                        </div>
+                    }
+                    else
+                    {
+                        <form method="post" asp-page-handler="AddStep">
+                            <input type="hidden" asp-for="ApplicationId" />
+                            <div class="mb-3">
+                                <label class="form-label" for="Input_Status">Trạng thái công việc</label>
+                                <select class="form-select" id="Input_Status" asp-for="Input.Status" required>
+                                    <option value="">-- Chọn trạng thái --</option>
+                                    @foreach (var opt in JobPortal.Web.Helpers.WorkProgressCatalog.Options)
+                                    {
+                                        <option value="@opt.Value">@opt.Label</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label" for="Input_Notes">Ghi chú (tùy chọn)</label>
+                                <textarea class="form-control" id="Input_Notes" asp-for="Input.Notes" rows="4"
+                                          maxlength="2000" placeholder="VD: Đã giao bài lúc 14h, dự kiến xong tối nay; cần file Word + PDF..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-plus-circle me-1"></i> Lưu bước tiến độ
+                            </button>
+                        </form>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>

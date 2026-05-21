@@ -41,7 +41,7 @@
 
                     <div class="d-flex flex-wrap gap-3 mb-4 text-muted">
                         <span><i class="bi bi-geo-alt"></i> @Model.Job.Location</span>
-                        <span><i class="bi bi-currency-dollar"></i> @Model.Job.Salary.ToString("N0") VNĐ</span>
+                        <span><i class="bi bi-currency-dollar"></i> @Model.Job.Salary</span>
                         @if (!string.IsNullOrWhiteSpace(Model.Job.WorkingHours))
                         {
                             <span><i class="bi bi-clock"></i> @Model.Job.WorkingHours</span>
@@ -159,7 +159,7 @@
                 <div class="card-body">
                     <h5 class="card-title mb-3">Thông tin tóm tắt</h5>
                     <ul class="list-unstyled mb-0">
-                        <li class="mb-2"><strong>Mức lương:</strong> @Model.Job.Salary.ToString("N0") VNĐ</li>
+                        <li class="mb-2"><strong>Mức lương:</strong> @Model.Job.Salary</li>
                         <li class="mb-2"><strong>Mã nhà tuyển dụng:</strong> @Model.Job.EmployerId</li>
                         <li class="mb-2"><strong>Địa điểm:</strong> @Model.Job.Location</li>
                         <li class="mb-2"><strong>Thời gian làm việc:</strong> @(string.IsNullOrWhiteSpace(Model.Job.WorkingHours) ? "—" : Model.Job.WorkingHours)</li>

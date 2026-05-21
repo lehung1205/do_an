@@ -67,6 +67,21 @@
                 {
                     <a asp-page="/Employer/Applicants" class="btn btn-sm btn-outline-primary">Xem CV</a>
                     <a asp-page="/Jobs/Detail" asp-route-id="@Model.Id" class="btn btn-sm btn-outline-secondary">Chi tiết</a>
+                    @if (isRecruiting)
+                    {
+                        <form method="post"
+                              asp-page="/Employer/Jobs"
+                              asp-page-handler="CloseJob"
+                              asp-route-jobId="@Model.Id"
+                              asp-route-status="@(Model.ListStatusFilter ?? "all")"
+                              asp-route-q="@Model.ListSearch"
+                              asp-route-pageNumber="@Model.ListPageNumber"
+                              asp-route-pageSize="@Model.ListPageSize"
+                              class="d-inline"
+                              onsubmit="return confirm('Đóng tin này? Ứng viên sẽ không thể nộp CV mới.');">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Đóng tin</button>
+                        </form>
+                    }
                 }
                 else
                 {

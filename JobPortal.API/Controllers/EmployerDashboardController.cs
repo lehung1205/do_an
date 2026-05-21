@@ -49,6 +49,16 @@ public class EmployerDashboardController : ControllerBase
             "Employer jobs retrieved successfully."));
     }
 
+    [HttpPost("jobs/{id:long}/close")]
+    public async Task<IActionResult> CloseJob(long id, CancellationToken cancellationToken)
+    {
+        var userId = GetCurrentUserId();
+        var updated = await _dashboardService.CloseJobForUserAsync(userId, id, cancellationToken);
+        return Ok(ApiResponse<EmployerDashboardJobDto>.SuccessResponse(
+            updated,
+            "Job closed successfully."));
+    }
+
     [HttpGet("applications")]
     public async Task<IActionResult> GetApplications(CancellationToken cancellationToken)
     {

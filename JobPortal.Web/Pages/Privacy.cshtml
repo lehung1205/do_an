@@ -1,9 +1,180 @@
 ﻿@page
 @model PrivacyModel
 @{
-    ViewData["Title"] = "Chính sách bảo mật";
+    ViewData["Title"] = "Chính sách";
 }
-<div class="container py-4">
-    <h1>@ViewData["Title"]</h1>
-    <p class="text-muted">Nội dung chính sách bảo mật sẽ được cập nhật.</p>
+
+<div class="container py-4 py-lg-5 policy-page">
+    <header class="policy-page__header mb-4 mb-lg-5">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb small mb-2">
+                <li class="breadcrumb-item"><a asp-page="/Index">Trang chủ</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Chính sách</li>
+            </ol>
+        </nav>
+        <h1 class="policy-page__title h2 mb-2">Chính sách &amp; điều khoản sử dụng</h1>
+        <p class="text-muted mb-0">
+            Cập nhật lần cuối: @Model.LastUpdated.ToString("dd/MM/yyyy").
+            Khi sử dụng JobPortal, bạn đồng ý với các quy định dưới đây.
+        </p>
+    </header>
+
+    <div class="row g-4 g-lg-5">
+        <aside class="col-lg-4 col-xl-3">
+            <nav class="policy-page__nav card border-0 shadow-sm sticky-lg-top" aria-label="Mục lục chính sách">
+                <div class="card-body p-3">
+                    <p class="small fw-semibold text-muted text-uppercase mb-2">Mục lục</p>
+                    <ul class="nav nav-pills flex-column gap-1 policy-page__toc">
+                        <li class="nav-item"><a class="nav-link" href="#gioi-thieu">1. Giới thiệu</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#dieu-khoan">2. Điều khoản sử dụng</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#bao-mat">3. Chính sách bảo mật</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#tai-khoan">4. Tài khoản &amp; vai trò</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#tuyen-dung">5. Tin tuyển dụng &amp; ứng tuyển</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#danh-gia">6. Đánh giá &amp; tiến độ công việc</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#goi-dang-tin">7. Gói đăng tin</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#cam-ket">8. Hành vi bị cấm</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#lien-he">9. Liên hệ &amp; thay đổi</a></li>
+                    </ul>
+                </div>
+            </nav>
+        </aside>
+
+        <div class="col-lg-8 col-xl-9">
+            <article class="policy-page__content card border-0 shadow-sm">
+                <div class="card-body p-4 p-lg-5">
+
+                    <section id="gioi-thieu" class="policy-section">
+                        <h2 class="h4 policy-section__title">1. Giới thiệu</h2>
+                        <p>
+                            JobPortal là nền tảng trực tuyến kết nối <strong>ứng viên</strong> và
+                            <strong>nhà tuyển dụng</strong>, hỗ trợ đăng tin việc làm, nộp hồ sơ (CV),
+                            quản lý đơn ứng tuyển, tiến độ công việc và đánh giá hai chiều sau khi hoàn thành công việc.
+                        </p>
+                        <p class="mb-0">
+                            Chính sách này áp dụng cho mọi người truy cập website, bao gồm khách, ứng viên,
+                            nhà tuyển dụng và quản trị viên được cấp quyền.
+                        </p>
+                    </section>
+
+                    <section id="dieu-khoan" class="policy-section">
+                        <h2 class="h4 policy-section__title">2. Điều khoản sử dụng</h2>
+                        <ul>
+                            <li>Bạn cam kết cung cấp thông tin đăng ký trung thực, chính xác và cập nhật khi có thay đổi.</li>
+                            <li>Bạn chịu trách nhiệm bảo mật tài khoản, mật khẩu và mọi hoạt động phát sinh từ tài khoản của mình.</li>
+                            <li>JobPortal có quyền tạm ngưng hoặc chấm dứt tài khoản vi phạm chính sách mà không cần báo trước trong trường hợp nghiêm trọng.</li>
+                            <li>Nội dung hiển thị trên hệ thống (tin tuyển dụng, CV, đánh giá) do người dùng đăng tải;
+                                JobPortal không đảm bảo tính chính xác tuyệt đối của từng tin đăng.</li>
+                            <li>Hợp đồng lao động, thỏa thuận lương và điều kiện làm việc được thỏa thuận trực tiếp giữa ứng viên và nhà tuyển dụng,
+                                ngoài phạm vi trách nhiệm của nền tảng.</li>
+                        </ul>
+                    </section>
+
+                    <section id="bao-mat" class="policy-section">
+                        <h2 class="h4 policy-section__title">3. Chính sách bảo mật</h2>
+                        <h3 class="h6 text-muted">3.1. Dữ liệu thu thập</h3>
+                        <p>Chúng tôi có thể thu thập các thông tin sau khi bạn sử dụng dịch vụ:</p>
+                        <ul>
+                            <li>Thông tin tài khoản: họ tên, email, số điện thoại, vai trò (ứng viên / nhà tuyển dụng).</li>
+                            <li>Hồ sơ cá nhân: ảnh đại diện, ngày sinh, giới tính, địa chỉ, mô tả bản thân (nếu bạn cung cấp).</li>
+                            <li>Dữ liệu nghiệp vụ: tin tuyển dụng, CV, đơn ứng tuyển, tiến độ công việc, đánh giá và sao điểm.</li>
+                            <li>Dữ liệu kỹ thuật: phiên đăng nhập, thời gian truy cập (phục vụ bảo mật và vận hành).</li>
+                        </ul>
+                        <h3 class="h6 text-muted">3.2. Mục đích sử dụng</h3>
+                        <ul>
+                            <li>Vận hành tính năng tìm việc, duyệt CV, quản lý tin đăng và đánh giá.</li>
+                            <li>Hiển thị thông tin công khai theo thiết kế (ví dụ: tên công ty, điểm đánh giá trung bình trên card việc làm).</li>
+                            <li>Bảo vệ an toàn hệ thống, phòng chống gian lận và lạm dụng.</li>
+                        </ul>
+                        <h3 class="h6 text-muted">3.3. Chia sẻ dữ liệu</h3>
+                        <p class="mb-0">
+                            Thông tin hồ sơ và CV có thể được chia sẻ với nhà tuyển dụng khi bạn nộp đơn ứng tuyển.
+                            Chúng tôi không bán dữ liệu cá nhân cho bên thứ ba. Dữ liệu chỉ được tiết lộ khi pháp luật yêu cầu
+                            hoặc để bảo vệ quyền lợi hợp pháp của người dùng và nền tảng.
+                        </p>
+                    </section>
+
+                    <section id="tai-khoan" class="policy-section">
+                        <h2 class="h4 policy-section__title">4. Tài khoản &amp; vai trò</h2>
+                        <h3 class="h6 text-muted">Ứng viên</h3>
+                        <ul>
+                            <li>Tạo và quản lý CV, ứng tuyển vào tin đang tuyển, theo dõi trạng thái đơn và tiến độ công việc.</li>
+                            <li>Xem thông tin cơ bản và đánh giá công khai của nhà tuyển dụng trước khi ứng tuyển.</li>
+                            <li>Đánh giá nhà tuyển dụng sau khi công việc kết thúc (theo quy trình hệ thống).</li>
+                        </ul>
+                        <h3 class="h6 text-muted">Nhà tuyển dụng</h3>
+                        <ul class="mb-0">
+                            <li>Đăng và quản lý tin tuyển dụng trong giới hạn lượt đăng (posting limit).</li>
+                            <li>Duyệt CV, cập nhật trạng thái đơn (đã xem, chấp nhận, từ chối).</li>
+                            <li>Quản lý tiến độ công việc với ứng viên đã được chấp nhận và đánh giá ứng viên khi hoàn tất.</li>
+                        </ul>
+                    </section>
+
+                    <section id="tuyen-dung" class="policy-section">
+                        <h2 class="h4 policy-section__title">5. Tin tuyển dụng &amp; ứng tuyển</h2>
+                        <ul>
+                            <li>Chỉ tin ở trạng thái <strong>đang tuyển</strong> mới nhận đơn ứng tuyển mới từ ứng viên.</li>
+                            <li>Tin hết hạn hoặc bị đóng sẽ không hiển thị trong danh sách tuyển dụng công khai và không nhận CV mới.</li>
+                            <li>Nhà tuyển dụng chịu trách nhiệm nội dung tin đăng (mô tả, lương, địa điểm, thời gian làm việc) không vi phạm pháp luật.</li>
+                            <li>Ứng viên chỉ nên nộp CV trung thực; mỗi đơn gắn với một hồ sơ đã chọn trên hệ thống.</li>
+                            <li>Sau khi đơn được <strong>chấp nhận</strong> hoặc <strong>từ chối</strong>, trạng thái cuối không thể đổi ngược (theo thiết kế hệ thống).</li>
+                        </ul>
+                    </section>
+
+                    <section id="danh-gia" class="policy-section">
+                        <h2 class="h4 policy-section__title">6. Đánh giá &amp; tiến độ công việc</h2>
+                        <ul>
+                            <li>Đánh giá (sao và nhận xét) chỉ được thực hiện khi tiến độ công việc ở trạng thái kết thúc
+                                (hoàn thành, đã hủy hoặc chấm dứt), theo quy tắc nghiệp vụ của nền tảng.</li>
+                            <li>Mỗi đơn ứng tuyển, mỗi bên chỉ được gửi một đánh giá theo từng loại (nhà tuyển dụng → ứng viên và ngược lại).</li>
+                            <li>Điểm trung bình và số sao có thể hiển thị công khai trên card việc làm, card ứng viên hoặc hồ sơ
+                                để hỗ trợ minh bạch; danh sách chi tiết đánh giá trong modal chỉ hiển thị nội dung đánh giá,
+                                không dẫn link tiến độ công việc đối với người xem hồ sơ công khai.</li>
+                            <li>Nội dung đánh giá không được chứa ngôn từ xúc phạm, thông tin sai lệch cố ý hoặc vi phạm quyền riêng tư.</li>
+                        </ul>
+                    </section>
+
+                    <section id="goi-dang-tin" class="policy-section">
+                        <h2 class="h4 policy-section__title">7. Gói đăng tin</h2>
+                        <p>
+                            Nhà tuyển dụng sử dụng <strong>lượt đăng tin</strong> (posting limit) khi đăng tin mới.
+                            Việc mua thêm gói (nếu có) tuân theo điều kiện hiển thị tại trang mua gói tại thời điểm giao dịch.
+                        </p>
+                        <p class="mb-0">
+                            JobPortal có quyền điều chỉnh giá gói, khuyến mãi và số lượt đăng kèm theo thông báo trên website.
+                            Quyền lợi đã kích hoạt trước thời điểm thay đổi được ưu tiên xử lý hợp lý theo từng trường hợp.
+                        </p>
+                    </section>
+
+                    <section id="cam-ket" class="policy-section">
+                        <h2 class="h4 policy-section__title">8. Hành vi bị cấm</h2>
+                        <ul class="mb-0">
+                            <li>Giả mạo danh tính, đăng tin lừa đảo, phân biệt đối xử hoặc trái pháp luật Việt Nam.</li>
+                            <li>Thu thập trái phép dữ liệu người dùng khác hoặc spam đơn ứng tuyển / tin tuyển dụng.</li>
+                            <li>Cố ý can thiệp, tấn công hoặc phá hoại hệ thống kỹ thuật.</li>
+                            <li>Đăng nội dung vi phạm bản quyền, thuần phong mỹ tục hoặc gây hại cho người khác.</li>
+                        </ul>
+                    </section>
+
+                    <section id="lien-he" class="policy-section mb-0">
+                        <h2 class="h4 policy-section__title">9. Liên hệ &amp; thay đổi chính sách</h2>
+                        <p>
+                            Chúng tôi có thể cập nhật chính sách để phản ánh thay đổi tính năng hoặc quy định pháp luật.
+                            Phiên bản mới có hiệu lực khi đăng trên trang này kèm ngày cập nhật.
+                        </p>
+                        <p class="mb-0">
+                            Mọi thắc mắc về chính sách, vui lòng liên hệ qua email hỗ trợ được công bố trên website
+                            hoặc bộ phận quản trị dự án JobPortal tại đơn vị triển khai hệ thống.
+                        </p>
+                    </section>
+
+                </div>
+            </article>
+
+            <p class="text-center mt-4 mb-0">
+                <a asp-page="/Index" class="btn btn-outline-primary">
+                    <i class="bi bi-arrow-left me-1"></i> Về trang chủ
+                </a>
+            </p>
+        </div>
+    </div>
 </div>

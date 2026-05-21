@@ -32,6 +32,10 @@
                     var isEmployer = string.Equals(userRole, "EMPLOYER", StringComparison.Ordinal);
                     var userAvatarUrl = Context.Session.GetString("UserAvatarUrl");
                     var userInitials = JobPortal.Web.Models.AccountPanelViewModel.GetInitials(userName);
+                    var isPolicyPage = string.Equals(
+                        ViewContext.RouteData.Values["page"]?.ToString(),
+                        "/Privacy",
+                        StringComparison.OrdinalIgnoreCase);
                 }
                 <div class="collapse navbar-collapse" id="mainNav">
                     <ul class="navbar-nav me-auto align-items-lg-center gap-lg-1">
@@ -71,6 +75,11 @@
                                 </li>
                             }
                         }
+                        <li class="nav-item">
+                            <a class="nav-link @(isPolicyPage ? "active" : "")" asp-page="/Privacy">
+                                <i class="bi bi-shield-check me-1 d-lg-none"></i>Chính sách
+                            </a>
+                        </li>
                     </ul>
                     <ul class="navbar-nav align-items-lg-center gap-2 nav-auth">
                         @if (isLoggedIn)
@@ -155,22 +164,7 @@
         @RenderBody()
     </main>
 
-    <footer class="site-footer">
-        <div class="container py-4">
-            <div class="row g-4 align-items-center">
-                <div class="col-md-6">
-                    <a class="site-brand text-white text-decoration-none" asp-page="/Index">
-                        <i class="bi bi-briefcase-fill me-2"></i>JobPortal
-                    </a>
-                    <p class="small text-white-50 mt-2 mb-0">Nền tảng kết nối ứng viên và nhà tuyển dụng.</p>
-                </div>
-                <div class="col-md-6 text-md-end">
-                    <a class="text-white-50 small text-decoration-none me-3" asp-page="/Privacy">Chính sách</a>
-                    <span class="text-white-50 small">&copy; @DateTime.Now.Year JobPortal</span>
-                </div>
-            </div>
-        </div>
-    </footer>
+    <partial name="_SiteFooter" />
 
     @if (isLoggedIn)
     {

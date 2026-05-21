@@ -1,10 +1,13 @@
 using AutoMapper;
+using JobPortal.API.Data;
 using JobPortal.API.DTOs;
 using JobPortal.API.DTOs.Common;
 using JobPortal.API.Exceptions;
+using JobPortal.API.Helpers;
 using JobPortal.API.Models;
 using JobPortal.API.Repositories.Interface;
 using JobPortal.API.Services.Interface;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace JobPortal.API.Services.Implementation;
@@ -15,28 +18,43 @@ public class JobService : IJobService
     private readonly IJobRepository _repository;
     private readonly IEmployerRepository _employerRepository;
     private readonly IJobExpiryService _jobExpiryService;
+    private readonly AppDbContext _context;
     private readonly IMapper _mapper;
 
     public JobService(
         IJobRepository repository,
         IEmployerRepository employerRepository,
         IJobExpiryService jobExpiryService,
+        AppDbContext context,
         IMapper mapper)
     {
         _repository = repository;
         _employerRepository = employerRepository;
         _jobExpiryService = jobExpiryService;
+        _context = context;
         _mapper = mapper;
     }
 
-    public async Task<PagedResult<JobDto>> GetJobsPagedAsync(int page, int pageSize, CancellationToken cancellationToken = default)
+    public async Task<PagedResult<JobDto>> GetJobsPagedAsync(
+        int page,
+        int pageSize,
+        string? search = null,
+        string? location = null,
+        CancellationToken cancellationToken = default)
     {
         ValidatePagination(page, pageSize);
 
         await _jobExpiryService.CloseExpiredJobsAsync(cancellationToken);
 
-        var (items, totalCount) = await _repository.GetPagedAsync(page, pageSize, recruitingOnly: true, cancellationToken);
-        var dtos = _mapper.Map<IReadOnlyList<JobDto>>(items);
+        var (items, totalCount) = await _repository.GetPagedAsync(
+            page,
+            pageSize,
+            recruitingOnly: true,
+            search,
+            location,
+            cancellationToken);
+        var dtos = _mapper.Map<List<JobDto>>(items);
+        await ApplyEmployerRatingsAsync(dtos, cancellationToken);
 
         return new PagedResult<JobDto>
         {
@@ -58,7 +76,9 @@ public class JobService : IJobService
             throw new NotFoundException($"Job with id {id} was not found.");
         }
 
-        return _mapper.Map<JobDto>(entity);
+        var dto = _mapper.Map<JobDto>(entity);
+        await ApplyEmployerRatingsAsync(new List<JobDto> { dto }, cancellationToken);
+        return dto;
     }
 
     public async Task<JobDto> CreateJobAsync(JobDto jobDto, CancellationToken cancellationToken = default)
@@ -82,7 +102,9 @@ public class JobService : IJobService
 
         var created = await _repository.GetByIdAsync(entity.Id, cancellationToken)
             ?? entity;
-        return _mapper.Map<JobDto>(created);
+        var dto = _mapper.Map<JobDto>(created);
+        await ApplyEmployerRatingsAsync(new List<JobDto> { dto }, cancellationToken);
+        return dto;
     }
 
     public async Task UpdateJobAsync(long id, JobDto jobDto, CancellationToken cancellationToken = default)
@@ -105,6 +127,67 @@ public class JobService : IJobService
         {
             throw new NotFoundException($"Job with id {id} was not found.");
         }
+    }
+
+    private async Task ApplyEmployerRatingsAsync(
+        IList<JobDto> jobs,
+        CancellationToken cancellationToken)
+    {
+        if (jobs.Count == 0)
+        {
+            return;
+        }
+
+        var employerIds = jobs.Select(j => j.EmployerId).Distinct().ToList();
+        var ratings = await LoadEmployerRatingsAsync(employerIds, cancellationToken);
+
+        foreach (var job in jobs)
+        {
+            if (ratings.TryGetValue(job.EmployerId, out var rating))
+            {
+                job.EmployerAverageRating = rating.Average;
+                job.EmployerReviewCount = rating.Count;
+            }
+        }
+    }
+
+    private async Task<Dictionary<long, EmployerRatingSnapshot>> LoadEmployerRatingsAsync(
+        IEnumerable<long> employerIds,
+        CancellationToken cancellationToken)
+    {
+        var ids = employerIds.Distinct().ToList();
+        if (ids.Count == 0)
+        {
+            return new Dictionary<long, EmployerRatingSnapshot>();
+        }
+
+        var rows = await _context.Reviews
+            .AsNoTracking()
+            .Where(r =>
+                r.ReviewType == ReviewCatalog.SeekerToEmployer &&
+                ids.Contains(r.EmployerId))
+            .GroupBy(r => r.EmployerId)
+            .Select(g => new
+            {
+                EmployerId = g.Key,
+                Average = g.Average(x => (double)x.Rating),
+                Count = g.Count()
+            })
+            .ToListAsync(cancellationToken);
+
+        return rows.ToDictionary(
+            x => x.EmployerId,
+            x => new EmployerRatingSnapshot
+            {
+                Average = Math.Round(x.Average, 1),
+                Count = x.Count
+            });
+    }
+
+    private sealed class EmployerRatingSnapshot
+    {
+        public double Average { get; init; }
+        public int Count { get; init; }
     }
 
     private static void ValidatePagination(int page, int pageSize)

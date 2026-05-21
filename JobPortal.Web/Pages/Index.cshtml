@@ -27,7 +27,7 @@ else
                 </p>
             </div>
             <div class="col-lg-5">
-                <form class="home-search card border-0 shadow-lg" method="get" asp-page="/Index">
+                <form class="home-search card border-0 shadow-lg" method="get" asp-page="/Jobs/Index">
                     <div class="card-body p-4">
                         <h2 class="h5 mb-3">Tìm việc làm</h2>
                         <div class="mb-3">
@@ -107,40 +107,11 @@ else
         }
         else
         {
-            <div class="row g-4">
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3 g-lg-4 job-grid">
                 @foreach (var job in Model.FeaturedJobs)
                 {
-                    <div class="col-md-6 col-lg-4">
-                        <article class="job-card card h-100 border-0 shadow-sm">
-                            <div class="card-body d-flex flex-column">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <span class="badge home-badge-status">@IndexModel.FormatStatus(job.PostingStatus)</span>
-                                    <small class="text-muted">
-                                        <i class="bi bi-clock me-1"></i>@job.ExpiryDate.ToString("dd/MM/yyyy")
-                                    </small>
-                                </div>
-                                <h3 class="h5 card-title mb-2">
-                                    <a asp-page="/Jobs/Detail" asp-route-id="@job.Id" class="job-card__title text-decoration-none">
-                                        @job.Title
-                                    </a>
-                                </h3>
-                                <p class="text-muted small mb-3 flex-grow-1">
-                                    @(job.Description.Length > 100 ? job.Description[..100] + "…" : job.Description)
-                                </p>
-                                <ul class="list-unstyled small mb-3 job-card__meta">
-                                    <li class="mb-1">
-                                        <i class="bi bi-geo-alt text-primary me-2"></i>@job.Location
-                                    </li>
-                                    <li>
-                                        <i class="bi bi-cash-stack text-primary me-2"></i>@IndexModel.FormatSalary(job.Salary)
-                                    </li>
-                                </ul>
-                                <a asp-page="/Jobs/Detail" asp-route-id="@job.Id"
-                                   class="btn btn-sm btn-outline-primary mt-auto align-self-start">
-                                    Xem chi tiết
-                                </a>
-                            </div>
-                        </article>
+                    <div class="col d-flex">
+                        <partial name="Shared/_JobGridCard" model="JobPortal.Web.Models.JobGridCardModel.FromJobDto(job)" />
                     </div>
                 }
             </div>

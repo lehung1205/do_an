@@ -1,11 +1,14 @@
 using AutoMapper;
+using JobPortal.API.Data;
 using JobPortal.API.DTOs;
 using JobPortal.API.Exceptions;
+using JobPortal.API.Helpers;
 using JobPortal.API.Models;
 using JobPortal.API.Models.Auth;
 using JobPortal.API.Repositories.Interface;
 using JobPortal.API.Services.Interface;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace JobPortal.API.Services.Implementation;
@@ -13,12 +16,14 @@ namespace JobPortal.API.Services.Implementation;
 public class EmployerService : IEmployerService
 {
     private readonly IEmployerRepository _repository;
+    private readonly AppDbContext _context;
     private readonly IMapper _mapper;
     private readonly PasswordHasher<User> _passwordHasher;
 
-    public EmployerService(IEmployerRepository repository, IMapper mapper)
+    public EmployerService(IEmployerRepository repository, AppDbContext context, IMapper mapper)
     {
         _repository = repository;
+        _context = context;
         _mapper = mapper;
         _passwordHasher = new PasswordHasher<User>();
     }
@@ -50,6 +55,27 @@ public class EmployerService : IEmployerService
             throw new NotFoundException($"Employer with id {id} was not found.");
         }
 
+        var reviewItems = await _context.Reviews
+            .AsNoTracking()
+            .Where(r =>
+                r.EmployerId == id &&
+                r.ReviewType == ReviewCatalog.SeekerToEmployer)
+            .OrderByDescending(r => r.Id)
+            .Select(r => new EmployerReceivedReviewItemDto
+            {
+                Id = r.Id,
+                ApplicationId = r.ApplicationId,
+                Rating = r.Rating,
+                Comment = r.Comment,
+                ApplicantName = r.JobSeeker.Name,
+                JobTitle = r.Job.Title
+            })
+            .ToListAsync(cancellationToken);
+
+        double? averageRating = reviewItems.Count == 0
+            ? null
+            : Math.Round(reviewItems.Average(i => i.Rating), 1);
+
         return new EmployerPublicProfileDto
         {
             Id = entity.Id,
@@ -58,7 +84,13 @@ public class EmployerService : IEmployerService
             Image = entity.Image,
             Phone = entity.Phone,
             Email = entity.Email,
-            Gender = entity.Gender
+            Gender = entity.Gender,
+            Reviews = new EmployerReceivedReviewsSummaryDto
+            {
+                AverageRating = averageRating,
+                TotalCount = reviewItems.Count,
+                Items = reviewItems
+            }
         };
     }
 

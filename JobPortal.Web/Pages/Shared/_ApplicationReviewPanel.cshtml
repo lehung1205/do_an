@@ -1,0 +1,96 @@
+@model JobPortal.Web.Dtos.ApplicationReviewContextDto
+@{
+    var reviewSuccess = ViewData["ReviewSuccessMessage"] as string;
+    var reviewError = ViewData["ReviewErrorMessage"] as string;
+    var reviewPage = ViewData["ReviewFormPage"] as string ?? "";
+    var reviewHandler = ViewData["ReviewFormHandler"] as string ?? "SubmitReview";
+    var applicationId = ViewData["ReviewApplicationId"] as long? ?? Model.ApplicationId;
+    var panelTitle = ViewData["ReviewPanelTitle"] as string ?? "Đánh giá";
+    var receivedLabel = ViewData["ReceivedReviewLabel"] as string ?? "Đánh giá từ đối tác:";
+    var commentPlaceholder = ViewData["CommentPlaceholder"] as string ?? "Chia sẻ trải nghiệm làm việc...";
+    var panelClass = ViewData["ReviewPanelClass"] as string ?? "card border-0 shadow-sm mt-4";
+}
+
+<div class="@panelClass">
+    <div class="card-body">
+        <h3 class="h6 mb-3"><i class="bi bi-star me-2"></i>@panelTitle</h3>
+
+        @if (!string.IsNullOrEmpty(reviewSuccess))
+        {
+            <div class="alert alert-success py-2 small">@reviewSuccess</div>
+        }
+        @if (!string.IsNullOrEmpty(reviewError))
+        {
+            <div class="alert alert-warning py-2 small">@reviewError</div>
+        }
+
+        @if (!Model.IsWorkFinished)
+        {
+            <p class="text-muted small mb-0">
+                <i class="bi bi-info-circle me-1"></i>
+                Đánh giá sẽ mở sau khi tiến độ ở trạng thái <strong>Hoàn thành</strong> hoặc <strong>Đã hủy</strong>.
+            </p>
+        }
+        else if (Model.MyReview != null)
+        {
+            <p class="small text-muted mb-2">Bạn đã đánh giá <strong>@Model.TargetLabel</strong>:</p>
+            <div class="border rounded p-3 bg-light">
+                <div class="mb-1">
+                    @for (var i = 1; i <= 5; i++)
+                    {
+                        <i class="bi @(i <= Model.MyReview.Rating ? "bi-star-fill text-warning" : "bi-star text-muted")"></i>
+                    }
+                    <span class="ms-1 fw-semibold">@Model.MyReview.Rating/5</span>
+                </div>
+                @if (!string.IsNullOrWhiteSpace(Model.MyReview.Comment))
+                {
+                    <p class="small mb-0" style="white-space: pre-wrap;">@Model.MyReview.Comment</p>
+                }
+            </div>
+        }
+        else if (Model.CanSubmitReview)
+        {
+            <p class="small text-muted mb-3">Đánh giá <strong>@Model.TargetLabel</strong> (chỉ được gửi một lần).</p>
+            <form method="post" asp-page="@reviewPage" asp-page-handler="@reviewHandler">
+                <input type="hidden" name="applicationId" value="@applicationId" />
+                <div class="mb-3">
+                    <label class="form-label">Điểm đánh giá <span class="text-danger">*</span></label>
+                    <div class="d-flex flex-wrap gap-2 review-rating-input" role="radiogroup" aria-label="Điểm đánh giá">
+                        @for (var star = 5; star >= 1; star--)
+                        {
+                            <input type="radio" class="btn-check" name="ReviewRating" id="rating_@(applicationId)_@star" value="@star" required />
+                            <label class="btn btn-outline-warning btn-sm" for="rating_@(applicationId)_@star">@star <i class="bi bi-star-fill"></i></label>
+                        }
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="review_comment_@applicationId">Nhận xét (tùy chọn)</label>
+                    <textarea class="form-control" id="review_comment_@applicationId" name="ReviewComment" rows="3" maxlength="2000"
+                              placeholder="@commentPlaceholder"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-send me-1"></i> Gửi đánh giá
+                </button>
+            </form>
+        }
+
+        @if (Model.ReceivedReview != null)
+        {
+            <hr class="my-3" />
+            <p class="small text-muted mb-2">@receivedLabel</p>
+            <div class="border rounded p-3">
+                <div class="mb-1">
+                    <span class="fw-semibold">@Model.ReceivedReview.ReviewerName</span>
+                    @for (var i = 1; i <= 5; i++)
+                    {
+                        <i class="bi @(i <= Model.ReceivedReview.Rating ? "bi-star-fill text-warning" : "bi-star text-muted")"></i>
+                    }
+                </div>
+                @if (!string.IsNullOrWhiteSpace(Model.ReceivedReview.Comment))
+                {
+                    <p class="small mb-0" style="white-space: pre-wrap;">@Model.ReceivedReview.Comment</p>
+                }
+            </div>
+        }
+    </div>
+</div>

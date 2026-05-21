@@ -52,7 +52,12 @@
         {
             <div class="alert alert-secondary">
                 <i class="bi bi-lock-fill me-1"></i>
-                Công việc đã kết thúc (trạng thái <strong>Đã hủy</strong>). Bạn chỉ có thể xem lịch sử tiến độ.
+                Tiến độ đã kết thúc
+                @if (p.CurrentStep != null)
+                {
+                    <text>(<strong>@JobPortal.Web.Helpers.WorkProgressCatalog.FormatStatus(p.CurrentStep.Status)</strong>)</text>
+                }
+                . Bạn chỉ có thể xem lịch sử tiến độ.
             </div>
         }
 
@@ -87,6 +92,16 @@
                     </div>
                 }
             </div>
+        }
+
+        @if (Model.ReviewContext != null)
+        {
+            ViewData["ReviewFormPage"] = "/Applications/WorkProgress/Detail";
+            ViewData["ReviewApplicationId"] = Model.ApplicationId;
+            ViewData["ReviewPanelTitle"] = "Đánh giá nhà tuyển dụng";
+            ViewData["ReceivedReviewLabel"] = "Đánh giá từ nhà tuyển dụng:";
+            ViewData["CommentPlaceholder"] = "Chia sẻ trải nghiệm làm việc với công ty...";
+            <partial name="Shared/_ApplicationReviewPanel" model="Model.ReviewContext" />
         }
 
         <div class="mt-4 d-flex flex-wrap gap-2">

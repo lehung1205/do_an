@@ -1,0 +1,62 @@
+@model JobPortal.Web.Models.ReceivedReviewsPanelModel
+
+<div class="text-center mb-4 py-2 rounded bg-light border">
+    <div class="text-muted small mb-1">@Model.AverageLabel</div>
+    @if (Model.TotalCount > 0 && Model.AverageRating is double avg)
+    {
+        <div class="d-flex align-items-center justify-content-center gap-2 flex-wrap">
+            <span class="display-6 fw-bold text-warning mb-0">@avg.ToString("0.0")</span>
+            <span class="text-muted">/ 5</span>
+        </div>
+        <div class="mt-1">
+            @for (var i = 1; i <= 5; i++)
+            {
+                var filled = i <= (int)Math.Round(avg, MidpointRounding.AwayFromZero);
+                <i class="bi @(filled ? "bi-star-fill text-warning" : "bi-star text-muted")"></i>
+            }
+        </div>
+        <p class="text-muted small mb-0 mt-2">@Model.TotalCount đánh giá</p>
+    }
+    else
+    {
+        <p class="text-muted mb-0 py-2">
+            <i class="bi bi-star me-1"></i> @Model.EmptyMessage
+        </p>
+    }
+</div>
+
+@if (Model.Items.Count > 0)
+{
+    <p class="small fw-semibold mb-2">Danh sách đánh giá</p>
+    <div class="d-flex flex-column gap-3">
+        @foreach (var item in Model.Items)
+        {
+            <div class="border rounded p-3">
+                <div class="d-flex flex-wrap justify-content-between gap-2 mb-1">
+                    <div class="min-w-0">
+                        <div class="fw-semibold small">@item.PrimaryLabel</div>
+                        <div class="text-muted small text-truncate">@item.SecondaryLabel</div>
+                    </div>
+                    <div class="text-nowrap">
+                        @for (var i = 1; i <= 5; i++)
+                        {
+                            <i class="bi @(i <= item.Rating ? "bi-star-fill text-warning" : "bi-star text-muted")"></i>
+                        }
+                    </div>
+                </div>
+                @if (!string.IsNullOrWhiteSpace(item.Comment))
+                {
+                    <p class="small @(string.IsNullOrEmpty(item.WorkProgressPage) ? "mb-0" : "mb-2")" style="white-space: pre-wrap;">@item.Comment</p>
+                }
+                @if (!string.IsNullOrEmpty(item.WorkProgressPage))
+                {
+                    <a asp-page="@item.WorkProgressPage"
+                       asp-route-applicationId="@item.ApplicationId"
+                       class="small text-decoration-none">
+                        <i class="bi bi-arrow-right-circle me-1"></i> Xem tiến độ công việc
+                    </a>
+                }
+            </div>
+        }
+    </div>
+}

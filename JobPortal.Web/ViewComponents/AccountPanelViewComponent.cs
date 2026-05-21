@@ -39,9 +39,21 @@ public class AccountPanelViewComponent : ViewComponent
         ViewData.TemplateInfo.HtmlFieldPrefix = string.Empty;
 
         IReadOnlyList<ResumeDto> resumes = Array.Empty<ResumeDto>();
+        ReceivedReviewsPanelModel? reviewsPanel = null;
         if (string.Equals(profile.Role, "JOB_SEEKER", StringComparison.Ordinal))
         {
             resumes = await _api.GetApiDataAsync<List<ResumeDto>>("/api/resumes/me") ?? new List<ResumeDto>();
+            var seekerReviews = await _api.GetApiDataAsync<SeekerReceivedReviewsSummaryDto>(
+                "/api/applications/me/reviews-received")
+                ?? new SeekerReceivedReviewsSummaryDto();
+            reviewsPanel = ReceivedReviewsPanelModel.FromSeeker(seekerReviews);
+        }
+        else if (string.Equals(profile.Role, "EMPLOYER", StringComparison.Ordinal))
+        {
+            var employerReviews = await _api.GetApiDataAsync<EmployerReceivedReviewsSummaryDto>(
+                "/api/employers/me/reviews-received")
+                ?? new EmployerReceivedReviewsSummaryDto();
+            reviewsPanel = ReceivedReviewsPanelModel.FromEmployer(employerReviews);
         }
 
         var resumeInput = new IndexModel.ResumeInputModel();
@@ -62,6 +74,7 @@ public class AccountPanelViewComponent : ViewComponent
             ErrorMessage = TempData["AccountErrorMessage"] as string,
             ActiveTab = TempData["AccountTab"] as string ?? "view",
             Resumes = resumes,
+            ReviewsPanel = reviewsPanel,
             UpdateFormAction = Url.Page("/Account/Index", pageHandler: "Update") ?? "/Account/Index?handler=Update",
             ChangePasswordFormAction = Url.Page("/Account/Index", pageHandler: "ChangePassword") ?? "/Account/Index?handler=ChangePassword",
             AddResumeFormAction = Url.Page("/Account/Index", pageHandler: "AddResume") ?? "/Account/Index?handler=AddResume",

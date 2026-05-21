@@ -653,6 +653,7 @@ public class IndexModel : PageModel
         "edit" => "edit",
         "password" => "password",
         "resume" => "resume",
+        "reviews" => "reviews",
         _ => "view"
     };
 

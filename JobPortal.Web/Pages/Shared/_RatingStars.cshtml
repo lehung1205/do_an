@@ -1,0 +1,24 @@
+@model JobPortal.Web.Models.RatingStarsModel
+
+@if (Model.ReviewCount > 0 && Model.AverageRating is double avg)
+{
+    <span class="rating-stars" aria-label="Đánh giá trung bình @avg.ToString("0.0") trên 5, @Model.ReviewCount đánh giá">
+        @for (var i = 1; i <= 5; i++)
+        {
+            var filled = i <= (int)Math.Round(avg, MidpointRounding.AwayFromZero);
+            <i class="bi @(filled ? "bi-star-fill text-warning" : "bi-star text-muted")" aria-hidden="true"></i>
+        }
+        <span class="rating-stars__score">@avg.ToString("0.0")</span>
+        <span class="rating-stars__count text-muted">(@Model.ReviewCount)</span>
+    </span>
+}
+else
+{
+    <span class="rating-stars rating-stars--empty text-muted" aria-label="@Model.EmptyMessage">
+        @for (var i = 1; i <= 5; i++)
+        {
+            <i class="bi bi-star" aria-hidden="true"></i>
+        }
+        <span class="rating-stars__count">@Model.EmptyMessage</span>
+    </span>
+}

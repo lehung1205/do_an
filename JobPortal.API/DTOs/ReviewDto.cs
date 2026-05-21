@@ -3,6 +3,7 @@ namespace JobPortal.API.DTOs;
 public class ReviewDto
 {
     public long Id { get; set; }
+    public long ApplicationId { get; set; }
     public long JobId { get; set; }
     public long EmployerId { get; set; }
     public long JobSeekerId { get; set; }

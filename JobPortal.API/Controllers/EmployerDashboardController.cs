@@ -14,10 +14,24 @@ namespace JobPortal.API.Controllers;
 public class EmployerDashboardController : ControllerBase
 {
     private readonly IEmployerDashboardService _dashboardService;
+    private readonly IApplicationReviewService _applicationReviewService;
 
-    public EmployerDashboardController(IEmployerDashboardService dashboardService)
+    public EmployerDashboardController(
+        IEmployerDashboardService dashboardService,
+        IApplicationReviewService applicationReviewService)
     {
         _dashboardService = dashboardService;
+        _applicationReviewService = applicationReviewService;
+    }
+
+    [HttpGet("reviews-received")]
+    public async Task<IActionResult> GetReceivedReviews(CancellationToken cancellationToken)
+    {
+        var userId = GetCurrentUserId();
+        var summary = await _applicationReviewService.GetEmployerReceivedReviewsAsync(userId, cancellationToken);
+        return Ok(ApiResponse<EmployerReceivedReviewsSummaryDto>.SuccessResponse(
+            summary,
+            "Received reviews retrieved successfully."));
     }
 
     [HttpGet("dashboard")]
@@ -57,6 +71,16 @@ public class EmployerDashboardController : ControllerBase
         return Ok(ApiResponse<EmployerDashboardJobDto>.SuccessResponse(
             updated,
             "Job closed successfully."));
+    }
+
+    [HttpGet("applications/{id:long}/applicant-profile")]
+    public async Task<IActionResult> GetApplicantProfile(long id, CancellationToken cancellationToken)
+    {
+        var userId = GetCurrentUserId();
+        var profile = await _dashboardService.GetApplicantProfileForEmployerAsync(userId, id, cancellationToken);
+        return Ok(ApiResponse<ApplicantProfileForEmployerDto>.SuccessResponse(
+            profile,
+            "Applicant profile retrieved successfully."));
     }
 
     [HttpGet("applications")]
@@ -134,6 +158,29 @@ public class EmployerDashboardController : ControllerBase
         return Ok(ApiResponse<WorkProgressStepDto>.SuccessResponse(
             created,
             "Work progress step added successfully."));
+    }
+
+    [HttpGet("applications/{id:long}/reviews")]
+    public async Task<IActionResult> GetApplicationReviewContext(long id, CancellationToken cancellationToken)
+    {
+        var userId = GetCurrentUserId();
+        var context = await _applicationReviewService.GetEmployerReviewContextAsync(userId, id, cancellationToken);
+        return Ok(ApiResponse<ApplicationReviewContextDto>.SuccessResponse(
+            context,
+            "Review context retrieved successfully."));
+    }
+
+    [HttpPost("applications/{id:long}/reviews")]
+    public async Task<IActionResult> SubmitApplicationReview(
+        long id,
+        [FromBody] CreateApplicationReviewRequest request,
+        CancellationToken cancellationToken)
+    {
+        var userId = GetCurrentUserId();
+        var created = await _applicationReviewService.SubmitEmployerReviewAsync(userId, id, request, cancellationToken);
+        return Ok(ApiResponse<ApplicationReviewViewDto>.SuccessResponse(
+            created,
+            "Review submitted successfully."));
     }
 
     private long GetCurrentUserId()

@@ -13,6 +13,7 @@ public class AccountPanelViewModel
     public string? ErrorMessage { get; set; }
     public string ActiveTab { get; set; } = "view";
     public IReadOnlyList<ResumeDto> Resumes { get; set; } = Array.Empty<ResumeDto>();
+    public ReceivedReviewsPanelModel? ReviewsPanel { get; set; }
     public IndexModel.EditInputModel EditInput { get; set; } = new();
     public IndexModel.PasswordInputModel PasswordInput { get; set; } = new();
     public IndexModel.ResumeInputModel ResumeInput { get; set; } = new();

@@ -118,7 +118,12 @@
                     {
                         <div class="alert alert-secondary mb-0">
                             <i class="bi bi-lock-fill me-1"></i>
-                            Công việc đã ở trạng thái <strong>Đã hủy</strong>. Không thể thêm hoặc chỉnh sửa tiến độ nữa.
+                            Tiến độ đã kết thúc
+                            @if (p.CurrentStep != null)
+                            {
+                                <text>(<strong>@JobPortal.Web.Helpers.WorkProgressCatalog.FormatStatus(p.CurrentStep.Status)</strong>)</text>
+                            }
+                            . Không thể thêm bước tiến độ mới.
                         </div>
                     }
                     else
@@ -144,6 +149,17 @@
                                 <i class="bi bi-plus-circle me-1"></i> Lưu bước tiến độ
                             </button>
                         </form>
+                    }
+
+                    @if (Model.ReviewContext != null)
+                    {
+                        ViewData["ReviewFormPage"] = "/Employer/WorkProgress/Detail";
+                        ViewData["ReviewApplicationId"] = Model.ApplicationId;
+                        ViewData["ReviewPanelTitle"] = "Đánh giá ứng viên";
+                        ViewData["ReceivedReviewLabel"] = "Đánh giá từ ứng viên:";
+                        ViewData["CommentPlaceholder"] = "Chia sẻ trải nghiệm làm việc với ứng viên...";
+                        ViewData["ReviewPanelClass"] = "card border-0 shadow-sm mt-4";
+                        <partial name="Shared/_ApplicationReviewPanel" model="Model.ReviewContext" />
                     }
                 </div>
             </div>

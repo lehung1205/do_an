@@ -19,7 +19,18 @@ public static class WorkProgressCatalog
         }
 
         var s = status.Trim().ToLowerInvariant();
-        return s is "cancelled" or "terminated";
+        return s is "completed" or "cancelled" or "terminated";
+    }
+
+    public static bool IsReviewableTerminalStatus(string? status)
+    {
+        if (string.IsNullOrWhiteSpace(status))
+        {
+            return false;
+        }
+
+        var s = status.Trim().ToLowerInvariant();
+        return s is "completed" or "cancelled" or "terminated";
     }
 
     public static string FormatStatus(string status) => status.Trim().ToLowerInvariant() switch

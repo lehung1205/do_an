@@ -22,7 +22,19 @@ public static class WorkProgressCatalog
         }
 
         var s = status.Trim().ToLowerInvariant();
-        return s is "cancelled" or "terminated";
+        return s is "completed" or "cancelled" or "terminated";
+    }
+
+    /// <summary>Employer/seeker may submit reviews after work is completed or cancelled.</summary>
+    public static bool IsReviewableTerminalStatus(string? status)
+    {
+        if (string.IsNullOrWhiteSpace(status))
+        {
+            return false;
+        }
+
+        var s = status.Trim().ToLowerInvariant();
+        return s is "completed" or "cancelled" or "terminated";
     }
 
     public static string GetTitle(string status) => FormatStatus(status);

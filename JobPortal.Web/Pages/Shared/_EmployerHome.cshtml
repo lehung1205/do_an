@@ -129,6 +129,8 @@
                                         _ => "bg-secondary"
                                     })">@IndexModel.FormatApplicationStatus(app.Status)</span>
                                 </div>
+                                <partial name="Shared/_ApplicantRatingStars"
+                                         model="JobPortal.Web.Models.ApplicantRatingStarsModel.FromApplication(app)" />
                                 <p class="text-muted small mb-3">
                                     @app.JobTitle • @IndexModel.FormatRelativeTime(app.AppliedAt)
                                 </p>

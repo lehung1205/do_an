@@ -114,11 +114,25 @@ public class EmployerDashboardService : IEmployerDashboardService
         };
     }
 
-    public async Task<IReadOnlyList<EmployerDashboardJobDto>> GetJobsForUserAsync(
+    public async Task<PagedResult<EmployerDashboardJobDto>> GetJobsForUserAsync(
         long userId,
+        string? status = null,
+        string? search = null,
+        int page = 1,
+        int pageSize = 9,
         CancellationToken cancellationToken = default)
     {
         await _jobExpiryService.CloseExpiredJobsAsync(cancellationToken);
+
+        if (page < 1)
+        {
+            page = 1;
+        }
+
+        if (pageSize < 1 || pageSize > 50)
+        {
+            pageSize = 9;
+        }
 
         var employer = await _context.Employers
             .AsNoTracking()
@@ -129,8 +143,69 @@ public class EmployerDashboardService : IEmployerDashboardService
             throw new NotFoundException("Employer profile not found for this user.");
         }
 
-        var jobs = await QueryJobsAsync(employer.Id, cancellationToken);
-        return jobs.Select(MapJobDto).ToList();
+        var query = _context.Jobs
+            .AsNoTracking()
+            .Where(j => j.EmployerId == employer.Id);
+
+        var statusFilter = NormalizePostingStatusFilter(status);
+        if (statusFilter != null)
+        {
+            query = query.Where(j => j.PostingStatus == statusFilter);
+        }
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var term = search.Trim();
+            query = query.Where(j =>
+                j.Title.Contains(term) ||
+                j.Description.Contains(term) ||
+                j.Location.Contains(term) ||
+                j.Salary.Contains(term) ||
+                (j.WorkingHours != null && j.WorkingHours.Contains(term)));
+        }
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var jobs = await query
+            .OrderByDescending(j => j.Id)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(j => new JobRow
+            {
+                Id = j.Id,
+                Title = j.Title,
+                Description = j.Description,
+                Location = j.Location,
+                Salary = j.Salary,
+                PostingStatus = j.PostingStatus,
+                WorkingHours = j.WorkingHours,
+                ExpiryDate = j.ExpiryDate,
+                ApplicantCount = j.Applications.Count,
+                ThumbnailUrl = j.Images.OrderBy(i => i.Id).Select(i => i.Url).FirstOrDefault()
+            })
+            .ToListAsync(cancellationToken);
+
+        var items = jobs.Select(MapJobDto).ToList();
+
+        return new PagedResult<EmployerDashboardJobDto>
+        {
+            Items = items,
+            Page = page,
+            PageSize = pageSize,
+            TotalCount = totalCount,
+            TotalPages = totalCount == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)pageSize)
+        };
+    }
+
+    private static string? NormalizePostingStatusFilter(string? status)
+    {
+        if (string.IsNullOrWhiteSpace(status) || string.Equals(status, "all", StringComparison.OrdinalIgnoreCase))
+        {
+            return null;
+        }
+
+        var normalized = status.Trim().ToLowerInvariant();
+        return normalized is "recruiting" or "closed" ? normalized : null;
     }
 
     public async Task<IReadOnlyList<EmployerDashboardApplicationDto>> GetApplicationsForUserAsync(

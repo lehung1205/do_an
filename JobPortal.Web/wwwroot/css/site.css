@@ -418,6 +418,11 @@ main {
   margin-bottom: 0 !important;
 }
 
+.job-grid-card--employer .job-grid-card__actions {
+  position: relative;
+  z-index: 2;
+}
+
 /* Features */
 .feature-card {
   background: #fff;

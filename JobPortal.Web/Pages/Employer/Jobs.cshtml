@@ -19,49 +19,130 @@
     {
         <div class="alert alert-warning">@Model.ErrorMessage</div>
     }
-    else if (Model.Jobs.Count == 0)
-    {
-        <div class="employer-panel text-center py-5 text-muted">
-            Chưa có tin nào. <a asp-page="/Employer/PostJob">Đăng tin đầu tiên</a>
-        </div>
-    }
     else
     {
-        <div class="d-flex flex-column gap-3">
-            @foreach (var job in Model.Jobs)
-            {
-                var isRecruiting = string.Equals(job.PostingStatus, "recruiting", StringComparison.OrdinalIgnoreCase);
-                var isClosed = string.Equals(job.PostingStatus, "closed", StringComparison.OrdinalIgnoreCase);
-                <div class="employer-panel">
-                    <div class="d-flex flex-wrap justify-content-between gap-2 mb-2">
-                        <h3 class="h6 mb-0 fw-semibold">@job.Title</h3>
-                        <span class="badge @(isRecruiting ? "employer-badge--open" : isClosed ? "bg-secondary" : "employer-badge--draft")">
-                            @JobPortal.Web.Pages.Employer.JobsModel.FormatJobStatus(job.PostingStatus)
-                        </span>
-                    </div>
-                    <p class="text-muted small mb-2">
-                        <i class="bi bi-geo-alt me-1"></i>@job.Location
-                        · <i class="bi bi-cash-stack me-1"></i>@JobPortal.Web.Pages.Employer.JobsModel.FormatSalary(job.Salary)
-                        · @job.ApplicantCount ứng viên
-                        @if (!string.IsNullOrWhiteSpace(job.WorkingHours))
+        <form method="get" class="employer-panel mb-4">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label" for="status">Trạng thái</label>
+                    <select class="form-select" id="status" name="status">
+                        @if (Model.StatusFilter == null)
                         {
-                            <text>· <i class="bi bi-clock"></i> @job.WorkingHours</text>
-                        }
-                        · Hết hạn @job.ExpiryDate.ToLocalTime().ToString("dd/MM/yyyy")
-                    </p>
-                    <div class="d-flex flex-wrap gap-2">
-                        @if (isRecruiting || isClosed)
-                        {
-                            <a asp-page="/Employer/Applicants" class="btn btn-sm btn-outline-primary">Xem CV</a>
-                            <a asp-page="/Jobs/Detail" asp-route-id="@job.Id" class="btn btn-sm btn-outline-secondary">Chi tiết</a>
+                            <option value="all" selected>Tất cả</option>
                         }
                         else
                         {
-                            <a asp-page="/Employer/PostJob" class="btn btn-sm btn-primary">Tiếp tục chỉnh sửa</a>
+                            <option value="all">Tất cả</option>
                         }
-                    </div>
+                        @if (Model.StatusFilter == "recruiting")
+                        {
+                            <option value="recruiting" selected>Đang tuyển</option>
+                        }
+                        else
+                        {
+                            <option value="recruiting">Đang tuyển</option>
+                        }
+                        @if (Model.StatusFilter == "closed")
+                        {
+                            <option value="closed" selected>Đã đóng</option>
+                        }
+                        else
+                        {
+                            <option value="closed">Đã đóng</option>
+                        }
+                    </select>
                 </div>
+                <div class="col-md-6">
+                    <label class="form-label" for="q">Tìm kiếm</label>
+                    <input type="search" class="form-control" id="q" name="q" value="@Model.Search"
+                           placeholder="Tiêu đề, mô tả, địa điểm, lương..." maxlength="200" />
+                </div>
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary flex-grow-1">
+                        <i class="bi bi-search me-1"></i> Lọc
+                    </button>
+                    <a asp-page="/Employer/Jobs" class="btn btn-outline-secondary" title="Xóa bộ lọc">
+                        <i class="bi bi-x-lg"></i>
+                    </a>
+                </div>
+            </div>
+            <input type="hidden" name="pageNumber" value="1" />
+            <input type="hidden" name="pageSize" value="@Model.PageSize" />
+        </form>
+
+        @if (Model.Jobs.Count == 0)
+        {
+            <div class="employer-panel text-center py-5 text-muted">
+                @if (Model.HasActiveFilter)
+                {
+                    <i class="bi bi-funnel display-6 d-block mb-2"></i>
+                    <p class="mb-2">Không có tin phù hợp bộ lọc.</p>
+                    <a asp-page="/Employer/Jobs" class="btn btn-sm btn-outline-primary">Xóa bộ lọc</a>
+                }
+                else
+                {
+                    <text>Chưa có tin nào. <a asp-page="/Employer/PostJob">Đăng tin đầu tiên</a></text>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3 g-lg-4 job-grid">
+                @foreach (var job in Model.Jobs)
+                {
+                    <div class="col d-flex">
+                        <partial name="Shared/_JobGridCard" model="JobPortal.Web.Models.JobGridCardModel.FromEmployerManageJob(job)" />
+                    </div>
+                }
+            </div>
+
+            @if (Model.ShowPagination)
+            {
+                <nav class="mt-4" aria-label="Phân trang tin tuyển dụng">
+                    <ul class="pagination justify-content-center flex-wrap mb-0">
+                        <li class="page-item @(Model.CurrentPage <= 1 ? "disabled" : "")">
+                            <a class="page-link"
+                               asp-page="/Employer/Jobs"
+                               asp-route-pageNumber="@(Model.CurrentPage - 1)"
+                               asp-route-pageSize="@Model.PageSize"
+                               asp-route-status="@Model.StatusFilter"
+                               asp-route-q="@Model.Search"
+                               aria-label="Trang trước">
+                                <i class="bi bi-chevron-left"></i>
+                            </a>
+                        </li>
+                        @for (var i = 1; i <= Model.TotalPages; i++)
+                        {
+                            <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                                <a class="page-link"
+                                   asp-page="/Employer/Jobs"
+                                   asp-route-pageNumber="@i"
+                                   asp-route-pageSize="@Model.PageSize"
+                                   asp-route-status="@Model.StatusFilter"
+                                   asp-route-q="@Model.Search">@i</a>
+                            </li>
+                        }
+                        <li class="page-item @(Model.CurrentPage >= Model.TotalPages ? "disabled" : "")">
+                            <a class="page-link"
+                               asp-page="/Employer/Jobs"
+                               asp-route-pageNumber="@(Model.CurrentPage + 1)"
+                               asp-route-pageSize="@Model.PageSize"
+                               asp-route-status="@Model.StatusFilter"
+                               asp-route-q="@Model.Search"
+                               aria-label="Trang sau">
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                    <p class="text-muted small text-center mt-2 mb-0">
+                        Trang @Model.CurrentPage / @Model.TotalPages · @Model.TotalCount tin
+                    </p>
+                </nav>
             }
-        </div>
+            else if (Model.TotalCount > 0)
+            {
+                <p class="text-muted small text-center mt-3 mb-0">@Model.TotalCount tin</p>
+            }
+        }
     }
 </div>

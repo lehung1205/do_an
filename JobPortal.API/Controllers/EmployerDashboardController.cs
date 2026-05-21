@@ -29,12 +29,23 @@ public class EmployerDashboardController : ControllerBase
     }
 
     [HttpGet("jobs")]
-    public async Task<IActionResult> GetJobs(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetJobs(
+        [FromQuery] string? status,
+        [FromQuery] string? q,
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 9,
+        CancellationToken cancellationToken = default)
     {
         var userId = GetCurrentUserId();
-        var items = await _dashboardService.GetJobsForUserAsync(userId, cancellationToken);
-        return Ok(ApiResponse<IReadOnlyList<EmployerDashboardJobDto>>.SuccessResponse(
-            items,
+        var result = await _dashboardService.GetJobsForUserAsync(
+            userId,
+            status,
+            q,
+            pageNumber,
+            pageSize,
+            cancellationToken);
+        return Ok(ApiResponse<PagedResult<EmployerDashboardJobDto>>.SuccessResponse(
+            result,
             "Employer jobs retrieved successfully."));
     }
 

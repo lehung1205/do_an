@@ -11,8 +11,12 @@ public interface IEmployerDashboardService
         long userId,
         CancellationToken cancellationToken = default);
 
-    Task<IReadOnlyList<EmployerDashboardJobDto>> GetJobsForUserAsync(
+    Task<PagedResult<EmployerDashboardJobDto>> GetJobsForUserAsync(
         long userId,
+        string? status = null,
+        string? search = null,
+        int page = 1,
+        int pageSize = 9,
         CancellationToken cancellationToken = default);
 
     Task<EmployerDashboardApplicationDto> UpdateApplicationStatusAsync(

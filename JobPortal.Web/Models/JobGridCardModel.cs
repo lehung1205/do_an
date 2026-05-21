@@ -13,6 +13,8 @@ public class JobGridCardModel
     public DateTime ExpiryDate { get; init; }
     public string? ThumbnailUrl { get; init; }
     public int? ApplicantCount { get; init; }
+    public string? WorkingHours { get; init; }
+    public bool ShowEmployerActions { get; init; }
 
     public static JobGridCardModel FromJobDto(JobDto job) => new()
     {
@@ -37,5 +39,20 @@ public class JobGridCardModel
         ExpiryDate = job.ExpiryDate,
         ThumbnailUrl = job.ThumbnailUrl,
         ApplicantCount = job.ApplicantCount
+    };
+
+    public static JobGridCardModel FromEmployerManageJob(EmployerDashboardJobDto job) => new()
+    {
+        Id = job.Id,
+        Title = job.Title,
+        Description = job.Description,
+        Location = job.Location,
+        Salary = job.Salary,
+        PostingStatus = job.PostingStatus,
+        ExpiryDate = job.ExpiryDate,
+        ThumbnailUrl = job.ThumbnailUrl,
+        ApplicantCount = job.ApplicantCount,
+        WorkingHours = job.WorkingHours,
+        ShowEmployerActions = true
     };
 }

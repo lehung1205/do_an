@@ -52,7 +52,12 @@
         {
             <div class="alert alert-secondary">
                 <i class="bi bi-lock-fill me-1"></i>
-                Công việc đã kết thúc (trạng thái <strong>Đã hủy</strong>). Bạn chỉ có thể xem lịch sử tiến độ.
+                Tiến độ đã kết thúc
+                @if (p.CurrentStep != null)
+                {
+                    <text>(<strong>@JobPortal.Web.Helpers.WorkProgressCatalog.FormatStatus(p.CurrentStep.Status)</strong>)</text>
+                }
+                . Bạn chỉ có thể xem lịch sử tiến độ.
             </div>
         }
 

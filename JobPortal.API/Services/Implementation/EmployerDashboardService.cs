@@ -531,7 +531,7 @@ public class EmployerDashboardService : IEmployerDashboardService
 
         if (WorkProgressCatalog.IsLockedStatus(latestStep))
         {
-            throw new BadRequestException("Công việc đã hủy, không thể cập nhật tiến độ thêm.");
+            throw new BadRequestException("Tiến độ đã kết thúc (hoàn thành hoặc đã hủy), không thể cập nhật thêm.");
         }
 
         var status = request.Status.Trim().ToLowerInvariant();

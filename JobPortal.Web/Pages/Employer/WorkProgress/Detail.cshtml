@@ -118,7 +118,12 @@
                     {
                         <div class="alert alert-secondary mb-0">
                             <i class="bi bi-lock-fill me-1"></i>
-                            Công việc đã ở trạng thái <strong>Đã hủy</strong>. Không thể thêm hoặc chỉnh sửa tiến độ nữa.
+                            Tiến độ đã kết thúc
+                            @if (p.CurrentStep != null)
+                            {
+                                <text>(<strong>@JobPortal.Web.Helpers.WorkProgressCatalog.FormatStatus(p.CurrentStep.Status)</strong>)</text>
+                            }
+                            . Không thể thêm bước tiến độ mới.
                         </div>
                     }
                     else

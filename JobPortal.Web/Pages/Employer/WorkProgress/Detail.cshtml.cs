@@ -57,7 +57,7 @@ public class DetailModel : PageModel
 
         if (Progress?.IsProgressLocked == true)
         {
-            ErrorMessage = "Công việc đã hủy, không thể cập nhật tiến độ thêm.";
+            ErrorMessage = "Tiến độ đã kết thúc (hoàn thành hoặc đã hủy), không thể cập nhật thêm.";
             return Page();
         }
 

@@ -1,0 +1,107 @@
+<footer class="site-footer">
+    <div class="container site-footer__main py-5">
+        <div class="row g-4 g-lg-5">
+            <div class="col-lg-4 col-xl-3">
+                <a class="site-footer__brand text-white text-decoration-none" asp-page="/Index">
+                    <i class="bi bi-briefcase-fill me-2"></i>JobPortal
+                </a>
+                <p class="site-footer__tagline small text-white-50 mt-2 mb-3">
+                    Tiếp cận việc làm — Kết nối thành công.
+                </p>
+                <div class="site-footer__contact">
+                    <p class="site-footer__heading small mb-2">Liên hệ</p>
+                    <ul class="list-unstyled small text-white-50 mb-0 site-footer__contact-list">
+                        <li class="mb-2">
+                            <i class="bi bi-envelope me-2 text-white-50"></i>
+                            <a href="mailto:support@jobportal.vn" class="site-footer__link">support@jobportal.vn</a>
+                        </li>
+                        <li>
+                            <i class="bi bi-clock me-2 text-white-50"></i>
+                            Hỗ trợ: 8:00 – 17:30 (T2–T6)
+                        </li>
+                    </ul>
+                </div>
+                <div class="site-footer__social mt-4">
+                    <p class="site-footer__heading small mb-2">Cộng đồng JobPortal</p>
+                    <div class="d-flex gap-2">
+                        <a href="#" class="site-footer__social-btn" aria-label="Facebook" title="Facebook">
+                            <i class="bi bi-facebook"></i>
+                        </a>
+                        <a href="#" class="site-footer__social-btn" aria-label="YouTube" title="YouTube">
+                            <i class="bi bi-youtube"></i>
+                        </a>
+                        <a href="#" class="site-footer__social-btn" aria-label="LinkedIn" title="LinkedIn">
+                            <i class="bi bi-linkedin"></i>
+                        </a>
+                        <a href="#" class="site-footer__social-btn" aria-label="TikTok" title="TikTok">
+                            <i class="bi bi-tiktok"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-6 col-md-4 col-lg-2">
+                <p class="site-footer__heading">Về JobPortal</p>
+                <ul class="site-footer__links list-unstyled small">
+                    <li><a class="site-footer__link" asp-page="/Index">Trang chủ</a></li>
+                    <li><a class="site-footer__link" asp-page="/Jobs/Index">Việc làm</a></li>
+                    <li><a class="site-footer__link" asp-page="/Privacy">Chính sách</a></li>
+                    <li><a class="site-footer__link" asp-page="/Auth/Login">Đăng nhập</a></li>
+                    <li><a class="site-footer__link" asp-page="/Auth/Register">Đăng ký</a></li>
+                </ul>
+            </div>
+
+            <div class="col-6 col-md-4 col-lg-2">
+                <p class="site-footer__heading">Ứng viên</p>
+                <ul class="site-footer__links list-unstyled small">
+                    <li><a class="site-footer__link" asp-page="/Jobs/Index">Tìm việc làm</a></li>
+                    <li><a class="site-footer__link" asp-page="/Applications/Index">Đơn ứng tuyển</a></li>
+                    <li><a class="site-footer__link" asp-page="/Applications/WorkProgress/Index">Tiến độ làm việc</a></li>
+                    <li><a class="site-footer__link" asp-page="/Auth/Register">Tạo tài khoản ứng viên</a></li>
+                </ul>
+            </div>
+
+            <div class="col-6 col-md-4 col-lg-2">
+                <p class="site-footer__heading">Nhà tuyển dụng</p>
+                <ul class="site-footer__links list-unstyled small">
+                    <li><a class="site-footer__link" asp-page="/Employer/PostJob">Đăng tin tuyển dụng</a></li>
+                    <li><a class="site-footer__link" asp-page="/Employer/Jobs">Quản lý tin</a></li>
+                    <li><a class="site-footer__link" asp-page="/Employer/Applicants">Duyệt CV ứng viên</a></li>
+                    <li><a class="site-footer__link" asp-page="/Employer/WorkProgress/Index">Tiến độ làm việc</a></li>
+                    <li><a class="site-footer__link" asp-page="/Employer/BuyPackages">Gói dịch vụ</a></li>
+                </ul>
+            </div>
+
+            <div class="col-6 col-md-8 col-lg-3">
+                <p class="site-footer__heading">Khám phá</p>
+                <ul class="site-footer__links list-unstyled small">
+                    <li><a class="site-footer__link" asp-page="/Jobs/Index">Việc làm đang tuyển</a></li>
+                    <li><a class="site-footer__link" asp-page="/Privacy">Điều khoản &amp; bảo mật</a></li>
+                    <li><a class="site-footer__link" asp-page="/Employer/BuyPackages">Mua lượt đăng tin</a></li>
+                </ul>
+                <p class="site-footer__heading mt-4">Quy định</p>
+                <ul class="site-footer__links list-unstyled small mb-0">
+                    <li><a class="site-footer__link" asp-page="/Privacy">Chính sách sử dụng</a></li>
+                    <li><a class="site-footer__link" asp-page="/Privacy">Chính sách bảo mật</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="site-footer__bottom">
+        <div class="container py-3">
+            <div class="row align-items-center g-2">
+                <div class="col-md-6">
+                    <p class="small text-white-50 mb-0">
+                        &copy; @DateTime.Now.Year JobPortal. Nền tảng kết nối ứng viên và nhà tuyển dụng.
+                    </p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <a class="site-footer__link small" asp-page="/Privacy">Chính sách</a>
+                    <span class="text-white-50 small mx-2">·</span>
+                    <a class="site-footer__link small" asp-page="/Auth/Login">Đăng nhập</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>

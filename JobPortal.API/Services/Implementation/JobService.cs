@@ -81,12 +81,12 @@ public class JobService : IJobService
         return dto;
     }
 
-    public async Task<JobDto> CreateJobAsync(JobDto jobDto, CancellationToken cancellationToken = default)
+    public async Task<JobDto> CreateJobAsync(CreateJobRequest request, CancellationToken cancellationToken = default)
     {
-        var employer = await _employerRepository.GetByIdAsync(jobDto.EmployerId, cancellationToken);
+        var employer = await _employerRepository.GetByIdAsync(request.EmployerId, cancellationToken);
         if (employer == null)
         {
-            throw new NotFoundException($"Employer with id {jobDto.EmployerId} was not found.");
+            throw new NotFoundException($"Employer with id {request.EmployerId} was not found.");
         }
 
         if (employer.PostingLimit < 1)
@@ -97,7 +97,7 @@ public class JobService : IJobService
         employer.PostingLimit--;
         employer.UpdatedAt = DateTime.UtcNow;
 
-        var entity = _mapper.Map<Job>(jobDto);
+        var entity = _mapper.Map<Job>(request);
         await _repository.AddAsync(entity, cancellationToken);
 
         var created = await _repository.GetByIdAsync(entity.Id, cancellationToken)

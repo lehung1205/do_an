@@ -24,6 +24,14 @@ public class MappingProfile : Profile
                 d => d.ThumbnailUrl,
                 o => o.MapFrom(s => s.Images.OrderBy(i => i.Id).Select(i => i.Url).FirstOrDefault()));
 
+        CreateMap<CreateJobRequest, Job>()
+            .ForMember(d => d.Id, o => o.Ignore())
+            .ForMember(d => d.Employer, o => o.Ignore())
+            .ForMember(d => d.Category, o => o.Ignore())
+            .ForMember(d => d.Images, o => o.Ignore())
+            .ForMember(d => d.Applications, o => o.Ignore())
+            .ForMember(d => d.Reviews, o => o.Ignore());
+
         CreateMap<JobDto, Job>()
             .ForMember(d => d.Id, o => o.Ignore())
             .ForMember(d => d.Employer, o => o.Ignore())

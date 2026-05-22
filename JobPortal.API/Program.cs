@@ -10,8 +10,10 @@ using JobPortal.API.Repositories.Implementation;
 using JobPortal.API.Services.Implementation;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using JobPortal.API.DTOs.Common;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -116,6 +118,26 @@ builder.Services.AddControllers()
     {
         o.JsonSerializerOptions.PropertyNamingPolicy = null;
     });
+
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.InvalidModelStateResponseFactory = context =>
+    {
+        var errors = context.ModelState
+            .Where(entry => entry.Value?.Errors.Count > 0)
+            .SelectMany(entry => entry.Value!.Errors.Select(error => new ApiErrorItem
+            {
+                Field = entry.Key,
+                Message = string.IsNullOrWhiteSpace(error.ErrorMessage)
+                    ? "Giá trị không hợp lệ."
+                    : error.ErrorMessage
+            }))
+            .ToList();
+
+        var response = ApiResponse<object>.FailResponse("Dữ liệu không hợp lệ.", errors);
+        return new BadRequestObjectResult(response);
+    };
+});
 
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();

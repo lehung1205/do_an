@@ -83,9 +83,8 @@ public class PostJobModel : PageModel
         }
 
         var now = DateTime.UtcNow;
-        var dto = new JobDto
+        var request = new CreateJobRequest
         {
-            Id = 0,
             EmployerId = employerId,
             CategoryId = Input.CategoryId,
             Title = Input.Title.Trim(),
@@ -97,7 +96,7 @@ public class PostJobModel : PageModel
             ExpiryDate = now.AddMonths(2)
         };
 
-        var response = await _api.PostApiResponseAsync<JobDto, JobDto>("/api/jobs", dto);
+        var response = await _api.PostApiResponseAsync<CreateJobRequest, JobDto>("/api/jobs", request);
         if (response is not { Success: true, Data: not null })
         {
             ErrorMessage = response?.Message

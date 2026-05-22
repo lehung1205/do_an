@@ -100,6 +100,133 @@ public class ApiService
             return null;
         }
 
-        return JsonSerializer.Deserialize<ApiResponse<T>>(body, JsonOptions);
+        try
+        {
+            return JsonSerializer.Deserialize<ApiResponse<T>>(body, JsonOptions);
+        }
+        catch (JsonException)
+        {
+            return TryParseApiResponseFallback<T>(body);
+        }
+    }
+
+    private static ApiResponse<T>? TryParseApiResponseFallback<T>(string body)
+    {
+        try
+        {
+            using var doc = JsonDocument.Parse(body);
+            var root = doc.RootElement;
+
+            var response = new ApiResponse<T>
+            {
+                Success = TryGetBool(root, "Success", "success"),
+                Message = TryGetString(root, "Message", "message", "title") ?? string.Empty,
+                TraceId = TryGetString(root, "TraceId", "traceId") ?? string.Empty
+            };
+
+            if (TryGetProperty(root, out var timestampEl, "Timestamp", "timestamp") &&
+                timestampEl.ValueKind == JsonValueKind.String &&
+                DateTime.TryParse(timestampEl.GetString(), out var timestamp))
+            {
+                response.Timestamp = timestamp;
+            }
+
+            if (TryGetProperty(root, out var dataEl, "Data", "data") &&
+                dataEl.ValueKind is not JsonValueKind.Null and not JsonValueKind.Undefined)
+            {
+                response.Data = dataEl.Deserialize<T>(JsonOptions);
+            }
+
+            response.Errors = ParseErrors(root);
+            return response;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static List<ApiErrorItem> ParseErrors(JsonElement root)
+    {
+        if (!TryGetProperty(root, out var errorsEl, "Errors", "errors"))
+        {
+            return new List<ApiErrorItem>();
+        }
+
+        if (errorsEl.ValueKind == JsonValueKind.Array)
+        {
+            return errorsEl.Deserialize<List<ApiErrorItem>>(JsonOptions) ?? new List<ApiErrorItem>();
+        }
+
+        if (errorsEl.ValueKind != JsonValueKind.Object)
+        {
+            return new List<ApiErrorItem>();
+        }
+
+        var items = new List<ApiErrorItem>();
+        foreach (var property in errorsEl.EnumerateObject())
+        {
+            if (property.Value.ValueKind == JsonValueKind.Array)
+            {
+                foreach (var messageEl in property.Value.EnumerateArray())
+                {
+                    var message = messageEl.GetString();
+                    if (!string.IsNullOrWhiteSpace(message))
+                    {
+                        items.Add(new ApiErrorItem { Field = property.Name, Message = message });
+                    }
+                }
+            }
+            else if (property.Value.ValueKind == JsonValueKind.String)
+            {
+                var message = property.Value.GetString();
+                if (!string.IsNullOrWhiteSpace(message))
+                {
+                    items.Add(new ApiErrorItem { Field = property.Name, Message = message });
+                }
+            }
+        }
+
+        return items;
+    }
+
+    private static bool TryGetBool(JsonElement root, params string[] names)
+    {
+        if (!TryGetProperty(root, out var element, names))
+        {
+            return false;
+        }
+
+        return element.ValueKind switch
+        {
+            JsonValueKind.True => true,
+            JsonValueKind.False => false,
+            JsonValueKind.String => bool.TryParse(element.GetString(), out var parsed) && parsed,
+            _ => false
+        };
+    }
+
+    private static string? TryGetString(JsonElement root, params string[] names)
+    {
+        if (!TryGetProperty(root, out var element, names))
+        {
+            return null;
+        }
+
+        return element.ValueKind == JsonValueKind.String ? element.GetString() : null;
+    }
+
+    private static bool TryGetProperty(JsonElement root, out JsonElement element, params string[] names)
+    {
+        foreach (var name in names)
+        {
+            if (root.TryGetProperty(name, out element))
+            {
+                return true;
+            }
+        }
+
+        element = default;
+        return false;
     }
 }

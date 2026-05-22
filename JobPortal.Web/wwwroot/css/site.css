@@ -59,6 +59,11 @@ main {
   color: var(--jp-primary);
 }
 
+.site-header .navbar-nav .nav-link.active {
+  color: var(--jp-primary);
+  font-weight: 600;
+}
+
 .nav-auth {
   margin-top: 0.5rem;
   padding-top: 0.5rem;
@@ -454,10 +459,165 @@ main {
   box-shadow: 0 20px 40px rgba(37, 99, 235, 0.25);
 }
 
+/* Chính sách */
+.policy-page__title {
+  color: var(--jp-dark);
+  font-weight: 700;
+}
+
+.policy-page__nav {
+  top: 5.5rem;
+}
+
+.policy-page__toc .nav-link {
+  font-size: 0.875rem;
+  color: var(--jp-muted);
+  padding: 0.35rem 0.65rem;
+  border-radius: 8px;
+}
+
+.policy-page__toc .nav-link:hover,
+.policy-page__toc .nav-link:focus {
+  color: var(--jp-primary);
+  background: #eff6ff;
+}
+
+.policy-section {
+  padding-bottom: 1.75rem;
+  margin-bottom: 1.75rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.policy-section:last-child {
+  padding-bottom: 0;
+  margin-bottom: 0;
+  border-bottom: none;
+}
+
+.policy-section__title {
+  color: var(--jp-dark);
+  font-weight: 600;
+  margin-bottom: 1rem;
+  scroll-margin-top: 5.5rem;
+}
+
+.policy-section h3 {
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.policy-section ul {
+  padding-left: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.policy-section ul li {
+  margin-bottom: 0.35rem;
+}
+
+.policy-section ul li:last-child {
+  margin-bottom: 0;
+}
+
+@media (max-width: 991.98px) {
+  .policy-page__nav {
+    position: static !important;
+  }
+
+  .policy-page__toc {
+    flex-direction: row !important;
+    flex-wrap: wrap;
+  }
+
+  .policy-page__toc .nav-item {
+    flex: 0 0 auto;
+  }
+}
+
 /* Footer */
 .site-footer {
   background: var(--jp-dark);
   margin-top: auto;
+  color: #e2e8f0;
+}
+
+.site-footer__brand {
+  font-weight: 700;
+  font-size: 1.35rem;
+  display: inline-flex;
+  align-items: center;
+}
+
+.site-footer__brand:hover {
+  color: #fff !important;
+}
+
+.site-footer__tagline {
+  line-height: 1.5;
+  max-width: 280px;
+}
+
+.site-footer__heading {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #f8fafc;
+  margin-bottom: 0.85rem;
+}
+
+.site-footer__links li {
+  margin-bottom: 0.45rem;
+}
+
+.site-footer__links li:last-child {
+  margin-bottom: 0;
+}
+
+.site-footer__link {
+  color: rgba(248, 250, 252, 0.65);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.site-footer__link:hover {
+  color: #fff;
+}
+
+.site-footer__contact-list a.site-footer__link {
+  color: rgba(248, 250, 252, 0.75);
+}
+
+.site-footer__social-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(248, 250, 252, 0.85);
+  text-decoration: none;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.site-footer__social-btn:hover {
+  background: var(--jp-primary);
+  color: #fff;
+}
+
+.site-footer__bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.15);
+}
+
+@media (max-width: 575.98px) {
+  .site-footer__main {
+    padding-top: 2.5rem !important;
+    padding-bottom: 2rem !important;
+  }
+
+  .site-footer__bottom .text-md-end {
+    text-align: left !important;
+  }
 }
 
 /* Employer dashboard */

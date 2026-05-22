@@ -9,6 +9,11 @@ namespace JobPortal.API.Middleware;
 
 public sealed class ExceptionHandlingMiddleware
 {
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNamingPolicy = null
+    };
+
     private readonly RequestDelegate _next;
     private readonly IWebHostEnvironment _environment;
 
@@ -56,7 +61,7 @@ public sealed class ExceptionHandlingMiddleware
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = (int)statusCode;
 
-        var json = JsonSerializer.Serialize(response);
+        var json = JsonSerializer.Serialize(response, JsonOptions);
         await context.Response.WriteAsync(json);
     }
 

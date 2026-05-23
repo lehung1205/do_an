@@ -11,11 +11,14 @@ public class IndexModel : PageModel
     private readonly ApiService _api;
 
     public List<JobDto> FeaturedJobs { get; set; } = new();
+    public List<CategoryDto> Categories { get; set; } = new();
     public int TotalJobCount { get; set; }
     public int EmployerCount { get; set; }
     public int JobSeekerCount { get; set; }
     public string? Q { get; set; }
     public string? Location { get; set; }
+    public bool HasHomeSearch =>
+        !string.IsNullOrWhiteSpace(Q) || !string.IsNullOrWhiteSpace(Location);
     public bool IsEmployerHome { get; set; }
     public EmployerDashboardDto? EmployerDashboard { get; set; }
 
@@ -41,37 +44,35 @@ public class IndexModel : PageModel
             }
         }
 
-        Q = q;
-        Location = location;
+        Q = string.IsNullOrWhiteSpace(q) ? null : q.Trim();
+        Location = string.IsNullOrWhiteSpace(location) ? null : location.Trim();
 
-        var pagedTask = _api.GetApiDataAsync<PagedResult<JobDto>>("/api/jobs?page=1&pageSize=50");
+        var featuredQuery = new List<string> { "page=1", "pageSize=6" };
+        if (!string.IsNullOrEmpty(Q))
+        {
+            featuredQuery.Add($"q={Uri.EscapeDataString(Q)}");
+        }
+
+        if (!string.IsNullOrEmpty(Location))
+        {
+            featuredQuery.Add($"location={Uri.EscapeDataString(Location)}");
+        }
+
+        var featuredTask = _api.GetApiDataAsync<PagedResult<JobDto>>(
+            $"/api/jobs?{string.Join("&", featuredQuery)}");
+        var totalJobsTask = _api.GetApiDataAsync<PagedResult<JobDto>>("/api/jobs?page=1&pageSize=1");
         var statsTask = _api.GetApiDataAsync<HomeStatsDto>("/api/stats");
-        await Task.WhenAll(pagedTask, statsTask);
+        var categoriesTask = _api.GetApiDataAsync<List<CategoryDto>>("/api/categories");
+        await Task.WhenAll(featuredTask, totalJobsTask, statsTask, categoriesTask);
 
-        var paged = await pagedTask;
+        var featured = await featuredTask;
+        var totalJobs = await totalJobsTask;
         var stats = await statsTask;
-        var jobs = paged?.Items.ToList() ?? new();
-        TotalJobCount = paged?.TotalCount ?? jobs.Count;
+        FeaturedJobs = featured?.Items.ToList() ?? new();
+        TotalJobCount = totalJobs?.TotalCount ?? featured?.TotalCount ?? 0;
         EmployerCount = stats?.EmployerCount ?? 0;
         JobSeekerCount = stats?.JobSeekerCount ?? 0;
-
-        if (!string.IsNullOrWhiteSpace(q))
-        {
-            jobs = jobs
-                .Where(j =>
-                    j.Title.Contains(q, StringComparison.OrdinalIgnoreCase) ||
-                    j.Description.Contains(q, StringComparison.OrdinalIgnoreCase))
-                .ToList();
-        }
-
-        if (!string.IsNullOrWhiteSpace(location))
-        {
-            jobs = jobs
-                .Where(j => j.Location.Contains(location, StringComparison.OrdinalIgnoreCase))
-                .ToList();
-        }
-
-        FeaturedJobs = jobs.Take(6).ToList();
+        Categories = (await categoriesTask ?? new List<CategoryDto>()).Take(8).ToList();
         return Page();
     }
 

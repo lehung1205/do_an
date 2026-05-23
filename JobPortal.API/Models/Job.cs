@@ -48,6 +48,9 @@ public class Job
     [Column("expiry_date")]
     public DateTime ExpiryDate { get; set; }
 
+    [Column("created_at")]
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
     public ICollection<Image> Images { get; set; } = new List<Image>();
     public ICollection<Application> Applications { get; set; } = new List<Application>();
     public ICollection<Review> Reviews { get; set; } = new List<Review>();

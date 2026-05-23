@@ -68,7 +68,7 @@ public sealed class AuthService : IAuthService
                 PasswordHash = authUser.PasswordHash,
                 Status = "ACTIVE",
                 Role = role,
-                PostingLimit = 10,
+                PostingLimit = 3,
                 UserId = authUser.Id,
                 CreatedAt = now,
                 UpdatedAt = now

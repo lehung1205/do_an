@@ -76,6 +76,11 @@ public class JobService : IJobService
             throw new NotFoundException($"Job with id {id} was not found.");
         }
 
+        if (!JobPostingCatalog.IsPubliclyVisible(entity.PostingStatus))
+        {
+            throw new NotFoundException($"Job with id {id} was not found.");
+        }
+
         var dto = _mapper.Map<JobDto>(entity);
         await ApplyEmployerRatingsAsync(new List<JobDto> { dto }, cancellationToken);
         return dto;
@@ -98,6 +103,8 @@ public class JobService : IJobService
         employer.UpdatedAt = DateTime.UtcNow;
 
         var entity = _mapper.Map<Job>(request);
+        entity.PostingStatus = JobPostingCatalog.Pending;
+        entity.CreatedAt = DateTime.UtcNow;
         await _repository.AddAsync(entity, cancellationToken);
 
         var created = await _repository.GetByIdAsync(entity.Id, cancellationToken)

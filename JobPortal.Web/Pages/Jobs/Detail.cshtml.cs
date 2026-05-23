@@ -137,7 +137,9 @@ public class DetailModel : PageModel
 
     public static string StatusBadgeClass(string status) => status.Trim().ToLowerInvariant() switch
     {
+        "pending" => "bg-warning text-dark",
         "recruiting" => "bg-success",
+        "rejected" => "bg-danger",
         "closed" => "bg-secondary",
         "draft" => "bg-warning text-dark",
         _ => "bg-secondary"

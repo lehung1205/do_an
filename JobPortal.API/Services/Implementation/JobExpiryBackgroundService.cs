@@ -18,21 +18,27 @@ public class JobExpiryBackgroundService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        await CloseExpiredAsync(stoppingToken);
+        await RunMaintenanceAsync(stoppingToken);
 
         using var timer = new PeriodicTimer(Interval);
         while (await timer.WaitForNextTickAsync(stoppingToken))
         {
-            await CloseExpiredAsync(stoppingToken);
+            await RunMaintenanceAsync(stoppingToken);
         }
     }
 
-    private async Task CloseExpiredAsync(CancellationToken cancellationToken)
+    private async Task RunMaintenanceAsync(CancellationToken cancellationToken)
     {
         try
         {
             using var scope = _scopeFactory.CreateScope();
             var expiryService = scope.ServiceProvider.GetRequiredService<IJobExpiryService>();
+            var approved = await expiryService.AutoApproveStalePendingJobsAsync(cancellationToken);
+            if (approved > 0)
+            {
+                _logger.LogInformation("Auto-approved {Count} pending job(s) after moderation timeout.", approved);
+            }
+
             var closed = await expiryService.CloseExpiredJobsAsync(cancellationToken);
             if (closed > 0)
             {
@@ -41,7 +47,7 @@ public class JobExpiryBackgroundService : BackgroundService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to auto-close expired jobs.");
+            _logger.LogError(ex, "Failed to run scheduled job maintenance.");
         }
     }
 }

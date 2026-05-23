@@ -1,0 +1,189 @@
+@page
+@model JobPortal.Web.Pages.Admin.Jobs.IndexModel
+@{
+    ViewData["Title"] = "Duyệt tin tuyển dụng";
+}
+
+<div class="container py-4">
+    <div class="mb-4">
+        <h2 class="mb-1"><i class="bi bi-shield-check me-2"></i>Duyệt tin tuyển dụng</h2>
+        <p class="text-muted mb-0">Tin mới cần phê duyệt trong 24 giờ; quá hạn sẽ tự chuyển sang đang tuyển</p>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+    {
+        <div class="alert alert-success">@Model.SuccessMessage</div>
+    }
+    @if (!string.IsNullOrEmpty(Model.ActionErrorMessage))
+    {
+        <div class="alert alert-warning">@Model.ActionErrorMessage</div>
+    }
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-warning">@Model.ErrorMessage</div>
+    }
+
+    <form method="get" class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-9">
+                    <label class="form-label" for="q">Tìm kiếm</label>
+                    <input type="search" class="form-control" id="q" name="q" value="@Model.Search"
+                           placeholder="Tiêu đề, mô tả, địa điểm, tên công ty..." maxlength="200" />
+                </div>
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary flex-grow-1">
+                        <i class="bi bi-search me-1"></i> Lọc
+                    </button>
+                    <a asp-page="/Admin/Jobs/Index" class="btn btn-outline-secondary" title="Xóa bộ lọc">
+                        <i class="bi bi-x-lg"></i>
+                    </a>
+                </div>
+            </div>
+            <input type="hidden" name="page" value="1" />
+            <input type="hidden" name="pageSize" value="@Model.PageSize" />
+        </div>
+    </form>
+
+    @if (string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        @if (Model.Jobs.Count == 0)
+        {
+            <div class="card border-0 shadow-sm text-center py-5 text-muted">
+                <i class="bi bi-inbox display-6 d-block mb-2"></i>
+                <p class="mb-0">Không có tin nào đang chờ duyệt.</p>
+            </div>
+        }
+        else
+        {
+            <div class="row g-4">
+                @foreach (var job in Model.Jobs)
+                {
+                    <div class="col-12">
+                        <article class="card border-0 shadow-sm admin-pending-job">
+                            <div class="row g-0">
+                                <div class="col-md-3 col-lg-2">
+                                    @if (!string.IsNullOrWhiteSpace(job.ThumbnailUrl))
+                                    {
+                                        <img src="@job.ThumbnailUrl" alt="" class="admin-pending-job__thumb w-100 h-100 object-fit-cover" loading="lazy" />
+                                    }
+                                    else
+                                    {
+                                        <div class="admin-pending-job__placeholder d-flex align-items-center justify-content-center h-100 min-h-120">
+                                            <i class="bi bi-briefcase fs-2 text-muted"></i>
+                                        </div>
+                                    }
+                                </div>
+                                <div class="col-md-9 col-lg-10">
+                                    <div class="card-body">
+                                        <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-2">
+                                            <h3 class="h5 mb-0">@job.Title</h3>
+                                            <span class="badge bg-warning text-dark">Chờ duyệt</span>
+                                        </div>
+                                        <p class="text-muted small mb-2">
+                                            <i class="bi bi-building me-1"></i>@job.EmployerName
+                                            @if (!string.IsNullOrWhiteSpace(job.EmployerEmail))
+                                            {
+                                                <span class="mx-1">·</span>
+                                                <i class="bi bi-envelope me-1"></i>@job.EmployerEmail
+                                            }
+                                            <span class="mx-1">·</span>
+                                            <i class="bi bi-tag me-1"></i>@job.CategoryName
+                                        </p>
+                                        <p class="small mb-2 text-truncate-3">@job.Description</p>
+                                        <ul class="list-unstyled small mb-3">
+                                            <li><i class="bi bi-geo-alt text-primary me-1"></i>@job.Location</li>
+                                            <li><i class="bi bi-cash-stack text-primary me-1"></i>@job.Salary</li>
+                                            @if (!string.IsNullOrWhiteSpace(job.WorkingHours))
+                                            {
+                                                <li><i class="bi bi-clock text-primary me-1"></i>@job.WorkingHours</li>
+                                            }
+                                            <li><i class="bi bi-calendar-event text-primary me-1"></i>Hết hạn @job.ExpiryDate.ToLocalTime().ToString("dd/MM/yyyy")</li>
+                                        </ul>
+                                        <div class="d-flex flex-wrap gap-2">
+                                            <form method="post" asp-page-handler="Approve" class="d-inline"
+                                                  onsubmit="return confirm('Duyệt tin này? Tin sẽ hiển thị công khai.');">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="jobId" value="@job.Id" />
+                                                <input type="hidden" name="q" value="@Model.Search" />
+                                                <input type="hidden" name="page" value="@Model.CurrentPage" />
+                                                <input type="hidden" name="pageSize" value="@Model.PageSize" />
+                                                <button type="submit" class="btn btn-success btn-sm">
+                                                    <i class="bi bi-check-lg me-1"></i>Duyệt
+                                                </button>
+                                            </form>
+                                            <form method="post" asp-page-handler="Reject" class="d-inline"
+                                                  onsubmit="return confirm('Từ chối tin này? Lượt đăng tin sẽ được hoàn lại cho nhà tuyển dụng.');">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="jobId" value="@job.Id" />
+                                                <input type="hidden" name="q" value="@Model.Search" />
+                                                <input type="hidden" name="page" value="@Model.CurrentPage" />
+                                                <input type="hidden" name="pageSize" value="@Model.PageSize" />
+                                                <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                    <i class="bi bi-x-lg me-1"></i>Từ chối
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+                }
+            </div>
+
+            @if (Model.ShowPagination)
+            {
+                <nav class="mt-4" aria-label="Phân trang duyệt tin">
+                    <ul class="pagination justify-content-center flex-wrap mb-0">
+                        <li class="page-item @(Model.CurrentPage <= 1 ? "disabled" : "")">
+                            <a class="page-link"
+                               asp-page="/Admin/Jobs/Index"
+                               asp-route-page="@(Model.CurrentPage - 1)"
+                               asp-route-pageSize="@Model.PageSize"
+                               asp-route-q="@Model.Search">
+                                <i class="bi bi-chevron-left"></i>
+                            </a>
+                        </li>
+                        @for (var i = 1; i <= Model.TotalPages; i++)
+                        {
+                            <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                                <a class="page-link"
+                                   asp-page="/Admin/Jobs/Index"
+                                   asp-route-page="@i"
+                                   asp-route-pageSize="@Model.PageSize"
+                                   asp-route-q="@Model.Search">@i</a>
+                            </li>
+                        }
+                        <li class="page-item @(Model.CurrentPage >= Model.TotalPages ? "disabled" : "")">
+                            <a class="page-link"
+                               asp-page="/Admin/Jobs/Index"
+                               asp-route-page="@(Model.CurrentPage + 1)"
+                               asp-route-pageSize="@Model.PageSize"
+                               asp-route-q="@Model.Search">
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                    <p class="text-muted small text-center mt-2 mb-0">
+                        Trang @Model.CurrentPage / @Model.TotalPages · @Model.TotalCount tin chờ duyệt
+                    </p>
+                </nav>
+            }
+        }
+    }
+</div>
+
+@section Styles {
+    <style>
+        .admin-pending-job__thumb { min-height: 120px; max-height: 200px; }
+        .admin-pending-job__placeholder { min-height: 120px; background: var(--bs-light, #f8f9fa); }
+        .text-truncate-3 {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .min-h-120 { min-height: 120px; }
+    </style>
+}

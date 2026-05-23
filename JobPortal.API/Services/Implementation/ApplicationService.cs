@@ -110,10 +110,10 @@ public class ApplicationService : IApplicationService
             throw new NotFoundException($"Job with id {request.JobId} was not found.");
         }
 
-        if (!string.Equals(job.PostingStatus, "recruiting", StringComparison.OrdinalIgnoreCase))
+        if (!string.Equals(job.PostingStatus, JobPostingCatalog.Recruiting, StringComparison.OrdinalIgnoreCase))
         {
             throw new BadRequestException(
-                string.Equals(job.PostingStatus, "closed", StringComparison.OrdinalIgnoreCase)
+                string.Equals(job.PostingStatus, JobPostingCatalog.Closed, StringComparison.OrdinalIgnoreCase)
                     ? "This job posting has closed and is no longer accepting applications."
                     : "This job is not accepting applications.");
         }

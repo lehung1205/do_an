@@ -1,6 +1,7 @@
 using JobPortal.Web.Dtos;
 using JobPortal.Web.Dtos.Common;
 using JobPortal.Web.Services;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace JobPortal.Web.Pages;
@@ -20,10 +21,15 @@ public class IndexModel : PageModel
 
     public IndexModel(ApiService api) => _api = api;
 
-    public async Task OnGetAsync(string? q, string? location)
+    public async Task<IActionResult> OnGetAsync(string? q, string? location)
     {
         var role = HttpContext.Session.GetString("UserRole");
         var isLoggedIn = !string.IsNullOrEmpty(HttpContext.Session.GetString("JwtToken"));
+
+        if (isLoggedIn && string.Equals(role, "ADMIN", StringComparison.Ordinal))
+        {
+            return RedirectToPage("/Admin/Jobs/Index");
+        }
 
         if (isLoggedIn && string.Equals(role, "EMPLOYER", StringComparison.Ordinal))
         {
@@ -31,7 +37,7 @@ public class IndexModel : PageModel
             IsEmployerHome = EmployerDashboard != null;
             if (IsEmployerHome)
             {
-                return;
+                return Page();
             }
         }
 
@@ -66,6 +72,7 @@ public class IndexModel : PageModel
         }
 
         FeaturedJobs = jobs.Take(6).ToList();
+        return Page();
     }
 
     public static string FormatSalary(string? salary) =>
@@ -79,7 +86,9 @@ public class IndexModel : PageModel
 
     public static string FormatJobStatus(string status) => status.Trim().ToLowerInvariant() switch
     {
+        "pending" => "Chờ duyệt",
         "recruiting" => "Đang tuyển",
+        "rejected" => "Từ chối",
         "draft" => "Nháp",
         "closed" => "Đã đóng",
         _ => status

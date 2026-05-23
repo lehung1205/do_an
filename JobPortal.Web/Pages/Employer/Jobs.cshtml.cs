@@ -156,7 +156,9 @@ public class JobsModel : PageModel
         }
 
         var normalized = status.Trim().ToLowerInvariant();
-        return normalized is "recruiting" or "closed" ? normalized : null;
+        return normalized is "pending" or "recruiting" or "rejected" or "closed"
+            ? normalized
+            : null;
     }
 
     private IActionResult? RequireEmployer()

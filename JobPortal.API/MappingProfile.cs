@@ -26,6 +26,7 @@ public class MappingProfile : Profile
 
         CreateMap<CreateJobRequest, Job>()
             .ForMember(d => d.Id, o => o.Ignore())
+            .ForMember(d => d.CreatedAt, o => o.Ignore())
             .ForMember(d => d.Employer, o => o.Ignore())
             .ForMember(d => d.Category, o => o.Ignore())
             .ForMember(d => d.Images, o => o.Ignore())

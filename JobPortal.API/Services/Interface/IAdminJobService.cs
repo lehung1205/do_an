@@ -5,9 +5,10 @@ namespace JobPortal.API.Services.Interface;
 
 public interface IAdminJobService
 {
-    Task<PagedResult<AdminPendingJobDto>> GetPendingJobsPagedAsync(
+    Task<PagedResult<AdminPendingJobDto>> GetJobsPagedAsync(
         int page,
         int pageSize,
+        string? status = null,
         string? search = null,
         CancellationToken cancellationToken = default);
 

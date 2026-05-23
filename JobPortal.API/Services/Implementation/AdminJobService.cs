@@ -20,72 +20,13 @@ public class AdminJobService : IAdminJobService
         _jobExpiryService = jobExpiryService;
     }
 
-    public async Task<PagedResult<AdminPendingJobDto>> GetPendingJobsPagedAsync(
+    public Task<PagedResult<AdminPendingJobDto>> GetJobsPagedAsync(
         int page,
         int pageSize,
+        string? status = null,
         string? search = null,
-        CancellationToken cancellationToken = default)
-    {
-        if (page < 1)
-        {
-            page = 1;
-        }
-
-        if (pageSize < 1 || pageSize > MaxPageSize)
-        {
-            pageSize = 12;
-        }
-
-        await _jobExpiryService.CloseExpiredJobsAsync(cancellationToken);
-
-        var query = _context.Jobs
-            .AsNoTracking()
-            .Where(j => j.PostingStatus == JobPostingCatalog.Pending);
-
-        if (!string.IsNullOrWhiteSpace(search))
-        {
-            var term = search.Trim();
-            query = query.Where(j =>
-                j.Title.Contains(term) ||
-                j.Description.Contains(term) ||
-                j.Location.Contains(term) ||
-                j.Employer.Name.Contains(term));
-        }
-
-        var totalCount = await query.CountAsync(cancellationToken);
-
-        var items = await query
-            .OrderByDescending(j => j.Id)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .Select(j => new AdminPendingJobDto
-            {
-                Id = j.Id,
-                EmployerId = j.EmployerId,
-                EmployerName = j.Employer.Name,
-                EmployerEmail = j.Employer.Email,
-                CategoryId = j.CategoryId,
-                CategoryName = j.Category.Name,
-                Title = j.Title,
-                Description = j.Description,
-                Salary = j.Salary,
-                Location = j.Location,
-                PostingStatus = j.PostingStatus,
-                WorkingHours = j.WorkingHours,
-                ExpiryDate = j.ExpiryDate,
-                ThumbnailUrl = j.Images.OrderBy(i => i.Id).Select(i => i.Url).FirstOrDefault()
-            })
-            .ToListAsync(cancellationToken);
-
-        return new PagedResult<AdminPendingJobDto>
-        {
-            Items = items,
-            Page = page,
-            PageSize = pageSize,
-            TotalCount = totalCount,
-            TotalPages = totalCount == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)pageSize)
-        };
-    }
+        CancellationToken cancellationToken = default) =>
+        GetJobsPagedInternalAsync(page, pageSize, status, search, cancellationToken);
 
     public async Task<JobDto> ApproveJobAsync(long jobId, CancellationToken cancellationToken = default)
     {
@@ -146,6 +87,100 @@ public class AdminJobService : IAdminJobService
         await _context.SaveChangesAsync(cancellationToken);
 
         return MapJobDto(job);
+    }
+
+    private async Task<PagedResult<AdminPendingJobDto>> GetJobsPagedInternalAsync(
+        int page,
+        int pageSize,
+        string? status,
+        string? search,
+        CancellationToken cancellationToken)
+    {
+        if (page < 1)
+        {
+            page = 1;
+        }
+
+        if (pageSize < 1 || pageSize > MaxPageSize)
+        {
+            pageSize = 12;
+        }
+
+        await _jobExpiryService.CloseExpiredJobsAsync(cancellationToken);
+
+        var query = _context.Jobs.AsNoTracking();
+        query = ApplyModerationStatusFilter(query, status);
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var term = search.Trim();
+            query = query.Where(j =>
+                j.Title.Contains(term) ||
+                j.Description.Contains(term) ||
+                j.Location.Contains(term) ||
+                j.Employer.Name.Contains(term));
+        }
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var items = await query
+            .OrderByDescending(j => j.Id)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(j => new AdminPendingJobDto
+            {
+                Id = j.Id,
+                EmployerId = j.EmployerId,
+                EmployerName = j.Employer.Name,
+                EmployerEmail = j.Employer.Email,
+                CategoryId = j.CategoryId,
+                CategoryName = j.Category.Name,
+                Title = j.Title,
+                Description = j.Description,
+                Salary = j.Salary,
+                Location = j.Location,
+                PostingStatus = j.PostingStatus,
+                WorkingHours = j.WorkingHours,
+                CreatedAt = j.CreatedAt,
+                ExpiryDate = j.ExpiryDate,
+                ThumbnailUrl = j.Images.OrderBy(i => i.Id).Select(i => i.Url).FirstOrDefault()
+            })
+            .ToListAsync(cancellationToken);
+
+        return new PagedResult<AdminPendingJobDto>
+        {
+            Items = items,
+            Page = page,
+            PageSize = pageSize,
+            TotalCount = totalCount,
+            TotalPages = totalCount == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)pageSize)
+        };
+    }
+
+    private static IQueryable<Models.Job> ApplyModerationStatusFilter(
+        IQueryable<Models.Job> query,
+        string? status)
+    {
+        if (string.IsNullOrWhiteSpace(status) ||
+            string.Equals(status, "all", StringComparison.OrdinalIgnoreCase))
+        {
+            return query.Where(j =>
+                j.PostingStatus == JobPostingCatalog.Pending ||
+                j.PostingStatus == JobPostingCatalog.Recruiting ||
+                j.PostingStatus == JobPostingCatalog.Rejected);
+        }
+
+        var normalized = status.Trim().ToLowerInvariant();
+        return normalized switch
+        {
+            JobPostingCatalog.Pending => query.Where(j => j.PostingStatus == JobPostingCatalog.Pending),
+            JobPostingCatalog.Recruiting => query.Where(j => j.PostingStatus == JobPostingCatalog.Recruiting),
+            JobPostingCatalog.Rejected => query.Where(j => j.PostingStatus == JobPostingCatalog.Rejected),
+            _ => query.Where(j =>
+                j.PostingStatus == JobPostingCatalog.Pending ||
+                j.PostingStatus == JobPostingCatalog.Recruiting ||
+                j.PostingStatus == JobPostingCatalog.Rejected)
+        };
     }
 
     private static JobDto MapJobDto(Models.Job job) => new()

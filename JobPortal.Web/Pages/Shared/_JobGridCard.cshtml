@@ -4,11 +4,12 @@
     var isClosed = string.Equals(Model.PostingStatus, "closed", StringComparison.OrdinalIgnoreCase);
     var isPending = string.Equals(Model.PostingStatus, "pending", StringComparison.OrdinalIgnoreCase);
     var isRejected = string.Equals(Model.PostingStatus, "rejected", StringComparison.OrdinalIgnoreCase);
-    var statusBadgeClass = Model.ShowEmployerActions
+    var showEmployerStatusBadge = Model.ShowEmployerActions || Model.ShowEmployerPostingStatus;
+    var statusBadgeClass = showEmployerStatusBadge
         ? (isRecruiting ? "employer-badge--open"
-            : isPending ? "bg-warning text-dark"
-            : isRejected ? "bg-danger"
-            : isClosed ? "bg-secondary"
+            : isPending ? "employer-badge--pending"
+            : isRejected ? "employer-badge--rejected"
+            : isClosed ? "employer-badge--closed"
             : "employer-badge--draft")
         : "home-badge-status";
     var hasApplicantCount = Model.ApplicantCount is int;

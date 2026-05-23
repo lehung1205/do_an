@@ -14,6 +14,7 @@ public class AdminPendingJobDto
     public string Location { get; set; } = null!;
     public string PostingStatus { get; set; } = null!;
     public string? WorkingHours { get; set; }
+    public DateTime CreatedAt { get; set; }
     public DateTime ExpiryDate { get; set; }
     public string? ThumbnailUrl { get; set; }
 }

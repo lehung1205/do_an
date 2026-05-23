@@ -18,6 +18,8 @@ public class JobGridCardModel
     public int? ApplicantCount { get; init; }
     public string? WorkingHours { get; init; }
     public bool ShowEmployerActions { get; init; }
+    /// <summary>Hiển thị badge trạng thái theo màu NTD (trang chủ employer, không cần nút thao tác).</summary>
+    public bool ShowEmployerPostingStatus { get; init; }
     public string? ListStatusFilter { get; init; }
     public string? ListSearch { get; init; }
     public int ListPageNumber { get; init; } = 1;
@@ -51,7 +53,8 @@ public class JobGridCardModel
         EmployerReviewCount = job.EmployerReviewCount,
         ExpiryDate = job.ExpiryDate,
         ThumbnailUrl = job.ThumbnailUrl,
-        ApplicantCount = job.ApplicantCount
+        ApplicantCount = job.ApplicantCount,
+        ShowEmployerPostingStatus = true
     };
 
     public static JobGridCardModel FromEmployerManageJob(

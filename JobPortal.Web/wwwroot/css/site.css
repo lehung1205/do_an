@@ -1134,6 +1134,24 @@ main {
   font-weight: 500;
 }
 
+.employer-badge--pending {
+  background: #fef3c7;
+  color: #92400e;
+  font-weight: 500;
+}
+
+.employer-badge--rejected {
+  background: #fee2e2;
+  color: #991b1b;
+  font-weight: 600;
+}
+
+.employer-badge--closed {
+  background: #f1f5f9;
+  color: #475569;
+  font-weight: 500;
+}
+
 .employer-badge--draft {
   background: #f1f5f9;
   color: #475569;

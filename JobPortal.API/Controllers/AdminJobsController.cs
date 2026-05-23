@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using JobPortal.API.DTOs;
 using JobPortal.API.DTOs.Common;
+using JobPortal.API.Helpers;
 using JobPortal.API.Services.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -20,19 +21,28 @@ public class AdminJobsController : ControllerBase
         _adminJobService = adminJobService;
     }
 
-    [HttpGet("pending")]
-    public async Task<IActionResult> GetPendingJobs(
+    [HttpGet]
+    public async Task<IActionResult> GetJobs(
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 12,
+        [FromQuery] string? status = "pending",
         [FromQuery] string? q = null,
         CancellationToken cancellationToken = default)
     {
         _ = GetCurrentUserId();
-        var result = await _adminJobService.GetPendingJobsPagedAsync(page, pageSize, q, cancellationToken);
+        var result = await _adminJobService.GetJobsPagedAsync(page, pageSize, status, q, cancellationToken);
         return Ok(ApiResponse<PagedResult<AdminPendingJobDto>>.SuccessResponse(
             result,
-            "Pending jobs retrieved successfully."));
+            "Jobs retrieved successfully."));
     }
+
+    [HttpGet("pending")]
+    public Task<IActionResult> GetPendingJobs(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 12,
+        [FromQuery] string? q = null,
+        CancellationToken cancellationToken = default) =>
+        GetJobs(page, pageSize, JobPostingCatalog.Pending, q, cancellationToken);
 
     [HttpPost("{id:long}/approve")]
     public async Task<IActionResult> ApproveJob(long id, CancellationToken cancellationToken)

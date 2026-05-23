@@ -56,6 +56,7 @@ builder.Services.AddScoped<IEmployerDashboardService, EmployerDashboardService>(
 builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<IJobService, JobService>();
 builder.Services.AddScoped<IAdminJobService, AdminJobService>();
+builder.Services.AddScoped<IAdminUserManagementService, AdminUserManagementService>();
 builder.Services.AddScoped<IJobExpiryService, JobExpiryService>();
 builder.Services.AddHostedService<JobExpiryBackgroundService>();
 builder.Services.AddScoped<IJobSeekerService, JobSeekerService>();

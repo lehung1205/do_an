@@ -125,6 +125,8 @@ public sealed class AuthService : IAuthService
             throw new UnauthorizedAccessException(GenericAuthenticationError);
         }
 
+        EnsureAccountCanAuthenticate(user);
+
         var accessToken = _tokenService.CreateAccessToken(user);
         var (refreshTokenEntity, refreshTokenValue) = _tokenService.GenerateRefreshToken(ipAddress);
         refreshTokenEntity.UserId = user.Id;
@@ -157,6 +159,8 @@ public sealed class AuthService : IAuthService
             await RevokeAllTokensForUserAsync(token.UserId, ipAddress, cancellationToken);
             throw new UnauthorizedAccessException("Refresh token is invalid.");
         }
+
+        EnsureAccountCanAuthenticate(token.User!);
 
         token.ReplacedAt = DateTime.UtcNow;
         token.RevokedAt = DateTime.UtcNow;
@@ -373,6 +377,15 @@ public sealed class AuthService : IAuthService
             refreshToken.RevokedAt = DateTime.UtcNow;
             refreshToken.RevokedByIp = ipAddress;
             await _authRepository.SaveChangesAsync(cancellationToken);
+        }
+    }
+
+    private static void EnsureAccountCanAuthenticate(User user)
+    {
+        if (!user.IsActive)
+        {
+            throw new UnauthorizedAccessException(
+                "Tài khoản đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên.");
         }
     }
 

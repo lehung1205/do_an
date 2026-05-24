@@ -23,6 +23,7 @@ public class AppDbContext : DbContext
     public DbSet<User> Users { get; set; } = null!;
     public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
     public DbSet<ChatMessage> ChatMessages { get; set; } = null!;
+    public DbSet<PendingRegistration> PendingRegistrations { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -190,5 +191,12 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<ChatMessage>()
             .HasIndex(m => new { m.ApplicationId, m.SentAt });
+
+        modelBuilder.Entity<PendingRegistration>()
+            .HasIndex(p => p.RegistrationToken)
+            .IsUnique();
+
+        modelBuilder.Entity<PendingRegistration>()
+            .HasIndex(p => p.Email);
     }
 }

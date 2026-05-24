@@ -1,0 +1,77 @@
+@page
+@model JobPortal.Web.Pages.Auth.VerifyRegisterModel
+@{
+    ViewData["Title"] = "Xác minh email";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card border-0 shadow-sm auth-card">
+                <div class="card-body p-4">
+                    <h1 class="h4 mb-1 text-center">Xác minh đăng ký</h1>
+                    <p class="text-muted small text-center mb-4">
+                        @if (!string.IsNullOrEmpty(Model.Email))
+                        {
+                            <span>Mã OTP đã gửi tới <strong>@Model.Email</strong></span>
+                        }
+                        else
+                        {
+                            <span>Nhập mã 6 chữ số từ email của bạn</span>
+                        }
+                    </p>
+
+                    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                    {
+                        <div class="alert alert-danger py-2 small">@Model.ErrorMessage</div>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+                    {
+                        <div class="alert alert-success py-2 small">@Model.SuccessMessage</div>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.DevOtp))
+                    {
+                        <div class="alert alert-warning py-2 small mb-3">
+                            <strong>Chế độ dev (chưa gửi Gmail):</strong> Mã OTP là
+                            <strong class="fs-5 ms-1">@Model.DevOtp</strong>
+                        </div>
+                    }
+
+                    <form method="post" asp-page-handler="Verify">
+                        <input type="hidden" asp-for="Input.RegistrationToken" value="@Model.Token" />
+                        <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+
+                        <div class="mb-4">
+                            <label asp-for="Input.OtpCode" class="form-label"></label>
+                            <input asp-for="Input.OtpCode" class="form-control text-center fs-4 letter-spacing-otp"
+                                   maxlength="6" inputmode="numeric" autocomplete="one-time-code"
+                                   placeholder="000000" />
+                            <span asp-validation-for="Input.OtpCode" class="text-danger small"></span>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 mb-3">Xác minh và hoàn tất đăng ký</button>
+                    </form>
+
+                    <form method="post" asp-page-handler="Resend" class="text-center">
+                        <input type="hidden" asp-for="Input.RegistrationToken" value="@Model.Token" />
+                        <button type="submit" class="btn btn-link btn-sm text-decoration-none p-0">
+                            Gửi lại mã OTP
+                        </button>
+                    </form>
+
+                    <p class="text-muted small text-center mt-4 mb-0">
+                        Sau khi xác minh, bạn có thể đăng nhập bằng email và mật khẩu đã đặt.
+                        <br />
+                        <a asp-page="/Auth/Login">Đăng nhập</a>
+                        ·
+                        <a asp-page="/Auth/Register">Đăng ký lại</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -26,7 +26,7 @@ public class RegisterModel : PageModel
             return Page();
         }
 
-        var response = await _api.PostApiResponseAsync<RegisterRequest, AuthResponse>(
+        var response = await _api.PostApiResponseAsync<RegisterRequest, RegisterPendingResponse>(
             "/api/auth/register",
             new RegisterRequest
             {
@@ -44,14 +44,16 @@ public class RegisterModel : PageModel
             return Page();
         }
 
-        HttpContext.Session.SetString("JwtToken", response.Data.AccessToken);
-        HttpContext.Session.SetString("RefreshToken", response.Data.RefreshToken);
-        HttpContext.Session.SetString("UserId", response.Data.User.Id.ToString());
-        HttpContext.Session.SetString("UserName", response.Data.User.Name);
-        HttpContext.Session.SetString("UserRole", response.Data.User.Role);
-        HttpContext.Session.SetString("UserAvatarUrl", response.Data.User.ProfileImage ?? string.Empty);
+        if (!string.IsNullOrEmpty(response.Data.DevOtp))
+        {
+            TempData["DevOtp"] = response.Data.DevOtp;
+        }
 
-        return RedirectToPage("/Index");
+        return RedirectToPage("/Auth/VerifyRegister", new
+        {
+            token = response.Data.RegistrationToken,
+            email = response.Data.Email
+        });
     }
 
     public class InputModel : IValidatableObject

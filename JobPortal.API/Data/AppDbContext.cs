@@ -119,6 +119,38 @@ public class AppDbContext : DbContext
             .HasForeignKey(l => l.PostingPackageId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        modelBuilder.Entity<PaymentHistory>()
+            .Property(l => l.Currency)
+            .HasDefaultValue("VND");
+
+        modelBuilder.Entity<PaymentHistory>()
+            .Property(l => l.CreatedAt)
+            .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
+
+        modelBuilder.Entity<PaymentHistory>()
+            .HasIndex(l => l.OrderId)
+            .IsUnique();
+
+        modelBuilder.Entity<PaymentHistory>()
+            .HasIndex(l => l.TransactionCode)
+            .IsUnique();
+
+        modelBuilder.Entity<PaymentHistory>()
+            .HasIndex(l => l.ProviderTransactionId)
+            .IsUnique();
+
+        modelBuilder.Entity<PostingPackage>()
+            .HasIndex(g => g.Name)
+            .IsUnique();
+
+        modelBuilder.Entity<PostingPackage>()
+            .Property(g => g.IsActive)
+            .HasDefaultValue(true);
+
+        modelBuilder.Entity<PostingPackage>()
+            .Property(g => g.CreatedAt)
+            .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
+
         modelBuilder.Entity<Admin>()
             .HasOne(a => a.User)
             .WithOne(u => u.AdminProfile)

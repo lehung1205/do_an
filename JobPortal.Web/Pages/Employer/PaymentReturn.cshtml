@@ -1,0 +1,42 @@
+@page
+@model JobPortal.Web.Pages.Employer.PaymentReturnModel
+@{
+    ViewData["Title"] = Model.IsSuccess ? "Thanh toán thành công" : "Thanh toán thất bại";
+}
+
+<div class="container py-5">
+    <div class="mx-auto" style="max-width: 720px;">
+        <div class="border rounded-3 p-4 p-md-5 bg-white shadow-sm">
+            @if (Model.IsSuccess)
+            {
+                <div class="text-success display-6 mb-3"><i class="bi bi-check-circle me-2"></i>Thanh toán thành công</div>
+                <p class="lead mb-4">Gói đăng tin đã được ghi nhận và hạn mức đăng tin đã được cộng vào tài khoản.</p>
+            }
+            else
+            {
+                <div class="text-danger display-6 mb-3"><i class="bi bi-x-circle me-2"></i>Thanh toán chưa thành công</div>
+                <p class="lead mb-4">@Model.Message</p>
+            }
+
+            @if (Model.Result != null)
+            {
+                <dl class="row mb-4">
+                    <dt class="col-sm-4">Mã đơn</dt>
+                    <dd class="col-sm-8">@Model.Result.PaymentHistoryId</dd>
+                    <dt class="col-sm-4">Số tiền</dt>
+                    <dd class="col-sm-8">@Model.Result.Amount.ToString("N0") VNĐ</dd>
+                    <dt class="col-sm-4">Mã giao dịch</dt>
+                    <dd class="col-sm-8">@(Model.Result.TransactionId ?? "-")</dd>
+                    <dt class="col-sm-4">Mã phản hồi</dt>
+                    <dd class="col-sm-8">@(Model.Result.ResponseCode ?? "-")</dd>
+                </dl>
+            }
+
+            <div class="d-flex flex-wrap gap-2">
+                <a asp-page="/Employer/BuyPackages" class="btn btn-outline-primary">Quay lại gói dịch vụ</a>
+                <a asp-page="/Employer/Dashboard" class="btn btn-primary">Về dashboard</a>
+            </div>
+        </div>
+    </div>
+</div>
+

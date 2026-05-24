@@ -17,6 +17,57 @@ public class BuyPackagesModel : PageModel
 
     public async Task<IActionResult> OnGetAsync()
     {
+        return await LoadPageAsync();
+    }
+
+    public async Task<IActionResult> OnPostBuyAsync(long packageId)
+    {
+        var redirect = RequireEmployerLogin();
+        if (redirect != null)
+        {
+            return redirect;
+        }
+
+        if (packageId <= 0)
+        {
+            ErrorMessage = "Gói đăng tin không hợp lệ. Vui lòng chọn lại.";
+            Packages = await _api.GetApiDataAsync<List<PostingPackageDto>>("/api/postingpackages") ?? new();
+            return Page();
+        }
+
+        try
+        {
+            var response = await _api.PostApiResponseAsync<CreateVnPayPaymentRequest, VnPayPaymentResponse>(
+                "/api/payments/vnpay/create-payment",
+                new CreateVnPayPaymentRequest { PostingPackageId = packageId });
+
+            if (response is { Success: true, Data.PaymentUrl.Length: > 0 })
+            {
+                return Redirect(response.Data.PaymentUrl);
+            }
+
+            var detail = response?.Errors.FirstOrDefault(e => !string.IsNullOrWhiteSpace(e.Message))?.Message;
+            ErrorMessage = detail ?? response?.Message ?? "Không thể tạo giao dịch VNPay. Vui lòng thử lại.";
+        }
+        catch (HttpRequestException)
+        {
+            ErrorMessage = "Không kết nối được API tại http://localhost:5068. Vui lòng chạy lại JobPortal.API rồi thử lại.";
+        }
+
+        try
+        {
+            Packages = await _api.GetApiDataAsync<List<PostingPackageDto>>("/api/postingpackages") ?? new();
+        }
+        catch (HttpRequestException)
+        {
+            Packages = new();
+        }
+
+        return Page();
+    }
+
+    private async Task<IActionResult> LoadPageAsync()
+    {
         var redirect = RequireEmployerLogin();
         if (redirect != null)
         {

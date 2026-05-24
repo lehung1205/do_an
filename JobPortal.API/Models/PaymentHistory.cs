@@ -25,6 +25,10 @@ public class PaymentHistory
     [Column("amount")]
     public int Amount { get; set; }
 
+    [Column("currency")]
+    [MaxLength(10)]
+    public string Currency { get; set; } = "VND";
+
     [Column("order_id")]
     [MaxLength(100)]
     public string OrderId { get; set; } = null!;
@@ -40,7 +44,34 @@ public class PaymentHistory
     [MaxLength(255)]
     public string? PaymentBank { get; set; }
 
+    [Column("payment_provider")]
+    [MaxLength(100)]
+    public string? PaymentProvider { get; set; }
+
     [Column("transaction_code")]
     [MaxLength(100)]
     public string? TransactionCode { get; set; }
+
+    [Column("provider_transaction_id")]
+    [MaxLength(100)]
+    public string? ProviderTransactionId { get; set; }
+
+    [Column("package_name_snapshot")]
+    [MaxLength(255)]
+    public string? PackageNameSnapshot { get; set; }
+
+    [Column("price_snapshot")]
+    public int? PriceSnapshot { get; set; }
+
+    [Column("posting_limit_snapshot")]
+    public int? PostingLimitSnapshot { get; set; }
+
+    [Column("expired_at")]
+    public DateTime? ExpiredAt { get; set; }
+
+    [Column("created_at")]
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    [Column("updated_at")]
+    public DateTime? UpdatedAt { get; set; }
 }

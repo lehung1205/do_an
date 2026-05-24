@@ -6,7 +6,7 @@
 
 <div class="container py-4">
     <h2 class="mb-2"><i class="bi bi-bag-heart me-2"></i>Mua gói đăng tin</h2>
-    <p class="text-muted mb-4">Chọn gói phù hợp để tăng hạn mức đăng bài. Thanh toán có thể được tích hợp ở bước sau.</p>
+    <p class="text-muted mb-4">Chọn gói phù hợp để tăng hạn mức đăng bài và thanh toán qua VNPay.</p>
 
     @if (!string.IsNullOrEmpty(Model.ErrorMessage))
     {
@@ -24,14 +24,17 @@
                             <h5 class="card-title">@p.Name</h5>
                             <p class="text-muted small mb-2">Số tin đăng: <strong>@p.PostingLimit</strong></p>
                             <p class="h5 text-primary mb-3">@p.Price.ToString("N0") <span class="fs-6 fw-normal">VNĐ</span></p>
-                            <button type="button" class="btn btn-outline-primary mt-auto" disabled title="Tích hợp thanh toán sau">
-                                Chọn gói (demo)
-                            </button>
+                            <form method="post" asp-page-handler="Buy" class="mt-auto">
+                                <input type="hidden" name="packageId" value="@p.Id" />
+                                <button type="submit" class="btn btn-outline-primary w-100">
+                                    Thanh toán VNPay
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>
             }
         </div>
-        <p class="small text-muted mt-4 mb-0">Nút mua sẽ kết nối cổng thanh toán khi bạn triển khai phần thanh toán.</p>
+        <p class="small text-muted mt-4 mb-0">Sau khi VNPay xác nhận thành công, hạn mức đăng tin sẽ được cộng vào tài khoản nhà tuyển dụng.</p>
     }
 </div>

@@ -98,7 +98,7 @@ public class AuthRepository : IAuthRepository
     public async Task<IEnumerable<RefreshToken>> GetNonRevokedRefreshTokensForUserAsync(long userId, CancellationToken cancellationToken = default)
     {
         return await _context.RefreshTokens
-            .Where(t => t.UserId == userId && !t.IsRevoked)
+            .Where(t => t.UserId == userId && t.RevokedAt == null)
             .ToListAsync(cancellationToken);
     }
 

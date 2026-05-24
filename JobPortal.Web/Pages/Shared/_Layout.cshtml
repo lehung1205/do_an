@@ -61,6 +61,12 @@
                                 <a class="nav-link" asp-page="/Employer/Applicants">Ứng viên</a>
                             </li>
                             <li class="nav-item">
+                                <a class="nav-link d-inline-flex align-items-center" asp-page="/Messages/Index">
+                                    Tin nhắn
+                                    @await Component.InvokeAsync("ChatNavBadge")
+                                </a>
+                            </li>
+                            <li class="nav-item">
                                 <a class="nav-link" asp-page="/Employer/WorkProgress/Index">Tiến độ làm việc</a>
                             </li>
                             <li class="nav-item">
@@ -82,6 +88,12 @@
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" asp-page="/Applications/WorkProgress/Index">Tiến độ làm việc</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link d-inline-flex align-items-center" asp-page="/Messages/Index">
+                                        Tin nhắn
+                                        @await Component.InvokeAsync("ChatNavBadge")
+                                    </a>
                                 </li>
                             }
                         }

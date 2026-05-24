@@ -45,6 +45,7 @@ public class LoginModel : PageModel
 
         HttpContext.Session.SetString("JwtToken", response.Data.AccessToken);
         HttpContext.Session.SetString("RefreshToken", response.Data.RefreshToken);
+        HttpContext.Session.SetString("UserId", response.Data.User.Id.ToString());
         HttpContext.Session.SetString("UserName", response.Data.User.Name);
         HttpContext.Session.SetString("UserRole", response.Data.User.Role);
         HttpContext.Session.SetString("UserAvatarUrl", response.Data.User.ProfileImage ?? string.Empty);

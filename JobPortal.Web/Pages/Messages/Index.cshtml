@@ -1,0 +1,153 @@
+@page
+@model JobPortal.Web.Pages.Messages.IndexModel
+@{
+    ViewData["Title"] = "Tin nhắn";
+    var selectedPartnerId = Model.SelectedPartnerUserId;
+}
+
+<div class="container py-4 chat-page"
+     id="chatPageRoot"
+     data-hub-url="@Model.HubUrl"
+     data-access-token="@Model.AccessToken"
+     data-user-id="@Model.CurrentUserId"
+     data-api-base="@Model.ApiBaseUrl"
+     data-partner-user-id="@(selectedPartnerId?.ToString() ?? "")">
+    <div class="chat-page__hero">
+        <h2 class="h4 mb-1"><i class="bi bi-chat-heart me-2 text-primary"></i>Tin nhắn</h2>
+        <p class="text-muted small mb-0">Trao đổi trực tiếp với đối tác · Lịch sử được lưu tự động</p>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-warning border-0 shadow-sm">@Model.ErrorMessage</div>
+    }
+
+    <div class="row g-3 chat-layout">
+        <div class="col-lg-4">
+            <div class="card border-0 chat-sidebar h-100">
+                <div class="chat-sidebar__head d-flex justify-content-between align-items-center">
+                    <span class="fw-semibold text-secondary">Hội thoại</span>
+                    @if (Model.TotalUnreadCount > 0)
+                    {
+                        <span class="badge bg-danger rounded-pill" id="chatThreadsUnreadTotal" title="Tổng tin chưa đọc">@Model.TotalUnreadCount chưa đọc</span>
+                    }
+                    else
+                    {
+                        <span class="d-none badge bg-danger rounded-pill" id="chatThreadsUnreadTotal"></span>
+                    }
+                </div>
+                <div class="list-group list-group-flush chat-thread-list__body">
+                    @if (Model.Threads.Count == 0)
+                    {
+                        <div class="chat-empty py-5">
+                            <i class="bi bi-inbox"></i>
+                            <p class="small mb-0">Chưa có hội thoại.<br />Cần có đơn ứng tuyển để nhắn tin.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        @foreach (var thread in Model.Threads)
+                        {
+                            var active = selectedPartnerId == thread.PartnerUserId;
+                            var initial = string.IsNullOrWhiteSpace(thread.Title)
+                                ? "?"
+                                : thread.Title.Trim()[0].ToString().ToUpperInvariant();
+                            var presenceClass = thread.PartnerIsOnline ? "online" : "offline";
+                            var timeLabel = thread.LastMessageAt.HasValue
+                                ? thread.LastMessageAt.Value.ToLocalTime().ToString("HH:mm")
+                                : "";
+                            <a href="?partnerUserId=@thread.PartnerUserId"
+                               class="list-group-item list-group-item-action chat-thread-item @(active ? "active" : "") @(thread.UnreadCount > 0 ? "chat-thread-item--unread" : "")"
+                               data-partner-user-id="@thread.PartnerUserId"
+                               data-thread-title="@thread.Title"
+                               data-application-id="@thread.ApplicationId"
+                               data-partner-online="@(thread.PartnerIsOnline ? "true" : "false")"
+                               data-unread-count="@thread.UnreadCount">
+                                <div class="chat-thread-item__row">
+                                    <div class="chat-avatar" aria-hidden="true">
+                                        @initial
+                                        <span class="chat-presence-dot chat-presence-dot--@presenceClass"
+                                              data-presence-for="@thread.PartnerUserId"
+                                              title="@(thread.PartnerIsOnline ? "Đang trực tuyến" : "Đang offline")"></span>
+                                    </div>
+                                    <div class="chat-thread-item__body">
+                                        <div class="chat-thread-item__top">
+                                            <span class="chat-thread-item__title">@thread.Title</span>
+                                            @if (!string.IsNullOrEmpty(timeLabel))
+                                            {
+                                                <span class="chat-thread-item__time">@timeLabel</span>
+                                            }
+                                        </div>
+                                        <div class="chat-thread-item__subtitle">@thread.Subtitle</div>
+                                        @if (!string.IsNullOrWhiteSpace(thread.LastMessagePreview))
+                                        {
+                                            <div class="chat-thread-item__preview">@thread.LastMessagePreview</div>
+                                        }
+                                    </div>
+                                    @if (thread.UnreadCount > 0)
+                                    {
+                                        <span class="badge bg-danger rounded-pill chat-thread-unread flex-shrink-0"
+                                              data-thread-unread="@thread.PartnerUserId"
+                                              title="@thread.UnreadCount tin chưa đọc">@thread.UnreadCount</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="d-none badge bg-danger rounded-pill chat-thread-unread flex-shrink-0"
+                                              data-thread-unread="@thread.ApplicationId"></span>
+                                    }
+                                </div>
+                            </a>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card border-0 chat-panel h-100 d-flex flex-column">
+                <div class="chat-panel__head" id="chatPanelHead">
+                    <div class="chat-avatar chat-avatar--sm d-none" id="chatHeaderAvatar" aria-hidden="true">
+                        <span id="chatHeaderInitial">?</span>
+                        <span class="chat-presence-dot chat-presence-dot--offline" id="chatHeaderPresenceDot"></span>
+                    </div>
+                    <div class="chat-panel__head-text flex-grow-1 min-w-0">
+                        <h3 id="chatPartnerName">@(selectedPartnerId.HasValue ? "Đang tải…" : "Chọn hội thoại")</h3>
+                        <p class="chat-panel__presence chat-panel__presence--offline d-none" id="chatPartnerPresence">
+                            <span class="chat-panel__presence-dot"></span>
+                            <span id="chatPartnerPresenceText">Offline</span>
+                        </p>
+                        <p class="chat-panel__job mb-0" id="chatJobTitle"></p>
+                    </div>
+                </div>
+                <div class="card-body chat-messages flex-grow-1" id="chatMessages" role="log" aria-live="polite">
+                    @if (!selectedPartnerId.HasValue)
+                    {
+                        <div class="chat-empty">
+                            <i class="bi bi-chat-left-text"></i>
+                            <p class="small mb-0">Chọn hội thoại bên trái để bắt đầu trò chuyện.</p>
+                        </div>
+                    }
+                </div>
+                <div class="chat-panel__footer border-top">
+                    <div class="alert alert-warning py-2 small d-none mb-2 border-0" id="chatAlert"></div>
+                    <form id="chatForm" class="d-flex gap-2 align-items-center" autocomplete="off">
+                        <input type="text" class="form-control" id="chatInput" maxlength="2000"
+                               placeholder="Nhập tin nhắn…" disabled />
+                        <button type="submit" class="btn btn-primary flex-shrink-0" id="chatSendBtn" disabled title="Gửi">
+                            <i class="bi bi-send-fill"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/chat.css" asp-append-version="true" />
+}
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js" crossorigin="anonymous"></script>
+    <script src="~/js/chat-page.js" asp-append-version="true"></script>
+}

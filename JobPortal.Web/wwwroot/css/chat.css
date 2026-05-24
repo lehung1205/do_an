@@ -1,0 +1,304 @@
+.chat-page {
+    --chat-accent: #2563eb;
+    --chat-accent-soft: #eff6ff;
+    --chat-border: #e2e8f0;
+    --chat-surface: #f8fafc;
+    --chat-online: #22c55e;
+    --chat-offline: #ef4444;
+}
+
+.chat-page__hero {
+    margin-bottom: 1.25rem;
+}
+
+.chat-page__hero h2 {
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.chat-layout {
+    min-height: calc(100vh - 12rem);
+}
+
+.chat-sidebar,
+.chat-panel {
+    border-radius: 1rem;
+    overflow: hidden;
+    border: 1px solid var(--chat-border) !important;
+    box-shadow: 0 4px 24px rgba(15, 23, 42, 0.06) !important;
+}
+
+.chat-sidebar__head {
+    background: linear-gradient(180deg, #fff 0%, var(--chat-surface) 100%);
+    padding: 1rem 1.25rem;
+}
+
+.chat-thread-list__body {
+    max-height: min(32rem, calc(100vh - 16rem));
+    overflow-y: auto;
+}
+
+.chat-thread-item {
+    padding: 0.875rem 1.25rem;
+    border: none !important;
+    border-bottom: 1px solid var(--chat-border) !important;
+    transition: background 0.15s ease;
+}
+
+.chat-thread-item:hover {
+    background: var(--chat-surface);
+}
+
+.chat-thread-item.active {
+    background: var(--chat-accent-soft);
+    border-left: 3px solid var(--chat-accent) !important;
+}
+
+.chat-thread-item--unread {
+    background: #fffbeb;
+}
+
+.chat-thread-item--unread.active {
+    background: var(--chat-accent-soft);
+}
+
+.chat-thread-item__row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.chat-avatar {
+    position: relative;
+    flex-shrink: 0;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6, #6366f1);
+    color: #fff;
+    font-weight: 600;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+}
+
+.chat-avatar--sm {
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 0.9rem;
+}
+
+.chat-presence-dot {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 0.7rem;
+    height: 0.7rem;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-sizing: content-box;
+}
+
+.chat-presence-dot--online {
+    background: var(--chat-online);
+}
+
+.chat-presence-dot--offline {
+    background: var(--chat-offline);
+}
+
+.chat-thread-item__body {
+    min-width: 0;
+    flex: 1;
+}
+
+.chat-thread-item__top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.5rem;
+}
+
+.chat-thread-item__title {
+    font-weight: 600;
+    font-size: 0.9375rem;
+    color: #0f172a;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.chat-thread-item.active .chat-thread-item__title {
+    color: var(--chat-accent);
+}
+
+.chat-thread-item__time {
+    font-size: 0.7rem;
+    color: #94a3b8;
+    flex-shrink: 0;
+}
+
+.chat-thread-item__subtitle {
+    font-size: 0.8125rem;
+    color: #64748b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.chat-thread-item__preview {
+    font-size: 0.8125rem;
+    color: #94a3b8;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 0.15rem;
+}
+
+.chat-thread-item--unread .chat-thread-item__preview {
+    color: #475569;
+    font-weight: 500;
+}
+
+.chat-thread-unread {
+    min-width: 1.25rem;
+    font-size: 0.7rem;
+}
+
+.chat-panel__head {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 1rem 1.25rem;
+    background: #fff;
+    border-bottom: 1px solid var(--chat-border);
+}
+
+.chat-panel__head-text h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+    color: #0f172a;
+}
+
+.chat-panel__presence {
+    font-size: 0.75rem;
+    margin: 0.15rem 0 0;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.chat-panel__presence-dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.chat-panel__presence--online {
+    color: #15803d;
+}
+
+.chat-panel__presence--online .chat-panel__presence-dot {
+    background: var(--chat-online);
+}
+
+.chat-panel__presence--offline {
+    color: #b91c1c;
+}
+
+.chat-panel__presence--offline .chat-panel__presence-dot {
+    background: var(--chat-offline);
+}
+
+.chat-panel__job {
+    font-size: 0.8125rem;
+    color: #64748b;
+    margin: 0.1rem 0 0;
+}
+
+.chat-messages {
+    min-height: 20rem;
+    max-height: min(28rem, calc(100vh - 18rem));
+    overflow-y: auto;
+    background: var(--chat-surface);
+    padding: 1.25rem !important;
+}
+
+.chat-bubble {
+    max-width: 78%;
+    padding: 0.625rem 0.875rem;
+    border-radius: 1rem;
+    margin-bottom: 0.625rem;
+    font-size: 0.9375rem;
+    line-height: 1.45;
+    word-break: break-word;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.chat-bubble--mine {
+    margin-left: auto;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #fff;
+    border-bottom-right-radius: 0.25rem;
+}
+
+.chat-bubble--theirs {
+    margin-right: auto;
+    background: #fff;
+    border: 1px solid var(--chat-border);
+    border-bottom-left-radius: 0.25rem;
+}
+
+.chat-bubble__meta {
+    font-size: 0.68rem;
+    opacity: 0.8;
+    margin-top: 0.25rem;
+}
+
+.chat-panel__footer {
+    padding: 1rem 1.25rem;
+    background: #fff;
+}
+
+.chat-panel__footer .form-control {
+    border-radius: 999px;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    border-color: var(--chat-border);
+}
+
+.chat-panel__footer .form-control:focus {
+    border-color: var(--chat-accent);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.chat-panel__footer .btn-primary {
+    border-radius: 50%;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.chat-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 16rem;
+    color: #94a3b8;
+    text-align: center;
+    padding: 2rem;
+}
+
+.chat-empty i {
+    font-size: 2.5rem;
+    margin-bottom: 0.75rem;
+    opacity: 0.5;
+}

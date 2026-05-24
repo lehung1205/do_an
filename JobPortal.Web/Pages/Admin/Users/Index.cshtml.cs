@@ -136,7 +136,7 @@ public class IndexModel : PageModel
         if (response is not { Success: true })
         {
             TempData["AdminUserErrorMessage"] = response?.Message
-                ?? response?.Errors.FirstOrDefault()?.Message
+                ?? response?.Errors?.FirstOrDefault()?.Message
                 ?? "Không thể cập nhật trạng thái tài khoản.";
         }
         else
@@ -145,14 +145,7 @@ public class IndexModel : PageModel
                 ?? (active ? "Đã kích hoạt tài khoản." : "Đã vô hiệu hóa tài khoản.");
         }
 
-        return RedirectToPage(new
-        {
-            tab = EmployersTab,
-            q = string.IsNullOrWhiteSpace(q) ? null : q.Trim(),
-            status = NormalizeStatusFilter(status) ?? "all",
-            page,
-            pageSize
-        });
+        return RedirectToPage("/Admin/Users/Index", BuildListRouteValues(EmployersTab, q, status, page, pageSize));
     }
 
     private async Task<IActionResult> SetJobSeekerStatusAsync(
@@ -177,7 +170,7 @@ public class IndexModel : PageModel
         if (response is not { Success: true })
         {
             TempData["AdminUserErrorMessage"] = response?.Message
-                ?? response?.Errors.FirstOrDefault()?.Message
+                ?? response?.Errors?.FirstOrDefault()?.Message
                 ?? "Không thể cập nhật trạng thái tài khoản.";
         }
         else
@@ -186,15 +179,18 @@ public class IndexModel : PageModel
                 ?? (active ? "Đã kích hoạt tài khoản." : "Đã vô hiệu hóa tài khoản.");
         }
 
-        return RedirectToPage(new
+        return RedirectToPage("/Admin/Users/Index", BuildListRouteValues(JobSeekersTab, q, status, page, pageSize));
+    }
+
+    private static object BuildListRouteValues(string tab, string? q, string? status, int page, int pageSize) =>
+        new
         {
-            tab = JobSeekersTab,
+            tab,
             q = string.IsNullOrWhiteSpace(q) ? null : q.Trim(),
             status = NormalizeStatusFilter(status) ?? "all",
             page,
             pageSize
-        });
-    }
+        };
 
     private string BuildQuery(int page, int pageSize)
     {

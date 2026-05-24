@@ -33,6 +33,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     ));
 
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("Email"));
+builder.Services.Configure<OtpSettings>(builder.Configuration.GetSection("Otp"));
 
 // Repositories
 builder.Services.AddScoped<IAdminRepository, AdminRepository>();
@@ -53,6 +55,7 @@ builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<IApplicationService, ApplicationService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IEmployerService, EmployerService>();
 builder.Services.AddScoped<IEmployerDashboardService, EmployerDashboardService>();

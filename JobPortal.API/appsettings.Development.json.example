@@ -1,0 +1,12 @@
+{
+  "Email": {
+    "Enabled": true,
+    "Host": "smtp.gmail.com",
+    "Port": 587,
+    "UseSsl": true,
+    "Username": "your-email@gmail.com",
+    "Password": "your-16-char-app-password",
+    "FromEmail": "your-email@gmail.com",
+    "FromName": "JobPortal"
+  }
+}

@@ -24,8 +24,26 @@ public class AuthController : ControllerBase
     [EnableRateLimiting("AuthLimiter")]
     public async Task<IActionResult> Register([FromBody] RegisterRequest request, CancellationToken cancellationToken)
     {
-        var authResponse = await _authService.RegisterAsync(request, GetClientIp(), cancellationToken);
-        return Ok(ApiResponse<AuthResponse>.SuccessResponse(authResponse, "Registration successful."));
+        var result = await _authService.StartRegistrationAsync(request, cancellationToken);
+        return Ok(ApiResponse<RegisterPendingResponse>.SuccessResponse(result, result.Message));
+    }
+
+    [HttpPost("register/verify")]
+    [AllowAnonymous]
+    [EnableRateLimiting("AuthLimiter")]
+    public async Task<IActionResult> VerifyRegister([FromBody] VerifyRegisterRequest request, CancellationToken cancellationToken)
+    {
+        var authResponse = await _authService.CompleteRegistrationAsync(request, GetClientIp(), cancellationToken);
+        return Ok(ApiResponse<AuthResponse>.SuccessResponse(authResponse, "Đăng ký và xác minh email thành công."));
+    }
+
+    [HttpPost("register/resend-otp")]
+    [AllowAnonymous]
+    [EnableRateLimiting("AuthLimiter")]
+    public async Task<IActionResult> ResendRegisterOtp([FromBody] ResendRegisterOtpRequest request, CancellationToken cancellationToken)
+    {
+        var result = await _authService.ResendRegistrationOtpAsync(request, cancellationToken);
+        return Ok(ApiResponse<RegisterPendingResponse>.SuccessResponse(result, result.Message));
     }
 
     [HttpPost("login")]

@@ -31,7 +31,7 @@ public class IndexModel : PageModel
 
         if (isLoggedIn && string.Equals(role, "ADMIN", StringComparison.Ordinal))
         {
-            return RedirectToPage("/Admin/Jobs/Index");
+            return RedirectToPage("/Admin/Dashboard/Index");
         }
 
         if (isLoggedIn && string.Equals(role, "EMPLOYER", StringComparison.Ordinal))

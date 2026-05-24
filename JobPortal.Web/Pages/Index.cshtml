@@ -1,7 +1,7 @@
 @page
 @model JobPortal.Web.Pages.IndexModel
 @{
-    ViewData["Title"] = Model.IsEmployerHome ? "Dashboard" : "Trang chủ";
+    ViewData["Title"] = Model.IsEmployerHome ? "Thống kê" : "Trang chủ";
     var isLoggedIn = !string.IsNullOrEmpty(HttpContext.Session.GetString("JwtToken"));
     var isJobSeeker = string.Equals(HttpContext.Session.GetString("UserRole"), "JOB_SEEKER", StringComparison.Ordinal);
     var isEmployer = string.Equals(HttpContext.Session.GetString("UserRole"), "EMPLOYER", StringComparison.Ordinal);

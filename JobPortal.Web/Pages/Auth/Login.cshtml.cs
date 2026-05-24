@@ -57,7 +57,7 @@ public class LoginModel : PageModel
 
         if (string.Equals(response.Data.User.Role, "ADMIN", StringComparison.Ordinal))
         {
-            return RedirectToPage("/Admin/Jobs/Index");
+            return RedirectToPage("/Admin/Dashboard/Index");
         }
 
         return RedirectToPage("/Index");

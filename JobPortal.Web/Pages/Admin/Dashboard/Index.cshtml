@@ -1,0 +1,269 @@
+@page
+@model JobPortal.Web.Pages.Admin.Dashboard.IndexModel
+@using System.Text.Json
+@{
+    ViewData["Title"] = "Bảng điều khiển Admin";
+    var d = Model.Dashboard;
+    var s = d?.Summary;
+    var chartsJson = d?.Charts != null
+        ? JsonSerializer.Serialize(d.Charts, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
+        : "null";
+}
+
+<div class="admin-dash" id="adminDashboardRoot">
+    @if (d?.Charts != null)
+    {
+        <script type="application/json" id="adminChartsData">@Html.Raw(chartsJson)</script>
+    }
+    <header class="admin-dash__hero">
+        <div class="container">
+            <div class="admin-dash__hero-inner">
+                <div class="admin-dash__hero-text">
+                    <p class="admin-dash__eyebrow">JobPortal · Quản trị hệ thống</p>
+                    <h1 class="admin-dash__title">Bảng điều khiển</h1>
+                    <p class="admin-dash__subtitle">
+                        Tổng quan tuyển dụng, người dùng hoạt động và xếp hạng đánh giá
+                    </p>
+                </div>
+                @if (s != null)
+                {
+                    <div class="admin-dash__hero-metrics" aria-label="Quy mô hệ thống">
+                        <div class="admin-dash__metric">
+                            <span class="admin-dash__metric-value">@s.TotalEmployers</span>
+                            <span class="admin-dash__metric-label">Nhà tuyển dụng</span>
+                        </div>
+                        <div class="admin-dash__metric">
+                            <span class="admin-dash__metric-value">@s.TotalJobSeekers</span>
+                            <span class="admin-dash__metric-label">Người lao động</span>
+                        </div>
+                        <div class="admin-dash__metric">
+                            <span class="admin-dash__metric-value">@s.TotalApplications</span>
+                            <span class="admin-dash__metric-label">Đơn ứng tuyển</span>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </header>
+
+    <div class="container" style="margin-top: 1.5rem;">
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="alert alert-warning border-0 shadow-sm">@Model.ErrorMessage</div>
+        }
+        else if (d == null || s == null)
+        {
+            <div class="admin-empty">
+                <i class="bi bi-cloud-slash"></i>
+                <p class="mb-0">Không có dữ liệu thống kê.</p>
+            </div>
+        }
+        else
+        {
+            <div class="admin-stat-grid">
+                <div class="admin-stat-card">
+                    <div class="admin-stat-card__icon admin-stat-card__icon--pending">
+                        <i class="bi bi-hourglass-split"></i>
+                    </div>
+                    <div class="admin-stat-card__value">@s.PendingJobsCount</div>
+                    <div class="admin-stat-card__label">Bài đăng chờ duyệt</div>
+                </div>
+                <div class="admin-stat-card">
+                    <div class="admin-stat-card__icon admin-stat-card__icon--approved">
+                        <i class="bi bi-check-circle"></i>
+                    </div>
+                    <div class="admin-stat-card__value">@s.ApprovedJobsCount</div>
+                    <div class="admin-stat-card__label">Bài đăng đã duyệt (đang tuyển)</div>
+                </div>
+                <div class="admin-stat-card">
+                    <div class="admin-stat-card__icon admin-stat-card__icon--active">
+                        <i class="bi bi-person-check"></i>
+                    </div>
+                    <div class="admin-stat-card__value">@s.ActiveUsersCount</div>
+                    <div class="admin-stat-card__label">Người dùng hoạt động (30 ngày)</div>
+                </div>
+                <div class="admin-stat-card">
+                    <div class="admin-stat-card__icon admin-stat-card__icon--apps">
+                        <i class="bi bi-send"></i>
+                    </div>
+                    <div class="admin-stat-card__value">@s.TotalApplications</div>
+                    <div class="admin-stat-card__label">Tổng đơn ứng tuyển</div>
+                </div>
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-sm-4">
+                    <div class="admin-stat-card py-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted small">Nhà tuyển dụng</span>
+                            <strong class="fs-5">@s.TotalEmployers</strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="admin-stat-card py-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted small">Người lao động</span>
+                            <strong class="fs-5">@s.TotalJobSeekers</strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="admin-stat-card py-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted small">Tin từ chối / đã đóng</span>
+                            <strong class="fs-5">@s.RejectedJobsCount <span class="text-muted fw-normal">/</span> @s.ClosedJobsCount</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-lg-8">
+                    <div class="admin-panel">
+                        <div class="admin-panel__head">
+                            <h3><i class="bi bi-graph-up-arrow me-2 text-primary"></i>Xu hướng tuyển dụng theo thời gian</h3>
+                            <span class="badge bg-light text-dark border">6 tháng gần nhất</span>
+                        </div>
+                        <div class="admin-panel__body admin-panel__body--chart">
+                            <canvas id="chartRecruitmentLine" aria-label="Biểu đồ đường tuyển dụng"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="admin-panel">
+                        <div class="admin-panel__head">
+                            <h3><i class="bi bi-pie-chart me-2 text-primary"></i>Tin theo danh mục</h3>
+                        </div>
+                        <div class="admin-panel__body admin-panel__body--chart">
+                            <canvas id="chartCategoryPie" aria-label="Biểu đồ tròn danh mục"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-lg-6">
+                    <div class="admin-panel">
+                        <div class="admin-panel__head">
+                            <h3><i class="bi bi-bar-chart me-2 text-primary"></i>Đơn ứng tuyển theo tháng</h3>
+                        </div>
+                        <div class="admin-panel__body admin-panel__body--chart">
+                            <canvas id="chartApplicationsBar" aria-label="Biểu đồ cột đơn ứng tuyển"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="admin-panel">
+                        <div class="admin-panel__head">
+                            <h3><i class="bi bi-bar-chart-steps me-2 text-primary"></i>Trạng thái tin tuyển dụng</h3>
+                        </div>
+                        <div class="admin-panel__body admin-panel__body--chart">
+                            <canvas id="chartStatusBar" aria-label="Biểu đồ cột trạng thái tin"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-lg-6">
+                    <div class="admin-panel">
+                        <div class="admin-panel__head">
+                            <h3><i class="bi bi-building me-2 text-warning"></i>Top 10 nhà tuyển dụng</h3>
+                            <span class="badge text-bg-warning">Điểm cao nhất</span>
+                        </div>
+                        <div class="admin-panel__body">
+                            @if (d.TopEmployers.Count == 0)
+                            {
+                                <div class="admin-empty py-4">
+                                    <i class="bi bi-star"></i>
+                                    <p class="mb-0">Chưa có đánh giá từ ứng viên.</p>
+                                </div>
+                            }
+                            else
+                            {
+                                <ul class="admin-top-list">
+                                    @{ var rank = 0; }
+                                    @foreach (var item in d.TopEmployers)
+                                    {
+                                        rank++;
+                                        var rankClass = rank == 1 ? "admin-top-item__rank--gold" : rank == 2 ? "admin-top-item__rank--silver" : rank == 3 ? "admin-top-item__rank--bronze" : "";
+                                        <li class="admin-top-item">
+                                            <span class="admin-top-item__rank @rankClass">@rank</span>
+                                            <div class="admin-top-item__info">
+                                                <div class="admin-top-item__name">@item.Name</div>
+                                                <div class="admin-top-item__meta">@item.ReviewCount đánh giá</div>
+                                            </div>
+                                            <div class="admin-top-item__rating">
+                                                <div class="admin-top-item__stars">
+                                                    @for (var i = 0; i < 5; i++)
+                                                    {
+                                                        <i class="bi @(i < (int)Math.Round(item.AverageRating) ? "bi-star-fill" : "bi-star")"></i>
+                                                    }
+                                                </div>
+                                                <div class="admin-top-item__score">@IndexModel.FormatRating(item.AverageRating)</div>
+                                            </div>
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="admin-panel">
+                        <div class="admin-panel__head">
+                            <h3><i class="bi bi-person-workspace me-2 text-success"></i>Top 10 người lao động</h3>
+                            <span class="badge text-bg-success">Điểm cao nhất</span>
+                        </div>
+                        <div class="admin-panel__body">
+                            @if (d.TopJobSeekers.Count == 0)
+                            {
+                                <div class="admin-empty py-4">
+                                    <i class="bi bi-star"></i>
+                                    <p class="mb-0">Chưa có đánh giá từ nhà tuyển dụng.</p>
+                                </div>
+                            }
+                            else
+                            {
+                                <ul class="admin-top-list">
+                                    @{ var rankS = 0; }
+                                    @foreach (var item in d.TopJobSeekers)
+                                    {
+                                        rankS++;
+                                        var rankClass = rankS == 1 ? "admin-top-item__rank--gold" : rankS == 2 ? "admin-top-item__rank--silver" : rankS == 3 ? "admin-top-item__rank--bronze" : "";
+                                        <li class="admin-top-item">
+                                            <span class="admin-top-item__rank @rankClass">@rankS</span>
+                                            <div class="admin-top-item__info">
+                                                <div class="admin-top-item__name">@item.Name</div>
+                                                <div class="admin-top-item__meta">@item.ReviewCount đánh giá</div>
+                                            </div>
+                                            <div class="admin-top-item__rating">
+                                                <div class="admin-top-item__stars">
+                                                    @for (var i = 0; i < 5; i++)
+                                                    {
+                                                        <i class="bi @(i < (int)Math.Round(item.AverageRating) ? "bi-star-fill" : "bi-star")"></i>
+                                                    }
+                                                </div>
+                                                <div class="admin-top-item__score">@IndexModel.FormatRating(item.AverageRating)</div>
+                                            </div>
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/admin-dashboard.css" asp-append-version="true" />
+}
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" crossorigin="anonymous"></script>
+    <script src="~/js/admin-dashboard.js" asp-append-version="true"></script>
+}

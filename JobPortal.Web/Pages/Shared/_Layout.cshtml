@@ -16,43 +16,53 @@
 <body class="site-body">
     <header class="site-header">
         <nav class="navbar navbar-expand-lg navbar-light">
+            @{
+                var isLoggedIn = !string.IsNullOrEmpty(Context.Session.GetString("JwtToken"));
+                var userName = Context.Session.GetString("UserName");
+                var userRole = Context.Session.GetString("UserRole");
+                var isJobSeeker = string.Equals(userRole, "JOB_SEEKER", StringComparison.Ordinal);
+                var isEmployer = string.Equals(userRole, "EMPLOYER", StringComparison.Ordinal);
+                var isAdmin = string.Equals(userRole, "ADMIN", StringComparison.Ordinal);
+                var userAvatarUrl = Context.Session.GetString("UserAvatarUrl");
+                var userInitials = JobPortal.Web.Models.AccountPanelViewModel.GetInitials(userName);
+                var isPolicyPage = string.Equals(
+                    ViewContext.RouteData.Values["page"]?.ToString(),
+                    "/Privacy",
+                    StringComparison.OrdinalIgnoreCase);
+                var currentPage = ViewContext.RouteData.Values["page"]?.ToString() ?? "";
+                var isAdminDashboard = string.Equals(currentPage, "/Admin/Dashboard/Index", StringComparison.OrdinalIgnoreCase);
+                var isAdminJobs = string.Equals(currentPage, "/Admin/Jobs/Index", StringComparison.OrdinalIgnoreCase);
+                var isAdminUsers = string.Equals(currentPage, "/Admin/Users/Index", StringComparison.OrdinalIgnoreCase);
+                var isEmployerStats = isEmployer && (
+                    string.Equals(currentPage, "/Index", StringComparison.OrdinalIgnoreCase)
+                    || string.IsNullOrEmpty(currentPage));
+            }
             <div class="container">
-                <a class="navbar-brand site-brand" asp-page="/Index">
+                <a class="navbar-brand site-brand" asp-page="@(isAdmin ? "/Admin/Dashboard/Index" : "/Index")">
                     <i class="bi bi-briefcase-fill me-2"></i>JobPortal
                 </a>
                 <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
                         aria-controls="mainNav" aria-expanded="false" aria-label="Mở menu">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                @{
-                    var isLoggedIn = !string.IsNullOrEmpty(Context.Session.GetString("JwtToken"));
-                    var userName = Context.Session.GetString("UserName");
-                    var userRole = Context.Session.GetString("UserRole");
-                    var isJobSeeker = string.Equals(userRole, "JOB_SEEKER", StringComparison.Ordinal);
-                    var isEmployer = string.Equals(userRole, "EMPLOYER", StringComparison.Ordinal);
-                    var isAdmin = string.Equals(userRole, "ADMIN", StringComparison.Ordinal);
-                    var userAvatarUrl = Context.Session.GetString("UserAvatarUrl");
-                    var userInitials = JobPortal.Web.Models.AccountPanelViewModel.GetInitials(userName);
-                    var isPolicyPage = string.Equals(
-                        ViewContext.RouteData.Values["page"]?.ToString(),
-                        "/Privacy",
-                        StringComparison.OrdinalIgnoreCase);
-                }
                 <div class="collapse navbar-collapse" id="mainNav">
                     <ul class="navbar-nav me-auto align-items-lg-center gap-lg-1">
                         @if (isLoggedIn && isAdmin)
                         {
                             <li class="nav-item">
-                                <a class="nav-link" asp-page="/Admin/Jobs/Index">Duyệt tin</a>
+                                <a class="nav-link @(isAdminDashboard ? "active fw-semibold" : "")" asp-page="/Admin/Dashboard/Index">Thống kê</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" asp-page="/Admin/Users/Index">Quản lý tài khoản</a>
+                                <a class="nav-link @(isAdminJobs ? "active fw-semibold" : "")" asp-page="/Admin/Jobs/Index">Duyệt tin</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @(isAdminUsers ? "active fw-semibold" : "")" asp-page="/Admin/Users/Index">Quản lý tài khoản</a>
                             </li>
                         }
                         else if (isLoggedIn && isEmployer)
                         {
                             <li class="nav-item">
-                                <a class="nav-link" asp-page="/Index">Dashboard</a>
+                                <a class="nav-link @(isEmployerStats ? "active fw-semibold" : "")" asp-page="/Index">Thống kê</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" asp-page="/Employer/Jobs">Tin tuyển dụng</a>

@@ -2,8 +2,15 @@
 @{
     var isRecruiting = string.Equals(Model.PostingStatus, "recruiting", StringComparison.OrdinalIgnoreCase);
     var isClosed = string.Equals(Model.PostingStatus, "closed", StringComparison.OrdinalIgnoreCase);
-    var statusBadgeClass = Model.ShowEmployerActions
-        ? (isRecruiting ? "employer-badge--open" : isClosed ? "bg-secondary" : "employer-badge--draft")
+    var isPending = string.Equals(Model.PostingStatus, "pending", StringComparison.OrdinalIgnoreCase);
+    var isRejected = string.Equals(Model.PostingStatus, "rejected", StringComparison.OrdinalIgnoreCase);
+    var showEmployerStatusBadge = Model.ShowEmployerActions || Model.ShowEmployerPostingStatus;
+    var statusBadgeClass = showEmployerStatusBadge
+        ? (isRecruiting ? "employer-badge--open"
+            : isPending ? "employer-badge--pending"
+            : isRejected ? "employer-badge--rejected"
+            : isClosed ? "employer-badge--closed"
+            : "employer-badge--draft")
         : "home-badge-status";
     var hasApplicantCount = Model.ApplicantCount is int;
     var hasWorkingHours = Model.ShowEmployerActions && !string.IsNullOrWhiteSpace(Model.WorkingHours);
@@ -101,9 +108,17 @@
                         </form>
                     }
                 }
+                else if (isPending)
+                {
+                    <span class="btn btn-sm btn-outline-secondary disabled" tabindex="-1" aria-disabled="true">Chờ admin duyệt</span>
+                }
+                else if (isRejected)
+                {
+                    <a asp-page="/Employer/PostJob" class="btn btn-sm btn-primary">Đăng tin mới</a>
+                }
                 else
                 {
-                    <a asp-page="/Employer/PostJob" class="btn btn-sm btn-primary">Tiếp tục chỉnh sửa</a>
+                    <a asp-page="/Employer/PostJob" class="btn btn-sm btn-outline-primary">Tiếp tục chỉnh sửa</a>
                 }
             </div>
         }

@@ -91,7 +91,7 @@ public class PostJobModel : PageModel
             Description = Input.Description.Trim(),
             Salary = Input.Salary.Trim(),
             Location = Input.Location.Trim(),
-            PostingStatus = "recruiting",
+            PostingStatus = "pending",
             WorkingHours = string.IsNullOrWhiteSpace(Input.WorkingHours) ? null : Input.WorkingHours.Trim(),
             ExpiryDate = now.AddMonths(2)
         };
@@ -109,8 +109,8 @@ public class PostJobModel : PageModel
         var imageNotes = await SaveJobImagesAndRegisterAsync(newJobId);
 
         TempData["PostJobSuccessMessage"] = string.IsNullOrEmpty(imageNotes)
-            ? "Đã đăng tin tuyển dụng thành công."
-            : $"Đã đăng tin tuyển dụng thành công. {imageNotes}";
+            ? "Đã gửi tin tuyển dụng. Tin chờ admin duyệt (tối đa 24 giờ, sau đó tự hiển thị)."
+            : $"Đã gửi tin (chờ duyệt, tối đa 24 giờ). {imageNotes}";
 
         return RedirectToPage();
     }

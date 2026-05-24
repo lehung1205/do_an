@@ -4,6 +4,7 @@ using JobPortal.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JobPortal.API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260523192721_AddJobCreatedAt")]
+    partial class AddJobCreatedAt
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -607,37 +610,15 @@ namespace JobPortal.API.Migrations
                         .HasColumnType("int")
                         .HasColumnName("amount");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime(6)")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP(6)")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("Currency")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("varchar(10)")
-                        .HasDefaultValue("VND")
-                        .HasColumnName("currency");
-
                     b.Property<long>("EmployerId")
                         .HasColumnType("bigint")
                         .HasColumnName("employer_id");
-
-                    b.Property<DateTime?>("ExpiredAt")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("expired_at");
 
                     b.Property<string>("OrderId")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)")
                         .HasColumnName("order_id");
-
-                    b.Property<string>("PackageNameSnapshot")
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)")
-                        .HasColumnName("package_name_snapshot");
 
                     b.Property<string>("PaymentBank")
                         .HasMaxLength(255)
@@ -648,27 +629,9 @@ namespace JobPortal.API.Migrations
                         .HasColumnType("datetime(6)")
                         .HasColumnName("payment_date");
 
-                    b.Property<string>("PaymentProvider")
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)")
-                        .HasColumnName("payment_provider");
-
-                    b.Property<int?>("PostingLimitSnapshot")
-                        .HasColumnType("int")
-                        .HasColumnName("posting_limit_snapshot");
-
                     b.Property<long>("PostingPackageId")
                         .HasColumnType("bigint")
                         .HasColumnName("posting_package_id");
-
-                    b.Property<int?>("PriceSnapshot")
-                        .HasColumnType("int")
-                        .HasColumnName("price_snapshot");
-
-                    b.Property<string>("ProviderTransactionId")
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)")
-                        .HasColumnName("provider_transaction_id");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -681,24 +644,11 @@ namespace JobPortal.API.Migrations
                         .HasColumnType("varchar(100)")
                         .HasColumnName("transaction_code");
 
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("updated_at");
-
                     b.HasKey("Id");
 
                     b.HasIndex("EmployerId");
 
-                    b.HasIndex("OrderId")
-                        .IsUnique();
-
                     b.HasIndex("PostingPackageId");
-
-                    b.HasIndex("ProviderTransactionId")
-                        .IsUnique();
-
-                    b.HasIndex("TransactionCode")
-                        .IsUnique();
 
                     b.ToTable("payment_histories");
                 });
@@ -716,21 +666,6 @@ namespace JobPortal.API.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("admin_id");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime(6)")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP(6)")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("text")
-                        .HasColumnName("description");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("tinyint(1)")
-                        .HasDefaultValue(true)
-                        .HasColumnName("is_active");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -745,16 +680,9 @@ namespace JobPortal.API.Migrations
                         .HasColumnType("int")
                         .HasColumnName("price");
 
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("updated_at");
-
                     b.HasKey("Id");
 
                     b.HasIndex("AdminId");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
 
                     b.ToTable("posting_packages");
                 });

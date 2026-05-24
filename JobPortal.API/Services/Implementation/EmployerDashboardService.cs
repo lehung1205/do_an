@@ -56,16 +56,28 @@ public class EmployerDashboardService : IEmployerDashboardService
             a => a.Status == "submitted" || a.Status == "pending",
             cancellationToken);
 
-        var openJobs = jobs.Count(j => string.Equals(j.PostingStatus, "recruiting", StringComparison.OrdinalIgnoreCase));
+        var pendingJobs = jobs.Count(j =>
+            string.Equals(j.PostingStatus, JobPostingCatalog.Pending, StringComparison.OrdinalIgnoreCase));
+        var openJobs = jobs.Count(j =>
+            string.Equals(j.PostingStatus, JobPostingCatalog.Recruiting, StringComparison.OrdinalIgnoreCase));
         var expiringSoon = jobs.Count(j =>
-            string.Equals(j.PostingStatus, "recruiting", StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(j.PostingStatus, JobPostingCatalog.Recruiting, StringComparison.OrdinalIgnoreCase) &&
             j.ExpiryDate <= expiringThreshold &&
             j.ExpiryDate >= now);
 
         var notifications = new List<EmployerDashboardNotificationDto>();
 
+        if (pendingJobs > 0)
+        {
+            notifications.Add(new EmployerDashboardNotificationDto
+            {
+                Type = "info",
+                Message = $"Bạn có {pendingJobs} tin đang chờ admin duyệt"
+            });
+        }
+
         foreach (var job in jobs.Where(j =>
-                     string.Equals(j.PostingStatus, "recruiting", StringComparison.OrdinalIgnoreCase) &&
+                     string.Equals(j.PostingStatus, JobPostingCatalog.Recruiting, StringComparison.OrdinalIgnoreCase) &&
                      j.ExpiryDate <= expiringThreshold &&
                      j.ExpiryDate >= now))
         {
@@ -227,9 +239,9 @@ public class EmployerDashboardService : IEmployerDashboardService
 
         var employerRating = await LoadEmployerRatingForEmployerAsync(employer.Id, cancellationToken);
 
-        if (!string.Equals(job.PostingStatus, "recruiting", StringComparison.OrdinalIgnoreCase))
+        if (!string.Equals(job.PostingStatus, JobPostingCatalog.Recruiting, StringComparison.OrdinalIgnoreCase))
         {
-            if (string.Equals(job.PostingStatus, "closed", StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(job.PostingStatus, JobPostingCatalog.Closed, StringComparison.OrdinalIgnoreCase))
             {
                 return MapJobDto(ToJobRow(job), employerRating);
             }
@@ -237,7 +249,7 @@ public class EmployerDashboardService : IEmployerDashboardService
             throw new BadRequestException("Chỉ có thể đóng tin đang tuyển.");
         }
 
-        job.PostingStatus = "closed";
+        job.PostingStatus = JobPostingCatalog.Closed;
         await _context.SaveChangesAsync(cancellationToken);
 
         return MapJobDto(ToJobRow(job), employerRating);
@@ -265,7 +277,9 @@ public class EmployerDashboardService : IEmployerDashboardService
         }
 
         var normalized = status.Trim().ToLowerInvariant();
-        return normalized is "recruiting" or "closed" ? normalized : null;
+        return normalized is "pending" or "recruiting" or "rejected" or "closed"
+            ? normalized
+            : null;
     }
 
     public async Task<IReadOnlyList<EmployerDashboardApplicationDto>> GetApplicationsForUserAsync(

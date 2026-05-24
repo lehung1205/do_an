@@ -1,4 +1,5 @@
 using JobPortal.API.Data;
+using JobPortal.API.Helpers;
 using JobPortal.API.Repositories.Interface;
 using JobPortal.API.Models;
 using Microsoft.EntityFrameworkCore;
@@ -19,10 +20,24 @@ public class JobRepository : IJobRepository
         var now = DateTime.UtcNow;
         return await _context.Jobs
             .Where(j =>
-                j.PostingStatus == "recruiting" &&
+                j.PostingStatus == JobPostingCatalog.Recruiting &&
                 j.ExpiryDate < now)
             .ExecuteUpdateAsync(
-                setters => setters.SetProperty(j => j.PostingStatus, "closed"),
+                setters => setters.SetProperty(j => j.PostingStatus, JobPostingCatalog.Closed),
+                cancellationToken);
+    }
+
+    public async Task<int> AutoApproveStalePendingJobsAsync(
+        TimeSpan pendingMaxAge,
+        CancellationToken cancellationToken = default)
+    {
+        var threshold = DateTime.UtcNow - pendingMaxAge;
+        return await _context.Jobs
+            .Where(j =>
+                j.PostingStatus == JobPostingCatalog.Pending &&
+                j.CreatedAt <= threshold)
+            .ExecuteUpdateAsync(
+                setters => setters.SetProperty(j => j.PostingStatus, JobPostingCatalog.Recruiting),
                 cancellationToken);
     }
 
@@ -37,7 +52,7 @@ public class JobRepository : IJobRepository
         var query = _context.Jobs.AsNoTracking();
         if (recruitingOnly)
         {
-            query = query.Where(j => j.PostingStatus == "recruiting");
+            query = query.Where(j => j.PostingStatus == JobPostingCatalog.Recruiting);
         }
 
         if (!string.IsNullOrWhiteSpace(search))

@@ -3,6 +3,8 @@
 @{
     ViewData["Title"] = Model.IsEmployerHome ? "Dashboard" : "Trang chủ";
     var isLoggedIn = !string.IsNullOrEmpty(HttpContext.Session.GetString("JwtToken"));
+    var isJobSeeker = string.Equals(HttpContext.Session.GetString("UserRole"), "JOB_SEEKER", StringComparison.Ordinal);
+    var isEmployer = string.Equals(HttpContext.Session.GetString("UserRole"), "EMPLOYER", StringComparison.Ordinal);
 }
 
 @if (Model.IsEmployerHome)
@@ -15,46 +17,69 @@ else
 <section class="home-hero">
     <div class="home-hero__bg" aria-hidden="true"></div>
     <div class="container home-hero__inner">
-        <div class="row align-items-center g-4">
-            <div class="col-lg-7">
-                <span class="home-hero__badge">Nền tảng tuyển dụng thông minh</span>
+        <div class="row align-items-center g-4 g-xl-5">
+            <div class="col-lg-6">
+                <span class="home-hero__badge">
+                    <i class="bi bi-stars me-1"></i>JobPortal · Việc làm part-time & bán thời gian
+                </span>
                 <h1 class="home-hero__title">
-                    Tìm công việc mơ ước<br />
-                    <span class="text-gradient">chỉ trong vài phút</span>
+                    Tìm việc linh hoạt<br />
+                    <span class="text-gradient">đúng nơi, đúng lúc</span>
                 </h1>
                 <p class="home-hero__lead">
-                    Kết nối ứng viên và nhà tuyển dụng hàng đầu. Khám phá hàng nghìn cơ hội việc làm phù hợp với kỹ năng và địa điểm của bạn.
+                    Nền tảng kết nối ứng viên với nhà tuyển dụng uy tín. Tin được admin duyệt, minh bạch lương và ca làm — ứng tuyển chỉ vài phút.
                 </p>
+                <ul class="home-hero__points list-unstyled mb-4">
+                    <li><i class="bi bi-shield-check text-primary me-2"></i>Tin tuyển dụng kiểm duyệt trước khi hiển thị</li>
+                    <li><i class="bi bi-lightning-charge text-primary me-2"></i>Ứng tuyển nhanh với CV đã lưu trên hệ thống</li>
+                    <li><i class="bi bi-bar-chart-steps text-primary me-2"></i>Theo dõi tiến độ ứng tuyển &amp; đánh giá hai chiều</li>
+                </ul>
+                <div class="home-trust-strip d-flex flex-wrap gap-3 small text-muted">
+                    <span><i class="bi bi-lock me-1"></i>Bảo mật thông tin</span>
+                    <span><i class="bi bi-clock-history me-1"></i>Cập nhật tin mỗi ngày</span>
+                    <span><i class="bi bi-headset me-1"></i>Hỗ trợ qua chính sách rõ ràng</span>
+                </div>
             </div>
-            <div class="col-lg-5">
-                <form class="home-search card border-0 shadow-lg" method="get" asp-page="/Jobs/Index">
-                    <div class="card-body p-4">
-                        <h2 class="h5 mb-3">Tìm việc làm</h2>
-                        <div class="mb-3">
-                            <label class="form-label small text-muted" for="q">Từ khóa</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-white border-end-0">
-                                    <i class="bi bi-search"></i>
-                                </span>
-                                <input type="text" class="form-control border-start-0 ps-0" id="q" name="q"
-                                       value="@Model.Q" placeholder="VD: Backend, Data Engineer..." />
+            <div class="col-lg-6">
+                <div class="home-search card border-0 shadow-lg">
+                    <div class="card-body p-4 p-lg-4">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <span class="home-search__icon-wrap"><i class="bi bi-search"></i></span>
+                            <h2 class="h5 mb-0">Tìm việc ngay</h2>
+                        </div>
+                        <p class="text-muted small mb-3">Lọc theo từ khóa và địa điểm — xem kết quả trên trang Việc làm</p>
+                        <form method="get" asp-page="/Jobs/Index">
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold" for="q">Từ khóa</label>
+                                <div class="input-group input-group-lg home-search__input">
+                                    <span class="input-group-text bg-white"><i class="bi bi-briefcase"></i></span>
+                                    <input type="search" class="form-control" id="q" name="q" value="@Model.Q"
+                                           placeholder="Thu ngân, phục vụ, giao hàng..." />
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label small fw-semibold" for="location">Địa điểm</label>
+                                <div class="input-group input-group-lg home-search__input">
+                                    <span class="input-group-text bg-white"><i class="bi bi-geo-alt"></i></span>
+                                    <input type="search" class="form-control" id="location" name="location" value="@Model.Location"
+                                           placeholder="Hà Nội, TP.HCM, Đà Nẵng..." />
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100 btn-lg home-btn-primary">
+                                <i class="bi bi-search me-2"></i>Tìm kiếm việc làm
+                            </button>
+                        </form>
+                        <div class="home-search__chips mt-3 pt-3 border-top">
+                            <span class="small text-muted d-block mb-2">Tìm nhanh theo khu vực:</span>
+                            <div class="d-flex flex-wrap gap-2">
+                                <a asp-page="/Jobs/Index" asp-route-location="Hà Nội" class="btn btn-sm btn-outline-secondary rounded-pill">Hà Nội</a>
+                                <a asp-page="/Jobs/Index" asp-route-location="TP.HCM" class="btn btn-sm btn-outline-secondary rounded-pill">TP.HCM</a>
+                                <a asp-page="/Jobs/Index" asp-route-location="Đà Nẵng" class="btn btn-sm btn-outline-secondary rounded-pill">Đà Nẵng</a>
+                                <a asp-page="/Jobs/Index" asp-route-location="Cần Thơ" class="btn btn-sm btn-outline-secondary rounded-pill">Cần Thơ</a>
                             </div>
                         </div>
-                        <div class="mb-4">
-                            <label class="form-label small text-muted" for="location">Địa điểm</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-white border-end-0">
-                                    <i class="bi bi-geo-alt"></i>
-                                </span>
-                                <input type="text" class="form-control border-start-0 ps-0" id="location" name="location"
-                                       value="@Model.Location" placeholder="VD: Hà Nội, TP.HCM..." />
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100 btn-lg home-btn-primary">
-                            <i class="bi bi-search me-2"></i>Tìm kiếm ngay
-                        </button>
                     </div>
-                </form>
+                </div>
             </div>
         </div>
     </div>
@@ -62,47 +87,152 @@ else
 
 <section class="home-stats py-4">
     <div class="container">
-        <div class="row g-3 text-center">
+        <div class="row g-3">
             <div class="col-md-4">
-                <div class="home-stat-card">
-                    <div class="home-stat-card__value">@(Model.TotalJobCount)+</div>
-                    <div class="home-stat-card__label">Việc làm đang mở</div>
+                <div class="home-stat-card home-stat-card--rich h-100">
+                    <div class="home-stat-card__icon"><i class="bi bi-briefcase-fill"></i></div>
+                    <div>
+                        <div class="home-stat-card__value">@Model.TotalJobCount.ToString("N0")</div>
+                        <div class="home-stat-card__label">Việc làm đang tuyển</div>
+                        <div class="home-stat-card__hint">Tin đã duyệt, sẵn sàng ứng tuyển</div>
+                    </div>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="home-stat-card">
-                    <div class="home-stat-card__value">@(Model.EmployerCount)+</div>
-                    <div class="home-stat-card__label">Nhà tuyển dụng</div>
+                <div class="home-stat-card home-stat-card--rich h-100">
+                    <div class="home-stat-card__icon home-stat-card__icon--accent"><i class="bi bi-building"></i></div>
+                    <div>
+                        <div class="home-stat-card__value">@Model.EmployerCount.ToString("N0")</div>
+                        <div class="home-stat-card__label">Nhà tuyển dụng</div>
+                        <div class="home-stat-card__hint">Doanh nghiệp &amp; cửa hàng đối tác</div>
+                    </div>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="home-stat-card">
-                    <div class="home-stat-card__value">@(Model.JobSeekerCount)+</div>
-                    <div class="home-stat-card__label">Ứng viên tin tưởng</div>
+                <div class="home-stat-card home-stat-card--rich h-100">
+                    <div class="home-stat-card__icon home-stat-card__icon--success"><i class="bi bi-people-fill"></i></div>
+                    <div>
+                        <div class="home-stat-card__value">@Model.JobSeekerCount.ToString("N0")</div>
+                        <div class="home-stat-card__label">Ứng viên</div>
+                        <div class="home-stat-card__hint">Đã tin tưởng &amp; sử dụng nền tảng</div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<section class="home-jobs py-5">
+@if (Model.Categories.Count > 0)
+{
+    <section class="home-categories py-4 border-top border-bottom bg-white">
+        <div class="container">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                <h2 class="h6 text-uppercase text-muted mb-0 letter-spacing-sm">Ngành nghề phổ biến</h2>
+                <a asp-page="/Jobs/Index" class="small text-primary text-decoration-none">Xem tất cả việc làm <i class="bi bi-arrow-right"></i></a>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                @foreach (var cat in Model.Categories)
+                {
+                    <a asp-page="/Jobs/Index" asp-route-q="@cat.Name"
+                       class="btn btn-sm btn-light border home-category-chip">
+                        <i class="bi bi-tag me-1 text-primary"></i>@cat.Name
+                    </a>
+                }
+            </div>
+        </div>
+    </section>
+}
+
+<section class="home-how py-5">
+    <div class="container">
+        <div class="text-center mb-5 home-section-head">
+            <span class="home-section-head__eyebrow">Quy trình đơn giản</span>
+            <h2 class="section-title mb-2">Ứng tuyển trong 4 bước</h2>
+            <p class="text-muted mb-0 mx-auto" style="max-width: 36rem;">
+                Từ tìm việc đến theo dõi kết quả — mọi thứ trên một nền tảng, không cần email rời rạc.
+            </p>
+        </div>
+        <div class="row g-4">
+            <div class="col-6 col-lg-3">
+                <div class="home-step-card h-100">
+                    <span class="home-step-card__num">1</span>
+                    <i class="bi bi-search home-step-card__icon"></i>
+                    <h3 class="h6">Tìm việc</h3>
+                    <p class="small text-muted mb-0">Lọc theo từ khóa, địa điểm và xem chi tiết tin tuyển dụng.</p>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="home-step-card h-100">
+                    <span class="home-step-card__num">2</span>
+                    <i class="bi bi-file-earmark-person home-step-card__icon"></i>
+                    <h3 class="h6">Chọn CV</h3>
+                    <p class="small text-muted mb-0">Tải sẵn hồ sơ trên tài khoản, nộp đơn chỉ một lần bấm.</p>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="home-step-card h-100">
+                    <span class="home-step-card__num">3</span>
+                    <i class="bi bi-send-check home-step-card__icon"></i>
+                    <h3 class="h6">Gửi đơn</h3>
+                    <p class="small text-muted mb-0">Nhà tuyển dụng nhận hồ sơ và cập nhật trạng thái minh bạch.</p>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="home-step-card h-100">
+                    <span class="home-step-card__num">4</span>
+                    <i class="bi bi-clipboard2-check home-step-card__icon"></i>
+                    <h3 class="h6">Theo dõi</h3>
+                    <p class="small text-muted mb-0">Xem tiến độ làm việc và đánh giá sau khi hoàn thành.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="home-jobs py-5 bg-light">
     <div class="container">
         <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
             <div>
+                <span class="home-section-head__eyebrow d-block">Cơ hội mới</span>
                 <h2 class="section-title mb-1">Việc làm nổi bật</h2>
-                <p class="text-muted mb-0">Các vị trí mới nhất từ nhà tuyển dụng uy tín</p>
+                <p class="text-muted mb-0">
+                    @if (Model.HasHomeSearch)
+                    {
+                        <text>Gợi ý theo tìm kiếm của bạn · </text>
+                    }
+                    <span>@Model.FeaturedJobs.Count / @Model.TotalJobCount tin đang tuyển</span>
+                </p>
             </div>
-            <a asp-page="/Jobs/Index" class="btn btn-outline-primary">
+            <a asp-page="/Jobs/Index"
+               asp-route-q="@Model.Q"
+               asp-route-location="@Model.Location"
+               class="btn btn-primary">
                 Xem tất cả <i class="bi bi-arrow-right ms-1"></i>
             </a>
         </div>
 
+        @if (Model.HasHomeSearch)
+        {
+            <div class="home-active-search alert alert-primary border-0 d-flex flex-wrap align-items-center gap-2 mb-4">
+                <span class="small"><i class="bi bi-funnel me-1"></i>Đang xem gợi ý:</span>
+                @if (!string.IsNullOrWhiteSpace(Model.Q))
+                {
+                    <span class="badge rounded-pill text-bg-white text-primary border">@Model.Q</span>
+                }
+                @if (!string.IsNullOrWhiteSpace(Model.Location))
+                {
+                    <span class="badge rounded-pill text-bg-white text-primary border"><i class="bi bi-geo-alt me-1"></i>@Model.Location</span>
+                }
+                <a asp-page="/Index" class="small ms-auto">Xóa bộ lọc</a>
+            </div>
+        }
+
         @if (Model.FeaturedJobs.Count == 0)
         {
-            <div class="alert alert-light border text-center py-5">
+            <div class="card border-0 shadow-sm text-center py-5">
                 <i class="bi bi-inbox display-4 text-muted d-block mb-3"></i>
-                <p class="mb-2">Chưa có việc làm phù hợp với bộ lọc của bạn.</p>
-                <a asp-page="/Index" class="btn btn-sm btn-primary">Xem tất cả việc làm</a>
+                <p class="text-muted mb-3">Chưa có việc phù hợp. Thử đổi từ khóa hoặc địa điểm khác.</p>
+                <a asp-page="/Jobs/Index" class="btn btn-primary">Khám phá tất cả việc làm</a>
             </div>
         }
         else
@@ -119,65 +249,123 @@ else
     </div>
 </section>
 
-<section class="home-features py-5 bg-light">
+<section class="home-features py-5">
     <div class="container">
-        <div class="text-center mb-5">
-            <h2 class="section-title">Vì sao chọn JobPortal?</h2>
-            <p class="text-muted">Trải nghiệm tuyển dụng đơn giản, minh bạch và hiệu quả</p>
+        <div class="text-center mb-5 home-section-head">
+            <span class="home-section-head__eyebrow">Lợi ích nổi bật</span>
+            <h2 class="section-title mb-2">Vì sao chọn JobPortal?</h2>
+            <p class="text-muted mb-0 mx-auto" style="max-width: 40rem;">
+                Thiết kế cho thị trường việc làm linh hoạt — minh bạch, nhanh và an toàn cho cả ứng viên lẫn nhà tuyển dụng.
+            </p>
         </div>
         <div class="row g-4">
-            <div class="col-md-4">
-                <div class="feature-card text-center p-4 h-100">
-                    <div class="feature-card__icon mb-3">
-                        <i class="bi bi-lightning-charge"></i>
-                    </div>
-                    <h3 class="h5">Ứng tuyển nhanh</h3>
-                    <p class="text-muted small mb-0">Nộp hồ sơ chỉ vài bước với CV đã lưu sẵn trên hệ thống.</p>
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card p-4 h-100">
+                    <div class="feature-card__icon mb-3"><i class="bi bi-patch-check"></i></div>
+                    <h3 class="h6">Tin đã kiểm duyệt</h3>
+                    <p class="text-muted small mb-0">Admin phê duyệt trước khi hiển thị; tin quá hạn tự ẩn hoặc đóng.</p>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="feature-card text-center p-4 h-100">
-                    <div class="feature-card__icon mb-3">
-                        <i class="bi bi-shield-check"></i>
-                    </div>
-                    <h3 class="h5">Tin cậy & bảo mật</h3>
-                    <p class="text-muted small mb-0">Thông tin cá nhân được bảo vệ, chỉ chia sẻ với nhà tuyển dụng bạn chọn.</p>
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card p-4 h-100">
+                    <div class="feature-card__icon mb-3"><i class="bi bi-lightning-charge"></i></div>
+                    <h3 class="h6">Ứng tuyển một chạm</h3>
+                    <p class="text-muted small mb-0">CV lưu sẵn, gửi đơn nhanh; theo dõi trạng thái trên cùng một dashboard.</p>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="feature-card text-center p-4 h-100">
-                    <div class="feature-card__icon mb-3">
-                        <i class="bi bi-graph-up-arrow"></i>
-                    </div>
-                    <h3 class="h5">Cơ hội đa dạng</h3>
-                    <p class="text-muted small mb-0">Từ IT, marketing đến tài chính — cập nhật tin tuyển dụng mỗi ngày.</p>
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card p-4 h-100">
+                    <div class="feature-card__icon mb-3"><i class="bi bi-star-half"></i></div>
+                    <h3 class="h6">Đánh giá uy tín</h3>
+                    <p class="text-muted small mb-0">Ứng viên và nhà tuyển dụng đánh giá sau khi làm việc — chọn đối tác tin cậy hơn.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card p-4 h-100">
+                    <div class="feature-card__icon mb-3"><i class="bi bi-calendar2-week"></i></div>
+                    <h3 class="h6">Part-time &amp; ca linh hoạt</h3>
+                    <p class="text-muted small mb-0">Phù hợp sinh viên, người đi làm thêm — mô tả rõ ca và mức lương.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card p-4 h-100">
+                    <div class="feature-card__icon mb-3"><i class="bi bi-shield-lock"></i></div>
+                    <h3 class="h6">Bảo mật dữ liệu</h3>
+                    <p class="text-muted small mb-0">Thông tin cá nhân được bảo vệ theo chính sách công khai trên hệ thống.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card p-4 h-100">
+                    <div class="feature-card__icon mb-3"><i class="bi bi-briefcase"></i></div>
+                    <h3 class="h6">Công cụ cho NTD</h3>
+                    <p class="text-muted small mb-0">Đăng tin, duyệt CV, quản lý tiến độ và gói đăng tin tập trung.</p>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<section class="home-cta py-5">
+<section class="home-dual-cta py-5 bg-light">
     <div class="container">
-        <div class="home-cta__box rounded-4 p-4 p-md-5 text-center text-md-start">
-            <div class="row align-items-center g-4">
-                <div class="col-md-8">
-                    <h2 class="h3 text-white mb-2">Bạn là nhà tuyển dụng?</h2>
-                    <p class="text-white-50 mb-0">Đăng tin tuyển dụng, tiếp cận ứng viên chất lượng và quản lý hồ sơ tập trung.</p>
-                </div>
-                <div class="col-md-4 text-md-end">
-                    @if (isLoggedIn)
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="home-dual-cta__card h-100 p-4 p-lg-5">
+                    <span class="badge text-bg-primary mb-3">Ứng viên</span>
+                    <h2 class="h4 mb-2">Bắt đầu tìm việc hôm nay</h2>
+                    <p class="text-muted mb-4">Tạo tài khoản miễn phí, lưu CV và nhận thông báo khi có tin phù hợp.</p>
+                    @if (isLoggedIn && isJobSeeker)
                     {
-                        <a asp-page="/Jobs/Index" class="btn btn-light btn-lg fw-semibold">
-                            Đăng tin ngay
-                        </a>
+                        <a asp-page="/Jobs/Index" class="btn btn-primary">Tìm việc ngay</a>
+                    }
+                    else if (!isLoggedIn)
+                    {
+                        <a asp-page="/Auth/Register" class="btn btn-primary me-2">Đăng ký ứng viên</a>
+                        <a asp-page="/Auth/Login" class="btn btn-outline-primary">Đăng nhập</a>
                     }
                     else
                     {
-                        <a asp-page="/Auth/Login" asp-route-returnUrl="/Index" class="btn btn-light btn-lg fw-semibold">
-                            Đăng tin ngay
-                        </a>
+                        <a asp-page="/Jobs/Index" class="btn btn-primary">Xem việc làm</a>
                     }
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="home-dual-cta__card home-dual-cta__card--employer h-100 p-4 p-lg-5">
+                    <span class="badge text-bg-dark mb-3">Nhà tuyển dụng</span>
+                    <h2 class="h4 mb-2">Tuyển dụng nhanh, quản lý dễ</h2>
+                    <p class="text-muted mb-4">Đăng tin part-time, nhận hồ sơ ứng viên và theo dõi tiến độ làm việc trên một nơi.</p>
+                    @if (isLoggedIn && isEmployer)
+                    {
+                        <a asp-page="/Employer/PostJob" class="btn btn-dark">Đăng tin tuyển dụng</a>
+                    }
+                    else if (!isLoggedIn)
+                    {
+                        <a asp-page="/Auth/Register" class="btn btn-dark me-2">Đăng ký nhà tuyển dụng</a>
+                        <a asp-page="/Auth/Login" class="btn btn-outline-dark">Đăng nhập</a>
+                    }
+                    else
+                    {
+                        <a asp-page="/Auth/Login" asp-route-returnUrl="/Employer/PostJob" class="btn btn-dark">Đăng tin ngay</a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="home-cta py-4 pb-5">
+    <div class="container">
+        <div class="home-cta__box rounded-4 p-4 p-md-5">
+            <div class="row align-items-center g-4">
+                <div class="col-lg-8">
+                    <h2 class="h4 text-white mb-2">Cần tìm hiểu thêm?</h2>
+                    <p class="text-white-50 mb-0">
+                        Đọc chính sách bảo mật, quy trình duyệt tin và quyền lợi khi sử dụng JobPortal.
+                    </p>
+                </div>
+                <div class="col-lg-4 text-lg-end">
+                    <a asp-page="/Privacy" class="btn btn-light fw-semibold">
+                        <i class="bi bi-shield-check me-1"></i> Xem chính sách
+                    </a>
                 </div>
             </div>
         </div>

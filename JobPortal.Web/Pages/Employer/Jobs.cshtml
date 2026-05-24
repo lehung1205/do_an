@@ -42,6 +42,14 @@
                         {
                             <option value="all">Tất cả</option>
                         }
+                        @if (Model.StatusFilter == "pending")
+                        {
+                            <option value="pending" selected>Chờ duyệt</option>
+                        }
+                        else
+                        {
+                            <option value="pending">Chờ duyệt</option>
+                        }
                         @if (Model.StatusFilter == "recruiting")
                         {
                             <option value="recruiting" selected>Đang tuyển</option>
@@ -49,6 +57,14 @@
                         else
                         {
                             <option value="recruiting">Đang tuyển</option>
+                        }
+                        @if (Model.StatusFilter == "rejected")
+                        {
+                            <option value="rejected" selected>Từ chối</option>
+                        }
+                        else
+                        {
+                            <option value="rejected">Từ chối</option>
                         }
                         @if (Model.StatusFilter == "closed")
                         {

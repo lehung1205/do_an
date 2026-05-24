@@ -1,3 +1,4 @@
+using JobPortal.API.Helpers;
 using JobPortal.API.Repositories.Interface;
 using JobPortal.API.Services.Interface;
 
@@ -12,6 +13,12 @@ public class JobExpiryService : IJobExpiryService
         _jobRepository = jobRepository;
     }
 
-    public Task<int> CloseExpiredJobsAsync(CancellationToken cancellationToken = default) =>
-        _jobRepository.CloseExpiredRecruitingJobsAsync(cancellationToken);
+    public async Task<int> CloseExpiredJobsAsync(CancellationToken cancellationToken = default)
+    {
+        await AutoApproveStalePendingJobsAsync(cancellationToken);
+        return await _jobRepository.CloseExpiredRecruitingJobsAsync(cancellationToken);
+    }
+
+    public Task<int> AutoApproveStalePendingJobsAsync(CancellationToken cancellationToken = default) =>
+        _jobRepository.AutoApproveStalePendingJobsAsync(JobPostingCatalog.PendingAutoApproveDelay, cancellationToken);
 }

@@ -8,7 +8,7 @@ public class CreateJobRequest
     public string Description { get; set; } = null!;
     public string Salary { get; set; } = null!;
     public string Location { get; set; } = null!;
-    public string PostingStatus { get; set; } = "recruiting";
+    public string PostingStatus { get; set; } = "pending";
     public string? WorkingHours { get; set; }
     public DateTime ExpiryDate { get; set; }
 }

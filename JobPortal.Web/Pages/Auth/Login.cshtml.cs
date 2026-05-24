@@ -54,6 +54,11 @@ public class LoginModel : PageModel
             return Redirect(ReturnUrl);
         }
 
+        if (string.Equals(response.Data.User.Role, "ADMIN", StringComparison.Ordinal))
+        {
+            return RedirectToPage("/Admin/Jobs/Index");
+        }
+
         return RedirectToPage("/Index");
     }
 

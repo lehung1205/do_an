@@ -10,6 +10,7 @@ public class IndexModel : PageModel
     public const int DefaultPageSize = 12;
 
     private readonly ApiService _api;
+
     public List<JobDto> Jobs { get; set; } = new();
     public string? Q { get; set; }
     public string? Location { get; set; }

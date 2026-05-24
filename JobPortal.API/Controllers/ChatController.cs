@@ -37,6 +37,19 @@ public class ChatController : ControllerBase
         return Ok(ApiResponse<IReadOnlyList<ChatThreadDto>>.SuccessResponse(threads, "Chat threads retrieved."));
     }
 
+    [HttpGet("partners/{partnerUserId:long}/messages")]
+    public async Task<IActionResult> GetMessagesByPartner(
+        long partnerUserId,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 50,
+        CancellationToken cancellationToken = default)
+    {
+        var userId = GetCurrentUserId();
+        var role = GetCurrentUserRole();
+        var result = await _chatService.GetMessagesByPartnerAsync(userId, role, partnerUserId, page, pageSize, cancellationToken);
+        return Ok(ApiResponse<PagedResult<ChatMessageDto>>.SuccessResponse(result, "Messages retrieved."));
+    }
+
     [HttpGet("applications/{applicationId:long}/messages")]
     public async Task<IActionResult> GetMessages(
         long applicationId,
@@ -48,6 +61,15 @@ public class ChatController : ControllerBase
         var role = GetCurrentUserRole();
         var result = await _chatService.GetMessagesAsync(userId, role, applicationId, page, pageSize, cancellationToken);
         return Ok(ApiResponse<PagedResult<ChatMessageDto>>.SuccessResponse(result, "Messages retrieved."));
+    }
+
+    [HttpPost("partners/{partnerUserId:long}/read")]
+    public async Task<IActionResult> MarkReadByPartner(long partnerUserId, CancellationToken cancellationToken)
+    {
+        var userId = GetCurrentUserId();
+        var role = GetCurrentUserRole();
+        await _chatService.MarkAsReadByPartnerAsync(userId, role, partnerUserId, cancellationToken);
+        return Ok(ApiResponse<object>.SuccessResponse(null, "Marked as read."));
     }
 
     [HttpPost("applications/{applicationId:long}/read")]

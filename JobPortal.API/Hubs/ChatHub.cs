@@ -46,28 +46,40 @@ public class ChatHub : Hub
         await base.OnDisconnectedAsync(exception);
     }
 
-    public async Task JoinChat(long applicationId)
+    /// <summary>Mở hội thoại gộp theo đối tác (một room cho mọi đơn ứng tuyển cùng cặp).</summary>
+    public async Task JoinChat(long partnerUserId)
     {
         var userId = GetUserId();
         var role = GetUserRole();
 
-        var info = await _chatService.GetThreadInfoAsync(userId, role, applicationId, Context.ConnectionAborted);
-        await _chatService.MarkAsReadAsync(userId, role, applicationId, Context.ConnectionAborted);
+        var info = await _chatService.GetThreadInfoByPartnerAsync(userId, role, partnerUserId, Context.ConnectionAborted);
+        await _chatService.MarkAsReadByPartnerAsync(userId, role, partnerUserId, Context.ConnectionAborted);
 
-        await Groups.AddToGroupAsync(Context.ConnectionId, GroupName(applicationId));
+        await Groups.AddToGroupAsync(Context.ConnectionId, PairGroupName(userId, partnerUserId));
         await Clients.Caller.SendAsync("ChatJoined", info);
     }
 
-    public Task LeaveChat(long applicationId) =>
-        Groups.RemoveFromGroupAsync(Context.ConnectionId, GroupName(applicationId));
+    /// <summary>Tương thích link cũ theo applicationId — resolve sang đối tác.</summary>
+    public async Task JoinChatByApplication(long applicationId)
+    {
+        var userId = GetUserId();
+        var role = GetUserRole();
+        var info = await _chatService.GetThreadInfoAsync(userId, role, applicationId, Context.ConnectionAborted);
+        await _chatService.MarkAsReadByPartnerAsync(userId, role, info.PartnerUserId, Context.ConnectionAborted);
+        await Groups.AddToGroupAsync(Context.ConnectionId, PairGroupName(userId, info.PartnerUserId));
+        await Clients.Caller.SendAsync("ChatJoined", info);
+    }
 
-    public async Task SendMessage(long applicationId, string content)
+    public Task LeaveChat(long partnerUserId) =>
+        Groups.RemoveFromGroupAsync(Context.ConnectionId, PairGroupName(GetUserId(), partnerUserId));
+
+    public async Task SendMessage(long partnerUserId, string content)
     {
         var userId = GetUserId();
         var role = GetUserRole();
 
-        var message = await _chatService.SendMessageAsync(userId, role, applicationId, content, Context.ConnectionAborted);
-        var group = GroupName(applicationId);
+        var message = await _chatService.SendMessageByPartnerAsync(userId, role, partnerUserId, content, Context.ConnectionAborted);
+        var group = PairGroupName(userId, partnerUserId);
 
         await Clients.OthersInGroup(group).SendAsync("ReceiveMessage", new ChatMessageDto
         {
@@ -108,5 +120,6 @@ public class ChatHub : Hub
         return role;
     }
 
-    private static string GroupName(long applicationId) => $"app-{applicationId}";
+    private static string PairGroupName(long userId, long partnerUserId) =>
+        IChatService.GetPairGroupName(userId, partnerUserId);
 }

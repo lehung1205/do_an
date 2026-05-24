@@ -6,6 +6,8 @@ public class ChatThreadDto
     public long PartnerUserId { get; set; }
     public string Title { get; set; } = null!;
     public string Subtitle { get; set; } = null!;
+    public int ApplicationCount { get; set; }
+    public IReadOnlyList<long> ApplicationIds { get; set; } = Array.Empty<long>();
     public bool PartnerIsOnline { get; set; }
     public int UnreadCount { get; set; }
     public string? LastMessagePreview { get; set; }
@@ -30,6 +32,7 @@ public class ChatJoinedDto
     public long PartnerUserId { get; set; }
     public string PartnerName { get; set; } = null!;
     public string JobTitle { get; set; } = null!;
+    public int ApplicationCount { get; set; }
     public bool PartnerIsOnline { get; set; }
 }
 

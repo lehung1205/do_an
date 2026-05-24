@@ -34,5 +34,39 @@ public interface IChatService
         long applicationId,
         CancellationToken cancellationToken = default);
 
+    Task<ChatJoinedDto> GetThreadInfoByPartnerAsync(
+        long userId,
+        string role,
+        long partnerUserId,
+        CancellationToken cancellationToken = default);
+
+    Task<PagedResult<ChatMessageDto>> GetMessagesByPartnerAsync(
+        long userId,
+        string role,
+        long partnerUserId,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default);
+
+    Task<ChatMessageDto> SendMessageByPartnerAsync(
+        long userId,
+        string role,
+        long partnerUserId,
+        string content,
+        CancellationToken cancellationToken = default);
+
+    Task MarkAsReadByPartnerAsync(
+        long userId,
+        string role,
+        long partnerUserId,
+        CancellationToken cancellationToken = default);
+
     Task<int> GetTotalUnreadCountAsync(long userId, string role, CancellationToken cancellationToken = default);
+
+    static string GetPairGroupName(long userId, long partnerUserId)
+    {
+        var a = Math.Min(userId, partnerUserId);
+        var b = Math.Max(userId, partnerUserId);
+        return $"pair-{a}-{b}";
+    }
 }

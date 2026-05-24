@@ -2,7 +2,7 @@
 @model JobPortal.Web.Pages.Messages.IndexModel
 @{
     ViewData["Title"] = "Tin nhắn";
-    var selectedId = Model.SelectedApplicationId;
+    var selectedPartnerId = Model.SelectedPartnerUserId;
 }
 
 <div class="container py-4 chat-page"
@@ -11,7 +11,7 @@
      data-access-token="@Model.AccessToken"
      data-user-id="@Model.CurrentUserId"
      data-api-base="@Model.ApiBaseUrl"
-     data-application-id="@(selectedId?.ToString() ?? "")">
+     data-partner-user-id="@(selectedPartnerId?.ToString() ?? "")">
     <div class="chat-page__hero">
         <h2 class="h4 mb-1"><i class="bi bi-chat-heart me-2 text-primary"></i>Tin nhắn</h2>
         <p class="text-muted small mb-0">Trao đổi trực tiếp với đối tác · Lịch sử được lưu tự động</p>
@@ -48,7 +48,7 @@
                     {
                         @foreach (var thread in Model.Threads)
                         {
-                            var active = selectedId == thread.ApplicationId;
+                            var active = selectedPartnerId == thread.PartnerUserId;
                             var initial = string.IsNullOrWhiteSpace(thread.Title)
                                 ? "?"
                                 : thread.Title.Trim()[0].ToString().ToUpperInvariant();
@@ -56,11 +56,11 @@
                             var timeLabel = thread.LastMessageAt.HasValue
                                 ? thread.LastMessageAt.Value.ToLocalTime().ToString("HH:mm")
                                 : "";
-                            <a href="?applicationId=@thread.ApplicationId"
+                            <a href="?partnerUserId=@thread.PartnerUserId"
                                class="list-group-item list-group-item-action chat-thread-item @(active ? "active" : "") @(thread.UnreadCount > 0 ? "chat-thread-item--unread" : "")"
-                               data-application-id="@thread.ApplicationId"
-                               data-thread-title="@thread.Title"
                                data-partner-user-id="@thread.PartnerUserId"
+                               data-thread-title="@thread.Title"
+                               data-application-id="@thread.ApplicationId"
                                data-partner-online="@(thread.PartnerIsOnline ? "true" : "false")"
                                data-unread-count="@thread.UnreadCount">
                                 <div class="chat-thread-item__row">
@@ -87,7 +87,7 @@
                                     @if (thread.UnreadCount > 0)
                                     {
                                         <span class="badge bg-danger rounded-pill chat-thread-unread flex-shrink-0"
-                                              data-thread-unread="@thread.ApplicationId"
+                                              data-thread-unread="@thread.PartnerUserId"
                                               title="@thread.UnreadCount tin chưa đọc">@thread.UnreadCount</span>
                                     }
                                     else
@@ -111,7 +111,7 @@
                         <span class="chat-presence-dot chat-presence-dot--offline" id="chatHeaderPresenceDot"></span>
                     </div>
                     <div class="chat-panel__head-text flex-grow-1 min-w-0">
-                        <h3 id="chatPartnerName">@(selectedId.HasValue ? "Đang tải…" : "Chọn hội thoại")</h3>
+                        <h3 id="chatPartnerName">@(selectedPartnerId.HasValue ? "Đang tải…" : "Chọn hội thoại")</h3>
                         <p class="chat-panel__presence chat-panel__presence--offline d-none" id="chatPartnerPresence">
                             <span class="chat-panel__presence-dot"></span>
                             <span id="chatPartnerPresenceText">Offline</span>
@@ -120,7 +120,7 @@
                     </div>
                 </div>
                 <div class="card-body chat-messages flex-grow-1" id="chatMessages" role="log" aria-live="polite">
-                    @if (!selectedId.HasValue)
+                    @if (!selectedPartnerId.HasValue)
                     {
                         <div class="chat-empty">
                             <i class="bi bi-chat-left-text"></i>

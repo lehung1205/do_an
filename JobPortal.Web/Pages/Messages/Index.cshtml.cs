@@ -23,18 +23,16 @@ public class IndexModel : PageModel
     public string HubUrl { get; set; } = "";
     public string ApiBaseUrl { get; set; } = "";
     public string AccessToken { get; set; } = "";
-    public long? SelectedApplicationId { get; set; }
+    public long? SelectedPartnerUserId { get; set; }
     public long CurrentUserId { get; set; }
 
-    public async Task<IActionResult> OnGetAsync(long? applicationId)
+    public async Task<IActionResult> OnGetAsync(long? applicationId, long? partnerUserId)
     {
         var redirect = RequireChatUser();
         if (redirect != null)
         {
             return redirect;
         }
-
-        SelectedApplicationId = applicationId > 0 ? applicationId : null;
         AccessToken = HttpContext.Session.GetString("JwtToken") ?? "";
 
         ApiBaseUrl = _config["ApiSettings:BaseUrl"]?.TrimEnd('/') ?? "http://localhost:5068";
@@ -62,6 +60,19 @@ public class IndexModel : PageModel
 
         Threads = threads;
         TotalUnreadCount = threads.Sum(t => t.UnreadCount);
+
+        if (partnerUserId > 0)
+        {
+            SelectedPartnerUserId = partnerUserId;
+        }
+        else if (applicationId > 0)
+        {
+            var match = threads.FirstOrDefault(t =>
+                t.ApplicationId == applicationId
+                || t.ApplicationIds.Contains(applicationId.Value));
+            SelectedPartnerUserId = match?.PartnerUserId;
+        }
+
         return Page();
     }
 

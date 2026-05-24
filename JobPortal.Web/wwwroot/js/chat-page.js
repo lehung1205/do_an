@@ -5,7 +5,9 @@
     const hubUrl = root.dataset.hubUrl;
     const apiBase = (root.dataset.apiBase || '').replace(/\/$/, '');
     const currentUserId = Number(root.dataset.userId || 0);
-    const initialApplicationId = root.dataset.applicationId ? Number(root.dataset.applicationId) : null;
+    const initialPartnerUserId = root.dataset.partnerUserId ? Number(root.dataset.partnerUserId) : null;
+    const urlParams = new URLSearchParams(window.location.search);
+    const legacyApplicationId = urlParams.get('applicationId') ? Number(urlParams.get('applicationId')) : null;
 
     const messagesEl = document.getElementById('chatMessages');
     const partnerNameEl = document.getElementById('chatPartnerName');
@@ -21,17 +23,16 @@
     const chatPartnerPresenceText = document.getElementById('chatPartnerPresenceText');
 
     let connection = null;
-    let activeApplicationId = null;
     let activePartnerUserId = null;
     let chatReady = false;
     const messageIds = new Set();
 
-    function getThreadItem(applicationId) {
-        return document.querySelector('.chat-thread-item[data-application-id="' + applicationId + '"]');
+    function getThreadItem(partnerUserId) {
+        return document.querySelector('.chat-thread-item[data-partner-user-id="' + partnerUserId + '"]');
     }
 
-    function getThreadUnreadBadge(applicationId) {
-        return document.querySelector('[data-thread-unread="' + applicationId + '"]');
+    function getThreadUnreadBadge(partnerUserId) {
+        return document.querySelector('[data-thread-unread="' + partnerUserId + '"]');
     }
 
     function setPresenceDot(el, online) {
@@ -81,9 +82,9 @@
         if (chatPartnerPresence) chatPartnerPresence.classList.add('d-none');
     }
 
-    function setThreadUnreadCount(applicationId, count) {
-        const item = getThreadItem(applicationId);
-        const badge = getThreadUnreadBadge(applicationId);
+    function setThreadUnreadCount(partnerUserId, count) {
+        const item = getThreadItem(partnerUserId);
+        const badge = getThreadUnreadBadge(partnerUserId);
         const n = Math.max(0, count);
         if (item) {
             item.dataset.unreadCount = String(n);
@@ -100,10 +101,16 @@
         }
     }
 
-    function adjustThreadUnread(applicationId, delta) {
-        const item = getThreadItem(applicationId);
+    function adjustThreadUnread(partnerUserId, delta) {
+        const item = getThreadItem(partnerUserId);
         const current = item ? Number(item.dataset.unreadCount || 0) : 0;
-        setThreadUnreadCount(applicationId, current + delta);
+        setThreadUnreadCount(partnerUserId, current + delta);
+    }
+
+    function partnerIdFromSender(senderUserId) {
+        const sid = Number(senderUserId);
+        if (!sid || sid === currentUserId) return null;
+        return sid;
     }
 
     async function refreshUnreadSummary() {
@@ -164,7 +171,7 @@
     }
 
     function updateComposer() {
-        const ok = chatReady && activeApplicationId != null &&
+        const ok = chatReady && activePartnerUserId != null &&
             connection && connection.state === signalR.HubConnectionState.Connected;
         chatInput.disabled = !ok;
         chatSendBtn.disabled = !ok;
@@ -206,9 +213,9 @@
         messagesEl.scrollTop = messagesEl.scrollHeight;
     }
 
-    async function loadHistory(applicationId) {
+    async function loadHistory(partnerUserId) {
         const res = await fetch(
-            apiBase + '/api/chat/applications/' + applicationId + '/messages?page=1&pageSize=100',
+            apiBase + '/api/chat/partners/' + partnerUserId + '/messages?page=1&pageSize=100',
             { headers: apiHeaders(), credentials: 'include' }
         );
         if (!res.ok) {
@@ -250,16 +257,16 @@
                 const isMine = currentUserId > 0 && senderId === currentUserId;
                 appendMessage(msg, true);
                 if (!isMine) {
-                    const appId = Number(msg.applicationId ?? msg.ApplicationId ?? activeApplicationId);
-                    if (appId && appId !== Number(activeApplicationId)) {
-                        adjustThreadUnread(appId, 1);
+                    const partnerId = partnerIdFromSender(senderId);
+                    if (partnerId && partnerId !== Number(activePartnerUserId)) {
+                        adjustThreadUnread(partnerId, 1);
                     }
                     refreshUnreadSummary();
                 }
             });
             connection.onreconnecting(() => { chatReady = false; updateComposer(); });
             connection.onreconnected(async () => {
-                if (activeApplicationId) await joinChat(activeApplicationId, true);
+                if (activePartnerUserId) await joinChat(activePartnerUserId, true);
             });
             connection.onclose(() => { chatReady = false; updateComposer(); });
         }
@@ -270,83 +277,102 @@
     }
 
     function onChatJoined(info) {
-        const appId = info.applicationId ?? info.ApplicationId;
-        if (Number(appId) !== Number(activeApplicationId)) return;
+        const partnerId = Number(info.partnerUserId ?? info.PartnerUserId ?? 0);
+        if (partnerId) {
+            activePartnerUserId = partnerId;
+            document.querySelectorAll('.chat-thread-item').forEach(el => {
+                el.classList.toggle('active', Number(el.dataset.partnerUserId) === partnerId);
+            });
+            const url = new URL(window.location.href);
+            url.searchParams.delete('applicationId');
+            url.searchParams.set('partnerUserId', String(partnerId));
+            window.history.replaceState({}, '', url);
+            if (!messageIds.size) {
+                loadHistory(partnerId).catch(() => { /* history may already be loaded */ });
+            }
+        }
 
         chatReady = true;
         const partnerName = info.partnerName ?? info.PartnerName ?? '';
-        const partnerUserId = Number(info.partnerUserId ?? info.PartnerUserId ?? 0);
         const partnerOnline = info.partnerIsOnline === true || info.PartnerIsOnline === true;
 
-        activePartnerUserId = partnerUserId || activePartnerUserId;
         partnerNameEl.textContent = partnerName;
         jobTitleEl.textContent = info.jobTitle ?? info.JobTitle ?? '';
         showChatHeader(partnerName, partnerOnline);
-        if (partnerUserId) setPartnerOnline(partnerUserId, partnerOnline);
+        if (partnerId) setPartnerOnline(partnerId, partnerOnline);
 
         updateComposer();
         showAlert('', false);
-        setThreadUnreadCount(Number(appId), 0);
+        if (partnerId) setThreadUnreadCount(partnerId, 0);
         refreshUnreadSummary();
     }
 
-    async function leaveChat(applicationId) {
-        if (!connection || connection.state !== signalR.HubConnectionState.Connected || !applicationId) return;
+    async function leaveChat(partnerUserId) {
+        if (!connection || connection.state !== signalR.HubConnectionState.Connected || !partnerUserId) return;
         try {
-            await connection.invoke('LeaveChat', applicationId);
+            await connection.invoke('LeaveChat', partnerUserId);
         } catch { /* ignore */ }
     }
 
-    async function joinChat(applicationId, isReconnect) {
-        if (!isReconnect && activeApplicationId && activeApplicationId !== applicationId) {
-            await leaveChat(activeApplicationId);
+    async function joinChat(partnerUserId, isReconnect) {
+        if (!isReconnect && activePartnerUserId && activePartnerUserId !== partnerUserId) {
+            await leaveChat(activePartnerUserId);
         }
-        activeApplicationId = applicationId;
+        activePartnerUserId = partnerUserId;
         chatReady = false;
         updateComposer();
         showAlert('Đang kết nối…', false);
 
-        await loadHistory(applicationId);
+        await loadHistory(partnerUserId);
         const conn = await ensureConnection();
-        await conn.invoke('JoinChat', applicationId);
+        await conn.invoke('JoinChat', partnerUserId);
     }
 
-    async function openThread(applicationId, title) {
+    async function joinChatByApplication(applicationId) {
+        activePartnerUserId = null;
+        chatReady = false;
+        updateComposer();
+        showAlert('Đang kết nối…', false);
+
+        const conn = await ensureConnection();
+        await conn.invoke('JoinChatByApplication', applicationId);
+    }
+
+    async function openThread(partnerUserId, title) {
         document.querySelectorAll('.chat-thread-item').forEach(el => {
-            el.classList.toggle('active', Number(el.dataset.applicationId) === Number(applicationId));
+            el.classList.toggle('active', Number(el.dataset.partnerUserId) === Number(partnerUserId));
         });
 
-        const item = getThreadItem(applicationId);
-        const partnerUserId = item ? Number(item.dataset.partnerUserId || 0) : 0;
+        const item = getThreadItem(partnerUserId);
         const partnerOnline = item ? item.dataset.partnerOnline === 'true' : false;
 
-        activePartnerUserId = partnerUserId || null;
         partnerNameEl.textContent = title || 'Đang tải…';
         jobTitleEl.textContent = '';
         showChatHeader(title || '', partnerOnline);
 
         const url = new URL(window.location.href);
-        url.searchParams.set('applicationId', String(applicationId));
+        url.searchParams.delete('applicationId');
+        url.searchParams.set('partnerUserId', String(partnerUserId));
         window.history.replaceState({}, '', url);
-        await joinChat(applicationId, false);
+        await joinChat(partnerUserId, false);
     }
 
     document.querySelectorAll('.chat-thread-item').forEach(el => {
         el.addEventListener('click', e => {
             e.preventDefault();
-            openThread(Number(el.dataset.applicationId), el.dataset.threadTitle || '');
+            openThread(Number(el.dataset.partnerUserId), el.dataset.threadTitle || '');
         });
     });
 
     chatForm?.addEventListener('submit', async e => {
         e.preventDefault();
-        if (!activeApplicationId || !chatReady) return;
+        if (!activePartnerUserId || !chatReady) return;
         const text = chatInput.value.trim();
         if (!text) return;
         try {
             chatSendBtn.disabled = true;
             await ensureConnection();
-            await connection.invoke('SendMessage', activeApplicationId, text);
+            await connection.invoke('SendMessage', activePartnerUserId, text);
             chatInput.value = '';
         } catch (err) {
             console.error(err);
@@ -363,9 +389,11 @@
         }
         try {
             await ensureConnection();
-            if (initialApplicationId) {
-                const link = document.querySelector('.chat-thread-item[data-application-id="' + initialApplicationId + '"]');
-                await openThread(initialApplicationId, link?.dataset.threadTitle || '');
+            if (initialPartnerUserId) {
+                const link = document.querySelector('.chat-thread-item[data-partner-user-id="' + initialPartnerUserId + '"]');
+                await openThread(initialPartnerUserId, link?.dataset.threadTitle || '');
+            } else if (legacyApplicationId) {
+                await joinChatByApplication(legacyApplicationId);
             } else {
                 hideChatHeaderExtras();
             }

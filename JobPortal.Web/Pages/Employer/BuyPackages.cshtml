@@ -19,18 +19,16 @@
             @foreach (var p in Model.Packages)
             {
                 <div class="col-md-6 col-lg-4">
-                    <div class="card border-0 shadow-sm h-100">
-                        <div class="card-body d-flex flex-column">
-                            <h5 class="card-title">@p.Name</h5>
-                            <p class="text-muted small mb-2">Số tin đăng: <strong>@p.PostingLimit</strong></p>
-                            <p class="h5 text-primary mb-3">@p.Price.ToString("N0") <span class="fs-6 fw-normal">VNĐ</span></p>
-                            <form method="post" asp-page-handler="Buy" class="mt-auto">
-                                <input type="hidden" name="packageId" value="@p.Id" />
-                                <button type="submit" class="btn btn-outline-primary w-100">
-                                    Thanh toán VNPay
-                                </button>
-                            </form>
-                        </div>
+                    <div class="employer-package-card h-100 d-flex flex-column">
+                        <h5 class="employer-package-card__title">@p.Name</h5>
+                        <p class="text-muted small mb-2">Số tin đăng: <strong>@p.PostingLimit</strong></p>
+                        <p class="h5 text-primary mb-3">@p.Price.ToString("N0") <span class="fs-6 fw-normal">VNĐ</span></p>
+                        <form method="post" asp-page-handler="Buy" class="mt-auto">
+                            <input type="hidden" name="packageId" value="@p.Id" />
+                            <button type="submit" class="btn btn-outline-primary w-100">
+                                Thanh toán VNPay
+                            </button>
+                        </form>
                     </div>
                 </div>
             }

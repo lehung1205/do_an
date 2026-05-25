@@ -1,8 +1,8 @@
 .chat-page {
-    --chat-accent: #2563eb;
-    --chat-accent-soft: #eff6ff;
-    --chat-border: #e2e8f0;
-    --chat-surface: #f8fafc;
+    --chat-accent: #0000ee;
+    --chat-accent-soft: #fafafa;
+    --chat-border: #d9d9d9;
+    --chat-surface: #fafafa;
     --chat-online: #22c55e;
     --chat-offline: #ef4444;
 }
@@ -22,14 +22,15 @@
 
 .chat-sidebar,
 .chat-panel {
-    border-radius: 1rem;
+    border-radius: 4px;
     overflow: hidden;
     border: 1px solid var(--chat-border) !important;
-    box-shadow: 0 4px 24px rgba(15, 23, 42, 0.06) !important;
+    box-shadow: none !important;
 }
 
 .chat-sidebar__head {
-    background: linear-gradient(180deg, #fff 0%, var(--chat-surface) 100%);
+    background: #fff;
+    border-bottom: 1px solid var(--chat-border);
     padding: 1rem 1.25rem;
 }
 

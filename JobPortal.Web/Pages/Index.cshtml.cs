@@ -1,5 +1,7 @@
 using JobPortal.Web.Dtos;
 using JobPortal.Web.Dtos.Common;
+using JobPortal.Web.Helpers;
+using JobPortal.Web.Models;
 using JobPortal.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -12,6 +14,7 @@ public class IndexModel : PageModel
 
     public List<JobDto> FeaturedJobs { get; set; } = new();
     public List<CategoryDto> Categories { get; set; } = new();
+    public List<HomeCategoryPanel> CategoryPanels { get; set; } = new();
     public int TotalJobCount { get; set; }
     public int EmployerCount { get; set; }
     public int JobSeekerCount { get; set; }
@@ -63,7 +66,8 @@ public class IndexModel : PageModel
         var totalJobsTask = _api.GetApiDataAsync<PagedResult<JobDto>>("/api/jobs?page=1&pageSize=1");
         var statsTask = _api.GetApiDataAsync<HomeStatsDto>("/api/stats");
         var categoriesTask = _api.GetApiDataAsync<List<CategoryDto>>("/api/categories");
-        await Task.WhenAll(featuredTask, totalJobsTask, statsTask, categoriesTask);
+        var jobsForCategoriesTask = _api.GetApiDataAsync<PagedResult<JobDto>>("/api/jobs?page=1&pageSize=120");
+        await Task.WhenAll(featuredTask, totalJobsTask, statsTask, categoriesTask, jobsForCategoriesTask);
 
         var featured = await featuredTask;
         var totalJobs = await totalJobsTask;
@@ -72,8 +76,38 @@ public class IndexModel : PageModel
         TotalJobCount = totalJobs?.TotalCount ?? featured?.TotalCount ?? 0;
         EmployerCount = stats?.EmployerCount ?? 0;
         JobSeekerCount = stats?.JobSeekerCount ?? 0;
-        Categories = (await categoriesTask ?? new List<CategoryDto>()).Take(8).ToList();
+        Categories = await categoriesTask ?? new List<CategoryDto>();
+        var jobsForCategories = await jobsForCategoriesTask;
+        CategoryPanels = BuildCategoryPanels(
+            Categories,
+            jobsForCategories?.Items ?? new List<JobDto>());
         return Page();
+    }
+
+    private static List<HomeCategoryPanel> BuildCategoryPanels(
+        IReadOnlyList<CategoryDto> categories,
+        IReadOnlyList<JobDto> jobs)
+    {
+        var titlesByCategory = jobs
+            .GroupBy(j => j.CategoryId)
+            .ToDictionary(
+                g => g.Key,
+                g => g.Select(j => j.Title.Trim())
+                    .Where(t => !string.IsNullOrWhiteSpace(t))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .Take(14)
+                    .ToList());
+
+        return CategoryDisplayOrder.SortOtherLast(categories)
+            .Select(c => new HomeCategoryPanel
+            {
+                Id = c.Id,
+                Name = c.Name,
+                JobTitles = titlesByCategory.TryGetValue(c.Id, out var titles) && titles.Count > 0
+                    ? titles
+                    : new List<string> { $"Việc làm {c.Name}", $"Tuyển {c.Name}", $"Part-time {c.Name}" }
+            })
+            .ToList();
     }
 
     public static string FormatSalary(string? salary) =>

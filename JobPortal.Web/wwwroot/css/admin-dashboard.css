@@ -1,35 +1,30 @@
 .admin-dash {
-    --adm-bg: #0f172a;
+    --adm-bg: #313131;
     --adm-surface: #ffffff;
-    --adm-muted: #64748b;
-    --adm-border: #e2e8f0;
-    --adm-primary: #4f46e5;
-    --adm-primary-soft: #eef2ff;
+    --adm-muted: #313131;
+    --adm-border: #d9d9d9;
+    --adm-primary: #0000ee;
+    --adm-primary-soft: #fafafa;
     --adm-success: #059669;
     --adm-warning: #d97706;
     --adm-danger: #dc2626;
-    --adm-radius: 1rem;
-    background: linear-gradient(180deg, #f1f5f9 0%, #f8fafc 40%, #fff 100%);
+    --adm-radius: 4px;
+    background: #fafafa;
     min-height: calc(100vh - 4rem);
     padding-bottom: 3rem;
 }
 
 .admin-dash__hero {
-    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 45%, #4f46e5 100%);
-    color: #fff;
+    background: #fff;
+    color: var(--adm-text, #313131);
+    border-bottom: 1px solid var(--adm-border);
     padding: 1.5rem 0 1.75rem;
-    margin-bottom: -1rem;
+    margin-bottom: 1rem;
     position: relative;
-    overflow: hidden;
 }
 
 .admin-dash__hero::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.12), transparent 45%),
-        radial-gradient(circle at 10% 80%, rgba(99, 102, 241, 0.4), transparent 40%);
-    pointer-events: none;
+    display: none;
 }
 
 .admin-dash__hero .container {
@@ -46,11 +41,11 @@
 }
 
 .admin-dash__eyebrow {
-    font-size: 0.75rem;
+    font-size: 12px;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    opacity: 0.75;
+    color: var(--adm-primary);
     margin: 0 0 0.35rem;
 }
 
@@ -62,10 +57,20 @@
 }
 
 .admin-dash__subtitle {
+    color: var(--adm-muted);
     opacity: 0.85;
-    font-size: 0.875rem;
+    font-size: 16px;
+    line-height: 24px;
     margin: 0;
     max-width: 28rem;
+}
+
+.admin-dash__metric-value {
+    color: var(--adm-primary);
+}
+
+.admin-dash__metric-label {
+    color: var(--adm-muted);
 }
 
 .admin-dash__hero-metrics {
@@ -75,12 +80,11 @@
 }
 
 .admin-dash__metric {
-    background: rgba(255, 255, 255, 0.12);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 0.75rem;
+    background: var(--adm-primary-soft);
+    border: 1px solid var(--adm-border);
+    border-radius: var(--adm-radius);
     padding: 0.65rem 1rem;
     min-width: 6.5rem;
-    backdrop-filter: blur(8px);
 }
 
 .admin-dash__metric-value {
@@ -110,14 +114,12 @@
     border: 1px solid var(--adm-border);
     border-radius: var(--adm-radius);
     padding: 1.25rem 1.35rem;
-    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: none;
     height: 100%;
 }
 
 .admin-stat-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+    border-color: var(--adm-primary);
 }
 
 .admin-stat-card__icon {
@@ -138,10 +140,9 @@
 
 .admin-stat-card__value {
     font-size: 1.75rem;
-    font-weight: 700;
-    color: #0f172a;
+    font-weight: 600;
+    color: var(--adm-primary);
     line-height: 1.1;
-    letter-spacing: -0.02em;
 }
 
 .admin-stat-card__label {
@@ -154,7 +155,7 @@
     background: var(--adm-surface);
     border: 1px solid var(--adm-border);
     border-radius: var(--adm-radius);
-    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
+    box-shadow: none;
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -170,10 +171,10 @@
 }
 
 .admin-panel__head h3 {
-    font-size: 0.9375rem;
+    font-size: 16px;
     font-weight: 600;
     margin: 0;
-    color: #0f172a;
+    color: var(--adm-bg);
 }
 
 .admin-panel__head .badge {

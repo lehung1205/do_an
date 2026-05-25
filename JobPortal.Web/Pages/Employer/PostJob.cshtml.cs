@@ -1,5 +1,6 @@
 using JobPortal.Web.Dtos;
 using JobPortal.Web.Dtos.Auth;
+using JobPortal.Web.Helpers;
 using JobPortal.Web.Services;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -46,7 +47,8 @@ public class PostJobModel : PageModel
             return redirect;
         }
 
-        Categories = await _api.GetApiDataAsync<List<CategoryDto>>("/api/categories") ?? new();
+        Categories = CategoryDisplayOrder.SortOtherLast(
+            await _api.GetApiDataAsync<List<CategoryDto>>("/api/categories") ?? new());
         SuccessMessage = TempData["PostJobSuccessMessage"] as string;
         return Page();
     }
@@ -59,7 +61,8 @@ public class PostJobModel : PageModel
             return redirect;
         }
 
-        Categories = await _api.GetApiDataAsync<List<CategoryDto>>("/api/categories") ?? new();
+        Categories = CategoryDisplayOrder.SortOtherLast(
+            await _api.GetApiDataAsync<List<CategoryDto>>("/api/categories") ?? new());
 
         var profile = await _api.GetApiDataAsync<ProfileResponse>("/api/auth/me");
         if (profile?.EmployerId is not long employerId)

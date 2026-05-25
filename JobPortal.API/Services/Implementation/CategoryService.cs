@@ -22,7 +22,27 @@ public class CategoryService : ICategoryService
     public async Task<IReadOnlyList<CategoryDto>> GetAllCategoriesAsync(CancellationToken cancellationToken = default)
     {
         var items = await _repository.GetAllAsync(cancellationToken);
-        return _mapper.Map<IReadOnlyList<CategoryDto>>(items);
+        var dtos = _mapper.Map<List<CategoryDto>>(items);
+        return SortOtherCategoryLast(dtos);
+    }
+
+    /// <summary>Đưa danh mục "Khác" xuống cuối danh sách (đăng tin, banner trang chủ, …).</summary>
+    private static List<CategoryDto> SortOtherCategoryLast(IEnumerable<CategoryDto> categories) =>
+        categories
+            .OrderBy(c => IsOtherCategory(c.Name) ? 1 : 0)
+            .ThenBy(c => c.Name, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+    private static bool IsOtherCategory(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return false;
+        }
+
+        var trimmed = name.Trim();
+        return string.Equals(trimmed, "Khác", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(trimmed, "Khac", StringComparison.OrdinalIgnoreCase);
     }
 
     public async Task<CategoryDto> GetCategoryByIdAsync(long id, CancellationToken cancellationToken = default)

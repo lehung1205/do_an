@@ -1,0 +1,67 @@
+@model JobPortal.Web.Dtos.JobDto
+@{
+    var initial = string.IsNullOrWhiteSpace(Model.EmployerName)
+        ? "?"
+        : Model.EmployerName.Trim()[0].ToString().ToUpperInvariant();
+    var descPreview = Model.Description.Length > 140
+        ? Model.Description[..140].Trim() + "…"
+        : Model.Description;
+}
+
+<article class="job-listing-card">
+    <a asp-page="/Jobs/Detail" asp-route-id="@Model.Id" class="job-listing-card__logo" tabindex="-1" aria-hidden="true">
+        @if (!string.IsNullOrWhiteSpace(Model.ThumbnailUrl))
+        {
+            <img src="@Model.ThumbnailUrl" alt="" class="job-listing-card__logo-img" loading="lazy" />
+        }
+        else
+        {
+            <span class="job-listing-card__logo-fallback">@initial</span>
+        }
+    </a>
+
+    <div class="job-listing-card__body">
+        <div class="job-listing-card__head">
+            <h2 class="job-listing-card__title">
+                <a asp-page="/Jobs/Detail" asp-route-id="@Model.Id">@Model.Title</a>
+            </h2>
+            <div class="job-listing-card__company">
+                <span>@Model.EmployerName</span>
+                <partial name="Shared/_RatingStars"
+                         model="JobPortal.Web.Models.RatingStarsModel.FromEmployer(Model.EmployerAverageRating, Model.EmployerReviewCount)" />
+            </div>
+        </div>
+
+        <div class="job-listing-card__tags">
+            <span class="job-listing-card__salary">
+                <i class="bi bi-cash-stack"></i>
+                @JobPortal.Web.Pages.IndexModel.FormatSalary(Model.Salary)
+            </span>
+            @if (!string.IsNullOrWhiteSpace(Model.CategoryName))
+            {
+                <span class="job-listing-card__tag">@Model.CategoryName</span>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.WorkingHours))
+            {
+                <span class="job-listing-card__tag job-listing-card__tag--muted">@Model.WorkingHours</span>
+            }
+        </div>
+
+        <p class="job-listing-card__desc">@descPreview</p>
+
+        <div class="job-listing-card__meta">
+            <span><i class="bi bi-geo-alt"></i> @Model.Location</span>
+            <span><i class="bi bi-clock"></i> @JobPortal.Web.Pages.Jobs.IndexModel.FormatPostedTime(Model.CreatedAt)</span>
+            <span><i class="bi bi-calendar-event"></i> Hết hạn @Model.ExpiryDate.ToLocalTime().ToString("dd/MM/yyyy")</span>
+        </div>
+    </div>
+
+    <div class="job-listing-card__actions">
+        <a asp-page="/Jobs/Detail" asp-route-id="@Model.Id" class="btn btn-primary job-listing-card__apply">
+            Ứng tuyển ngay
+        </a>
+        <a asp-page="/Jobs/Detail" asp-route-id="@Model.Id" class="btn btn-outline-secondary btn-sm">
+            Xem chi tiết
+        </a>
+    </div>
+</article>

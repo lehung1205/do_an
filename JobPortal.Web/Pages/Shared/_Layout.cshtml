@@ -4,6 +4,9 @@
     var layoutIsEmployer = string.Equals(layoutUserRole, "EMPLOYER", StringComparison.Ordinal);
     var isEmployerPortalChrome = layoutIsEmployer
         && ViewData["EmployerPortalChrome"] as bool? == true;
+    var layoutCurrentPage = ViewContext.RouteData.Values["page"]?.ToString() ?? "";
+    var isAdminPortalChrome = string.Equals(layoutUserRole, "ADMIN", StringComparison.Ordinal)
+        && layoutCurrentPage.StartsWith("/Admin/", StringComparison.OrdinalIgnoreCase);
 }
 <!DOCTYPE html>
 <html lang="vi">
@@ -16,10 +19,14 @@
     <link rel="stylesheet" href="~/css/jobsgo-theme.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/JobPortal.Web.styles.css" asp-append-version="true" />
+    @if (isAdminPortalChrome)
+    {
+        <link rel="stylesheet" href="~/css/admin-portal.css" asp-append-version="true" />
+    }
     @await RenderSectionAsync("Styles", required: false)
     @await RenderSectionAsync("EmployerStyles", required: false)
 </head>
-<body class="site-body@(isEmployerPortalChrome ? " employer-portal-mode" : "")">
+<body class="site-body@(isEmployerPortalChrome ? " employer-portal-mode" : "")@(isAdminPortalChrome ? " admin-portal-mode" : "")">
     @if (!isEmployerPortalChrome)
     {
     <header class="site-header">

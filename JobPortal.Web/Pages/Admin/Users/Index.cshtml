@@ -5,11 +5,9 @@
     var routeStatus = Model.StatusFilter ?? "all";
 }
 
-<div class="container py-4">
-    <div class="mb-4">
-        <h2 class="mb-1"><i class="bi bi-people me-2"></i>Quản lý tài khoản</h2>
-        <p class="text-muted mb-0">Vô hiệu hóa hoặc kích hoạt tài khoản nhà tuyển dụng và ứng viên</p>
-    </div>
+<div class="admin-portal">
+    <div class="container admin-portal__container py-4">
+    <partial name="Shared/_AdminPageHeader" model='("Quản lý tài khoản", "Vô hiệu hóa hoặc kích hoạt tài khoản nhà tuyển dụng và ứng viên", "bi-people")' />
 
     @if (!string.IsNullOrEmpty(Model.SuccessMessage))
     {
@@ -24,7 +22,7 @@
         <div class="alert alert-warning">@Model.ErrorMessage</div>
     }
 
-    <ul class="nav nav-tabs mb-3">
+    <ul class="nav nav-tabs admin-portal__tabs">
         <li class="nav-item">
             <a class="nav-link @(Model.IsEmployersTab ? "active" : "")"
                asp-page="/Admin/Users/Index"
@@ -105,12 +103,12 @@
 
     @if (string.IsNullOrEmpty(Model.ErrorMessage))
     {
-        <div class="card border-0 shadow-sm">
+        <div class="admin-portal__panel">
             <div class="table-responsive">
                 @if (Model.IsEmployersTab)
                 {
                     <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
+                        <thead>
                             <tr>
                                 <th>Họ tên / Email</th>
                                 <th>Liên hệ</th>
@@ -201,7 +199,7 @@
                 else
                 {
                     <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
+                        <thead>
                             <tr>
                                 <th>Họ tên / Email</th>
                                 <th>Liên hệ</th>
@@ -337,43 +335,5 @@
             </nav>
         }
     }
+    </div>
 </div>
-
-@section Styles {
-    <style>
-        .admin-user-avatar {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 2.75rem;
-            height: 2.75rem;
-            border-radius: 50%;
-            background: #e2e8f0;
-            color: #475569;
-            flex-shrink: 0;
-            overflow: hidden;
-            border: 1px solid rgba(15, 23, 42, 0.08);
-        }
-
-        .admin-user-avatar__img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .admin-user-avatar__placeholder {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            height: 100%;
-            font-size: 0.95rem;
-            font-weight: 600;
-            line-height: 1;
-        }
-
-        .admin-user-avatar__placeholder .bi-building {
-            font-size: 1.15rem;
-        }
-    </style>
-}

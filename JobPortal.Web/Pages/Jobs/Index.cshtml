@@ -4,127 +4,178 @@
     ViewData["Title"] = "Việc làm";
 }
 
-<div class="container py-4">
-    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
-        <div>
-            <h2 class="mb-1">Danh sách việc làm</h2>
-            <p class="text-muted mb-0">Tìm việc phù hợp theo từ khóa và địa điểm</p>
-        </div>
-        <a asp-page="/Index" class="btn btn-outline-secondary btn-sm">
-            <i class="bi bi-house me-1"></i> Trang chủ
-        </a>
-    </div>
+<div class="jobs-listing-page">
+    <section class="jobs-listing-hero">
+        <div class="container">
+            <h1 class="jobs-listing-hero__title">Tìm việc làm phù hợp với bạn</h1>
+            <p class="jobs-listing-hero__subtitle">Hàng nghìn cơ hội part-time &amp; flexible job — cập nhật liên tục</p>
 
-    <form method="get" class="card border-0 shadow-sm mb-4">
-        <div class="card-body">
-            <div class="row g-3 align-items-end">
-                <div class="col-md-5">
-                    <label class="form-label" for="q">Từ khóa</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-white">
-                            <i class="bi bi-search"></i>
-                        </span>
-                        <input type="search" class="form-control" id="q" name="q" value="@Model.Q"
-                               placeholder="Tiêu đề, mô tả, lương, công ty..." maxlength="200" />
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label" for="location">Địa điểm</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-white">
-                            <i class="bi bi-geo-alt"></i>
-                        </span>
-                        <input type="search" class="form-control" id="location" name="location" value="@Model.Location"
-                               placeholder="VD: Hà Nội, TP.HCM..." maxlength="200" />
-                    </div>
-                </div>
-                <div class="col-md-3 d-flex gap-2">
-                    <button type="submit" class="btn btn-primary flex-grow-1">
-                        <i class="bi bi-search me-1"></i> Tìm kiếm
-                    </button>
-                    <a asp-page="/Jobs/Index" class="btn btn-outline-secondary" title="Xóa bộ lọc">
-                        <i class="bi bi-x-lg"></i>
-                    </a>
-                </div>
+            <div class="jobs-listing-hero__stats">
+                <span class="jobs-listing-hero__stat">
+                    <i class="bi bi-briefcase-fill"></i>
+                    <span>@Model.TotalCount.ToString("N0") việc đang tuyển</span>
+                </span>
+                <span class="jobs-listing-hero__stat">
+                    <i class="bi bi-building"></i>
+                    <span>@Model.EmployerCount.ToString("N0") nhà tuyển dụng</span>
+                </span>
             </div>
-            <input type="hidden" name="pageNumber" value="1" />
-            <input type="hidden" name="pageSize" value="@Model.PageSize" />
-        </div>
-    </form>
 
-    @if (Model.Jobs.Count == 0)
-    {
-        <div class="card border-0 shadow-sm text-center py-5 text-muted">
-            @if (Model.HasActiveFilter)
-            {
-                <i class="bi bi-funnel display-6 d-block mb-2"></i>
-                <p class="mb-2">Không có việc làm phù hợp bộ lọc.</p>
-                <a asp-page="/Jobs/Index" class="btn btn-sm btn-outline-primary">Xóa bộ lọc</a>
-            }
-            else
-            {
-                <p class="mb-0">Chưa có tin tuyển dụng nào.</p>
-            }
-        </div>
-    }
-    else
-    {
-        @if (Model.TotalCount > 0)
-        {
-            <p class="text-muted small mb-3">@Model.TotalCount việc làm đang tuyển</p>
-        }
-
-        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3 g-lg-4 job-grid">
-            @foreach (var job in Model.Jobs)
-            {
-                <div class="col d-flex">
-                    <partial name="Shared/_JobGridCard" model="JobPortal.Web.Models.JobGridCardModel.FromJobDto(job)" />
+            <form method="get" class="jobs-listing-hero__search" id="jobsSearchForm" role="search">
+                <div class="jobs-listing-hero__search-grid">
+                    <div class="jobs-listing-hero__field">
+                        <label for="jl-q">Từ khóa</label>
+                        <input type="search" class="form-control" id="jl-q" name="q" value="@Model.Q"
+                               placeholder="Vị trí, kỹ năng, công ty..." maxlength="200" />
+                    </div>
+                    <div class="jobs-listing-hero__field">
+                        <label for="jl-location">Địa điểm</label>
+                        <input type="search" class="form-control" id="jl-location" name="location" value="@Model.Location"
+                               placeholder="Hà Nội, TP.HCM, Đà Nẵng..." maxlength="200"
+                               list="jl-location-list" />
+                        <datalist id="jl-location-list">
+                            <option value="Hồ Chí Minh"></option>
+                            <option value="Hà Nội"></option>
+                            <option value="Đà Nẵng"></option>
+                            <option value="Cần Thơ"></option>
+                        </datalist>
+                    </div>
+                    <div>
+                        <button type="submit" class="btn btn-primary w-100 px-4" style="border-radius: 12px; font-weight: 600;">
+                            <i class="bi bi-search me-1"></i> Tìm việc
+                        </button>
+                    </div>
                 </div>
-            }
-        </div>
+                <input type="hidden" name="pageNumber" value="1" />
+                <input type="hidden" name="pageSize" value="@Model.PageSize" />
+                @if (Model.CategoryId is > 0)
+                {
+                    <input type="hidden" name="categoryId" value="@Model.CategoryId" />
+                }
 
-        @if (Model.ShowPagination)
-        {
-            <p class="text-muted small text-center mb-2 mt-4">
-                Trang @Model.CurrentPage / @Model.TotalPages
-            </p>
-            <nav class="mt-3" aria-label="Phân trang danh sách việc làm">
-                <ul class="pagination justify-content-center flex-wrap mb-0">
-                    <li class="page-item @(Model.CurrentPage <= 1 ? "disabled" : "")">
-                        <a class="page-link"
-                           asp-page="/Jobs/Index"
-                           asp-route-pageNumber="@(Model.CurrentPage - 1)"
-                           asp-route-pageSize="@Model.PageSize"
-                           asp-route-q="@Model.Q"
-                           asp-route-location="@Model.Location"
-                           aria-label="Trang trước">
-                            <i class="bi bi-chevron-left"></i>
-                        </a>
-                    </li>
-                    @for (var i = 1; i <= Model.TotalPages; i++)
+                <div class="jobs-listing-hero__tags">
+                    <span class="jobs-listing-hero__tags-label">Từ khóa phổ biến:</span>
+                    @foreach (var kw in JobPortal.Web.Pages.Jobs.IndexModel.PopularKeywords)
                     {
-                        <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
-                            <a class="page-link"
-                               asp-page="/Jobs/Index"
-                               asp-route-pageNumber="@i"
-                               asp-route-pageSize="@Model.PageSize"
-                               asp-route-q="@Model.Q"
-                               asp-route-location="@Model.Location">@i</a>
-                        </li>
+                        <a asp-page="/Jobs/Index" asp-route-q="@kw" asp-route-location="@Model.Location"
+                           asp-route-categoryId="@Model.CategoryId" class="jobs-listing-hero__tag">@kw</a>
                     }
-                    <li class="page-item @(Model.CurrentPage >= Model.TotalPages ? "disabled" : "")">
-                        <a class="page-link"
-                           asp-page="/Jobs/Index"
-                           asp-route-pageNumber="@(Model.CurrentPage + 1)"
-                           asp-route-pageSize="@Model.PageSize"
-                           asp-route-q="@Model.Q"
-                           asp-route-location="@Model.Location"
-                           aria-label="Trang sau">
-                            <i class="bi bi-chevron-right"></i>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-        }
-    }
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <div class="container jobs-listing-page__container">
+        <div class="jobs-listing-page__layout">
+            <aside class="jobs-listing-filters jobs-listing-filters--desktop" aria-label="Bộ lọc việc làm">
+                <form method="get" id="jobsFilterForm">
+                    @{ ViewData["FilterIdPrefix"] = "desktop"; }
+                    <partial name="Shared/_JobsListingFilterFields" model="Model" />
+                </form>
+            </aside>
+
+            <main class="jobs-listing-main">
+                <div class="jobs-listing-main__toolbar">
+                    <p class="jobs-listing-main__count">
+                        @if (Model.TotalCount > 0)
+                        {
+                            <text>Hiển thị <strong>@Model.Jobs.Count</strong> / <strong>@Model.TotalCount</strong> việc làm</text>
+                        }
+                        else
+                        {
+                            <text>Không tìm thấy việc làm phù hợp</text>
+                        }
+                    </p>
+                    <button type="button" class="btn btn-outline-primary btn-sm d-lg-none"
+                            data-bs-toggle="offcanvas" data-bs-target="#jobsFilterOffcanvas">
+                        <i class="bi bi-funnel me-1"></i> Bộ lọc
+                    </button>
+                </div>
+
+                @if (Model.Jobs.Count == 0)
+                {
+                    <div class="jobs-listing-empty">
+                        <div class="jobs-listing-empty__icon"><i class="bi bi-search"></i></div>
+                        @if (Model.HasActiveFilter)
+                        {
+                            <h2 class="h5 mb-2">Không có kết quả phù hợp</h2>
+                            <p class="text-muted mb-3">Thử đổi từ khóa, địa điểm hoặc bỏ bớt bộ lọc.</p>
+                            <a asp-page="/Jobs/Index" class="btn btn-primary">Xóa bộ lọc</a>
+                        }
+                        else
+                        {
+                            <h2 class="h5 mb-2">Chưa có tin tuyển dụng</h2>
+                            <p class="text-muted mb-0">Quay lại sau để xem cơ hội mới.</p>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="jobs-listing-list">
+                        @foreach (var job in Model.Jobs)
+                        {
+                            <partial name="Shared/_JobListingCard" model="job" />
+                        }
+                    </div>
+
+                    @if (Model.ShowPagination)
+                    {
+                        <nav class="mt-4 jobs-listing-pagination" aria-label="Phân trang việc làm">
+                            <ul class="pagination justify-content-center flex-wrap mb-0">
+                                <li class="page-item @(Model.CurrentPage <= 1 ? "disabled" : "")">
+                                    <a class="page-link" asp-page="/Jobs/Index"
+                                       asp-route-pageNumber="@(Model.CurrentPage - 1)"
+                                       asp-route-pageSize="@Model.PageSize"
+                                       asp-route-q="@Model.Q"
+                                       asp-route-location="@Model.Location"
+                                       asp-route-categoryId="@Model.CategoryId">
+                                        <i class="bi bi-chevron-left"></i>
+                                    </a>
+                                </li>
+                                @for (var i = 1; i <= Model.TotalPages; i++)
+                                {
+                                    <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                                        <a class="page-link" asp-page="/Jobs/Index"
+                                           asp-route-pageNumber="@i"
+                                           asp-route-pageSize="@Model.PageSize"
+                                           asp-route-q="@Model.Q"
+                                           asp-route-location="@Model.Location"
+                                           asp-route-categoryId="@Model.CategoryId">@i</a>
+                                    </li>
+                                }
+                                <li class="page-item @(Model.CurrentPage >= Model.TotalPages ? "disabled" : "")">
+                                    <a class="page-link" asp-page="/Jobs/Index"
+                                       asp-route-pageNumber="@(Model.CurrentPage + 1)"
+                                       asp-route-pageSize="@Model.PageSize"
+                                       asp-route-q="@Model.Q"
+                                       asp-route-location="@Model.Location"
+                                       asp-route-categoryId="@Model.CategoryId">
+                                        <i class="bi bi-chevron-right"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    }
+                }
+            </main>
+        </div>
+    </div>
 </div>
+
+<div class="offcanvas offcanvas-start" tabindex="-1" id="jobsFilterOffcanvas" aria-labelledby="jobsFilterOffcanvasLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="jobsFilterOffcanvasLabel">Bộ lọc việc làm</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Đóng"></button>
+    </div>
+    <div class="offcanvas-body">
+        <form method="get" id="jobsFilterFormMobile">
+            @{ ViewData["FilterIdPrefix"] = "mobile"; }
+            <partial name="Shared/_JobsListingFilterFields" model="Model" />
+        </form>
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/jobs-listing.css" asp-append-version="true" />
+}
+

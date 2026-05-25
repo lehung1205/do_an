@@ -13,6 +13,8 @@ public class MappingProfile : Profile
             .ForMember(d => d.EmployerId, o => o.MapFrom(s => s.EmployerId))
             .ForMember(d => d.EmployerName, o => o.MapFrom(s => s.Employer.Name))
             .ForMember(d => d.CategoryId, o => o.MapFrom(s => s.CategoryId))
+            .ForMember(d => d.CategoryName, o => o.MapFrom(s => s.Category.Name))
+            .ForMember(d => d.CreatedAt, o => o.MapFrom(s => s.CreatedAt))
             .ForMember(d => d.Title, o => o.MapFrom(s => s.Title))
             .ForMember(d => d.Description, o => o.MapFrom(s => s.Description))
             .ForMember(d => d.Salary, o => o.MapFrom(s => s.Salary))

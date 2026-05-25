@@ -5,11 +5,9 @@
     var isPendingTab = Model.StatusFilter == IndexModel.StatusPending;
 }
 
-<div class="container py-4">
-    <div class="mb-4">
-        <h2 class="mb-1"><i class="bi bi-shield-check me-2"></i>Quản lý tin tuyển dụng</h2>
-        <p class="text-muted mb-0">Lọc tin chờ duyệt, đã duyệt hoặc bị từ chối · Tin chờ quá 24h có thể tự duyệt</p>
-    </div>
+<div class="admin-portal">
+    <div class="container admin-portal__container py-4">
+    <partial name="Shared/_AdminPageHeader" model='("Quản lý tin tuyển dụng", "Lọc tin chờ duyệt, đã duyệt hoặc bị từ chối · Tin chờ quá 24h có thể tự duyệt", "bi-shield-check")' />
 
     @if (!string.IsNullOrEmpty(Model.SuccessMessage))
     {
@@ -24,7 +22,7 @@
         <div class="alert alert-warning">@Model.ErrorMessage</div>
     }
 
-    <ul class="nav nav-tabs mb-3">
+    <ul class="nav nav-tabs admin-portal__tabs">
         <li class="nav-item">
             <a class="nav-link @(Model.StatusFilter == IndexModel.StatusPending ? "active" : "")"
                asp-page="/Admin/Jobs/Index"
@@ -59,7 +57,7 @@
         </li>
     </ul>
 
-    <form method="get" class="card border-0 shadow-sm mb-4">
+    <form method="get" class="admin-portal__panel mb-4">
         <div class="card-body">
             <input type="hidden" name="status" value="@Model.StatusFilter" />
             <div class="row g-3 align-items-end">
@@ -88,13 +86,13 @@
     {
         @if (Model.TotalCount > 0)
         {
-            <p class="text-muted small mb-3">@Model.TotalCount @Model.ListSummaryLabel</p>
+            <p class="admin-portal__toolbar">@Model.TotalCount @Model.ListSummaryLabel</p>
         }
 
         @if (Model.Jobs.Count == 0)
         {
-            <div class="card border-0 shadow-sm text-center py-5 text-muted">
-                <i class="bi bi-inbox display-6 d-block mb-2"></i>
+            <div class="admin-portal__empty">
+                <i class="bi bi-inbox"></i>
                 <p class="mb-0">@Model.EmptyListMessage</p>
             </div>
         }
@@ -106,16 +104,16 @@
                     var statusKey = job.PostingStatus.Trim().ToLowerInvariant();
                     var showModerationActions = string.Equals(statusKey, IndexModel.StatusPending, StringComparison.Ordinal);
                     <div class="col-12">
-                        <article class="card border-0 shadow-sm admin-pending-job">
+                        <article class="admin-job-card">
                             <div class="row g-0">
                                 <div class="col-md-3 col-lg-2">
                                     @if (!string.IsNullOrWhiteSpace(job.ThumbnailUrl))
                                     {
-                                        <img src="@job.ThumbnailUrl" alt="" class="admin-pending-job__thumb w-100 h-100 object-fit-cover" loading="lazy" />
+                                        <img src="@job.ThumbnailUrl" alt="" class="admin-job-card__thumb w-100 h-100 object-fit-cover" loading="lazy" />
                                     }
                                     else
                                     {
-                                        <div class="admin-pending-job__placeholder d-flex align-items-center justify-content-center h-100 min-h-120">
+                                        <div class="admin-job-card__placeholder d-flex align-items-center justify-content-center h-100 min-h-120">
                                             <i class="bi bi-briefcase fs-2 text-muted"></i>
                                         </div>
                                     }
@@ -239,18 +237,5 @@
             }
         }
     }
+    </div>
 </div>
-
-@section Styles {
-    <style>
-        .admin-pending-job__thumb { min-height: 120px; max-height: 200px; }
-        .admin-pending-job__placeholder { min-height: 120px; background: var(--bs-light, #f8f9fa); }
-        .text-truncate-3 {
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-        .min-h-120 { min-height: 120px; }
-    </style>
-}

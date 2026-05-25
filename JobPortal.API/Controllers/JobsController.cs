@@ -22,9 +22,10 @@ public class JobsController : ControllerBase
         [FromQuery] int pageSize = 12,
         [FromQuery] string? q = null,
         [FromQuery] string? location = null,
+        [FromQuery] long? categoryId = null,
         CancellationToken cancellationToken = default)
     {
-        var pagedJobs = await _jobService.GetJobsPagedAsync(page, pageSize, q, location, cancellationToken);
+        var pagedJobs = await _jobService.GetJobsPagedAsync(page, pageSize, q, location, categoryId, cancellationToken);
         return Ok(ApiResponse<PagedResult<JobDto>>.SuccessResponse(pagedJobs, "Jobs retrieved successfully."));
     }
 

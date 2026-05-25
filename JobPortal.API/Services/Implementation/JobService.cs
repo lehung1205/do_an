@@ -40,6 +40,7 @@ public class JobService : IJobService
         int pageSize,
         string? search = null,
         string? location = null,
+        long? categoryId = null,
         CancellationToken cancellationToken = default)
     {
         ValidatePagination(page, pageSize);
@@ -52,6 +53,7 @@ public class JobService : IJobService
             recruitingOnly: true,
             search,
             location,
+            categoryId,
             cancellationToken);
         var dtos = _mapper.Map<List<JobDto>>(items);
         await ApplyEmployerRatingsAsync(dtos, cancellationToken);

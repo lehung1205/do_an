@@ -1,0 +1,140 @@
+@using JobPortal.Web.Models
+@model JobPortal.Web.Pages.IndexModel
+@{
+    var panels = Model.CategoryPanels;
+    var slides = HeroBannerSlide.DefaultSlides;
+}
+
+<section class="jobsgo-hero" id="jobsgoHero" aria-label="Trang chủ tìm việc">
+    <div class="jobsgo-hero__top">
+        <div class="container">
+            <form method="get" asp-page="/Jobs/Index" class="jobsgo-hero__search" role="search">
+                <div class="jobsgo-hero__search-row">
+                    <div class="jobsgo-hero__search-bar">
+                        <div class="jobsgo-hero__field">
+                            <label class="jobsgo-hero__label" for="hero-q">Từ khóa:</label>
+                            <input type="text" class="jobsgo-hero__input" id="hero-q" name="q" value="@Model.Q"
+                                   placeholder="Việc, công ty, ngành nghề..." autocomplete="off"
+                                   enterkeyhint="search" />
+                        </div>
+                        <div class="jobsgo-hero__field jobsgo-hero__field--location">
+                            <label class="jobsgo-hero__label" for="hero-location">Địa điểm:</label>
+                            <div class="jobsgo-hero__location-wrap">
+                                <input type="text" class="jobsgo-hero__input jobsgo-hero__input--location" id="hero-location" name="location"
+                                       value="@Model.Location" placeholder="Hồ Chí Minh, Hà Nội, TP.HCM..."
+                                       list="hero-location-list" autocomplete="off" />
+                                <button type="button" class="jobsgo-hero__clear@(string.IsNullOrWhiteSpace(Model.Location) ? "" : " is-visible")"
+                                        id="hero-location-clear" aria-label="Xóa địa điểm" tabindex="-1">
+                                    <i class="bi bi-x-lg" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                            <datalist id="hero-location-list">
+                                <option value="Hồ Chí Minh"></option>
+                                <option value="Hà Nội"></option>
+                                <option value="Đà Nẵng"></option>
+                                <option value="Cần Thơ"></option>
+                            </datalist>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn jobsgo-hero__submit">TÌM VIỆC</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="container jobsgo-hero__body">
+        <div class="jobsgo-hero__main-panel" id="heroMainPanel">
+            <aside class="jobsgo-hero__categories" aria-label="Ngành nghề">
+                <div class="jobsgo-hero__categories-head">
+                    <button type="button" class="jobsgo-hero__menu-btn" aria-label="Menu ngành nghề">
+                        <i class="bi bi-list"></i>
+                    </button>
+                    <span class="jobsgo-hero__categories-title">NGÀNH NGHỀ</span>
+                </div>
+                <ul class="jobsgo-hero__category-list">
+                    @foreach (var panel in panels)
+                    {
+                        <li>
+                            <button type="button"
+                                    class="jobsgo-hero__category-item"
+                                    data-category-id="@panel.Id"
+                                    aria-controls="hero-tags-@panel.Id">
+                                <span>@panel.Name</span>
+                                <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                            </button>
+                        </li>
+                    }
+                </ul>
+            </aside>
+
+            <div class="jobsgo-hero__center" id="heroCenter">
+                <div class="jobsgo-hero__banner-default" id="heroBannerDefault">
+                    <div id="heroCarousel" class="carousel carousel-fade jobsgo-hero__carousel"
+                         data-bs-ride="carousel" data-bs-interval="5000" data-bs-pause="hover">
+                        <div class="carousel-inner">
+                            @for (var i = 0; i < slides.Count; i++)
+                            {
+                                var slide = slides[i];
+                                <div class="carousel-item jobsgo-hero__slide@(i == 0 ? " active" : "")">
+                                    <img src="@slide.ImagePath"
+                                         alt=""
+                                         class="jobsgo-hero__slide-img"
+                                         loading="eager"
+                                         decoding="async"
+                                         fetchpriority="@(i == 0 ? "high" : "low")" />
+                                </div>
+                            }
+                        </div>
+                        <button type="button" class="jobsgo-hero__nav jobsgo-hero__nav--prev"
+                                data-bs-target="#heroCarousel" data-bs-slide="prev"
+                                aria-label="Banner trước">
+                            <i class="bi bi-chevron-left" aria-hidden="true"></i>
+                        </button>
+                        <button type="button" class="jobsgo-hero__nav jobsgo-hero__nav--next"
+                                data-bs-target="#heroCarousel" data-bs-slide="next"
+                                aria-label="Banner sau">
+                            <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                        </button>
+                        <div class="jobsgo-hero__indicators-wrap" aria-hidden="false">
+                            <div class="carousel-indicators jobsgo-hero__indicators">
+                                @for (var i = 0; i < slides.Count; i++)
+                                {
+                                    <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="@i"
+                                            class="@(i == 0 ? "active" : "")"
+                                            aria-label="Banner @(i + 1) / @slides.Count"></button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @foreach (var panel in panels)
+                {
+                    <div class="jobsgo-hero__tags-panel"
+                         id="hero-tags-@panel.Id"
+                         data-category-tags="@panel.Id"
+                         role="region"
+                         aria-label="Từ khóa @panel.Name"
+                         hidden>
+                        <h3 class="jobsgo-hero__tags-title">@panel.Name</h3>
+                        <div class="jobsgo-hero__tags">
+                            @foreach (var title in panel.JobTitles)
+                            {
+                                <a asp-page="/Jobs/Index"
+                                   asp-route-q="@title"
+                                   asp-route-location="@Model.Location"
+                                   class="jobsgo-hero__tag">@title</a>
+                            }
+                        </div>
+                        <a asp-page="/Jobs/Index"
+                           asp-route-q="@panel.Name"
+                           asp-route-location="@Model.Location"
+                           class="jobsgo-hero__tags-more">
+                            Xem tất cả việc @panel.Name <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>

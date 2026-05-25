@@ -1,11 +1,11 @@
 :root {
-  --jp-primary: #2563eb;
-  --jp-primary-dark: #1d4ed8;
-  --jp-accent: #06b6d4;
-  --jp-dark: #0f172a;
-  --jp-muted: #64748b;
-  --jp-surface: #f8fafc;
-  --jp-radius: 12px;
+  --jp-primary: #0000ee;
+  --jp-primary-dark: #0000cc;
+  --jp-accent: #0000ee;
+  --jp-dark: #313131;
+  --jp-muted: #313131;
+  --jp-surface: #fafafa;
+  --jp-radius: 4px;
 }
 
 html {
@@ -21,9 +21,6 @@ html {
 }
 
 body.site-body {
-  font-family: "Be Vietnam Pro", system-ui, -apple-system, sans-serif;
-  color: var(--jp-dark);
-  background: #fff;
   margin: 0;
   min-height: 100vh;
   display: flex;
@@ -34,11 +31,8 @@ main {
   flex: 1;
 }
 
-/* Header */
+/* Header — JobsGo: flat white bar */
 .site-header {
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid #e2e8f0;
   position: sticky;
   top: 0;
   z-index: 1030;
@@ -142,12 +136,11 @@ main {
   width: 2.5rem;
   height: 2.5rem;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--jp-primary), var(--jp-accent));
+  background: var(--jp-primary);
   color: #fff;
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 0.02em;
-  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
 }
 
 .nav-avatar__img {
@@ -155,14 +148,6 @@ main {
   border-radius: 50%;
   object-fit: cover;
   padding: 0;
-  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
-}
-
-.nav-avatar:hover .nav-avatar__circle,
-.nav-avatar:focus .nav-avatar__circle,
-.nav-avatar:hover .nav-avatar__img,
-.nav-avatar:focus .nav-avatar__img {
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.45);
 }
 
 .work-progress-avatar {
@@ -202,15 +187,8 @@ main {
   font-size: 1.35rem;
 }
 
-.btn-primary,
 .home-btn-primary {
-  background: linear-gradient(135deg, var(--jp-primary), var(--jp-primary-dark));
-  border: none;
-}
-
-.btn-primary:hover,
-.home-btn-primary:hover {
-  background: linear-gradient(135deg, var(--jp-primary-dark), #1e40af);
+  font-weight: 600;
 }
 
 /* Hero */
@@ -223,10 +201,8 @@ main {
 .home-hero__bg {
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(ellipse 80% 60% at 10% 0%, rgba(37, 99, 235, 0.12), transparent),
-    radial-gradient(ellipse 60% 50% at 90% 20%, rgba(6, 182, 212, 0.1), transparent),
-    linear-gradient(180deg, #eff6ff 0%, #ffffff 100%);
+  background: #fafafa;
+  border-bottom: 1px solid #d9d9d9;
   z-index: 0;
 }
 
@@ -237,13 +213,14 @@ main {
 
 .home-hero__badge {
   display: inline-block;
-  background: #dbeafe;
-  color: var(--jp-primary-dark);
-  font-size: 0.8rem;
+  background: #fff;
+  color: var(--jp-primary);
+  font-size: 12px;
   font-weight: 600;
-  padding: 0.35rem 0.85rem;
-  border-radius: 999px;
-  margin-bottom: 1rem;
+  padding: 8px 16px;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  margin-bottom: 16px;
 }
 
 .home-hero__title {
@@ -254,10 +231,7 @@ main {
 }
 
 .text-gradient {
-  background: linear-gradient(90deg, var(--jp-primary), var(--jp-accent));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--jp-primary);
 }
 
 .home-hero__lead {
@@ -342,8 +316,8 @@ main {
 .home-search__icon-wrap {
   width: 2.25rem;
   height: 2.25rem;
-  border-radius: 10px;
-  background: linear-gradient(135deg, var(--jp-primary), var(--jp-accent));
+  border-radius: 4px;
+  background: var(--jp-primary);
   color: #fff;
   display: inline-flex;
   align-items: center;
@@ -399,8 +373,7 @@ main {
 }
 
 .home-step-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+  border-color: var(--jp-primary);
 }
 
 .home-step-card__num {
@@ -433,13 +406,13 @@ main {
 
 .home-dual-cta__card {
   background: #fff;
-  border: 1px solid #e2e8f0;
-  border-radius: calc(var(--jp-radius) + 4px);
-  box-shadow: 0 4px 24px rgba(15, 23, 42, 0.06);
+  border: 1px solid #d9d9d9;
+  border-radius: var(--jp-radius);
+  box-shadow: none;
 }
 
 .home-dual-cta__card--employer {
-  background: linear-gradient(145deg, #f8fafc 0%, #f1f5f9 100%);
+  background: #fafafa;
 }
 
 .job-active-filters__chip {
@@ -455,10 +428,10 @@ main {
 
 .home-stat-card {
   background: #fff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #d9d9d9;
   border-radius: var(--jp-radius);
   padding: 1.25rem;
-  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06);
+  box-shadow: none;
 }
 
 .home-stat-card__value {
@@ -485,8 +458,7 @@ main {
 }
 
 .job-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.1) !important;
+  border-color: var(--jp-primary) !important;
 }
 
 .job-card__title {
@@ -604,12 +576,11 @@ main {
 .feature-card {
   background: #fff;
   border-radius: var(--jp-radius);
-  border: 1px solid #e2e8f0;
-  transition: box-shadow 0.2s ease;
+  border: 1px solid #d9d9d9;
 }
 
 .feature-card:hover {
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  border-color: var(--jp-primary);
 }
 
 .feature-card__icon {
@@ -619,16 +590,18 @@ main {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #eff6ff;
+  background: #fafafa;
   color: var(--jp-primary);
-  border-radius: 14px;
+  border: 1px solid #d9d9d9;
+  border-radius: var(--jp-radius);
   font-size: 1.5rem;
 }
 
 /* CTA */
 .home-cta__box {
-  background: linear-gradient(135deg, var(--jp-primary) 0%, #1e3a8a 55%, var(--jp-accent) 120%);
-  box-shadow: 0 20px 40px rgba(37, 99, 235, 0.25);
+  background: var(--jp-primary);
+  border: 1px solid var(--jp-primary);
+  box-shadow: none;
 }
 
 /* Chính sách */
@@ -706,33 +679,37 @@ main {
   }
 }
 
-/* Footer */
+/* Footer — JobsGo: light, bordered */
 .site-footer {
-  background: var(--jp-dark);
+  background: #fff;
   margin-top: auto;
-  color: #e2e8f0;
+  color: var(--jp-dark);
+  border-top: 1px solid #d9d9d9;
 }
 
 .site-footer__brand {
-  font-weight: 700;
-  font-size: 1.35rem;
+  font-weight: 600;
+  font-size: 1.25rem;
   display: inline-flex;
   align-items: center;
+  color: var(--jp-primary) !important;
 }
 
 .site-footer__brand:hover {
-  color: #fff !important;
+  color: var(--jp-primary-dark) !important;
 }
 
 .site-footer__tagline {
   line-height: 1.5;
   max-width: 280px;
+  color: var(--jp-dark);
+  opacity: 0.72;
 }
 
 .site-footer__heading {
   font-weight: 600;
-  font-size: 0.9rem;
-  color: #f8fafc;
+  font-size: 16px;
+  color: var(--jp-dark);
   margin-bottom: 0.85rem;
 }
 
@@ -745,17 +722,19 @@ main {
 }
 
 .site-footer__link {
-  color: rgba(248, 250, 252, 0.65);
+  color: var(--jp-primary);
+  font-size: 12px;
   text-decoration: none;
-  transition: color 0.15s ease;
 }
 
 .site-footer__link:hover {
-  color: #fff;
+  text-decoration: underline;
+  color: var(--jp-primary-dark);
 }
 
-.site-footer__contact-list a.site-footer__link {
-  color: rgba(248, 250, 252, 0.75);
+.site-footer__contact-list {
+  color: var(--jp-dark);
+  opacity: 0.72;
 }
 
 .site-footer__social-btn {
@@ -764,21 +743,27 @@ main {
   justify-content: center;
   width: 2.25rem;
   height: 2.25rem;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(248, 250, 252, 0.85);
+  border-radius: 4px;
+  border: 1px solid #d9d9d9;
+  background: #fff;
+  color: var(--jp-dark);
   text-decoration: none;
-  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .site-footer__social-btn:hover {
-  background: var(--jp-primary);
-  color: #fff;
+  border-color: var(--jp-primary);
+  color: var(--jp-primary);
+  background: #fafafa;
 }
 
 .site-footer__bottom {
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(0, 0, 0, 0.15);
+  border-top: 1px solid #d9d9d9;
+  background: #fafafa;
+}
+
+.site-footer__bottom .text-white-50 {
+  color: var(--jp-dark) !important;
+  opacity: 0.65;
 }
 
 @media (max-width: 575.98px) {
@@ -798,9 +783,9 @@ main {
 }
 
 .employer-welcome__card {
-  background: linear-gradient(135deg, #eff6ff 0%, #fff 60%);
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06);
+  background: #fff;
+  border: 1px solid #d9d9d9;
+  box-shadow: none;
 }
 
 .employer-welcome__title {
@@ -845,6 +830,27 @@ main {
   border-radius: var(--jp-radius);
   padding: 1.25rem;
   box-shadow: 0 2px 12px rgba(15, 23, 42, 0.04);
+}
+
+.employer-package-card {
+  background: #fff;
+  border: 2px solid var(--jp-primary);
+  border-radius: var(--jp-radius);
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 238, 0.08);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.employer-package-card:hover {
+  border-color: var(--jp-primary-dark);
+  box-shadow: 0 4px 16px rgba(0, 0, 238, 0.14);
+}
+
+.employer-package-card__title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--jp-dark);
+  margin-bottom: 0.75rem;
 }
 
 /* Duyệt CV (theo wireframe gd.text) */
@@ -1334,9 +1340,11 @@ main {
   color: #fff;
 }
 
-/* Focus */
-.btn:focus,
-.btn:active:focus,
-.form-control:focus {
-  box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+/* Legacy jp-* aliases used across pages */
+.text-primary {
+  color: var(--jp-primary) !important;
+}
+
+.bi.text-primary {
+  color: var(--jp-primary) !important;
 }

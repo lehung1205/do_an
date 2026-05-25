@@ -14,76 +14,7 @@
 else
 {
 
-<section class="home-hero">
-    <div class="home-hero__bg" aria-hidden="true"></div>
-    <div class="container home-hero__inner">
-        <div class="row align-items-center g-4 g-xl-5">
-            <div class="col-lg-6">
-                <span class="home-hero__badge">
-                    <i class="bi bi-stars me-1"></i>JobPortal · Việc làm part-time & bán thời gian
-                </span>
-                <h1 class="home-hero__title">
-                    Tìm việc linh hoạt<br />
-                    <span class="text-gradient">đúng nơi, đúng lúc</span>
-                </h1>
-                <p class="home-hero__lead">
-                    Nền tảng kết nối ứng viên với nhà tuyển dụng uy tín. Tin được admin duyệt, minh bạch lương và ca làm — ứng tuyển chỉ vài phút.
-                </p>
-                <ul class="home-hero__points list-unstyled mb-4">
-                    <li><i class="bi bi-shield-check text-primary me-2"></i>Tin tuyển dụng kiểm duyệt trước khi hiển thị</li>
-                    <li><i class="bi bi-lightning-charge text-primary me-2"></i>Ứng tuyển nhanh với CV đã lưu trên hệ thống</li>
-                    <li><i class="bi bi-bar-chart-steps text-primary me-2"></i>Theo dõi tiến độ ứng tuyển &amp; đánh giá hai chiều</li>
-                </ul>
-                <div class="home-trust-strip d-flex flex-wrap gap-3 small text-muted">
-                    <span><i class="bi bi-lock me-1"></i>Bảo mật thông tin</span>
-                    <span><i class="bi bi-clock-history me-1"></i>Cập nhật tin mỗi ngày</span>
-                    <span><i class="bi bi-headset me-1"></i>Hỗ trợ qua chính sách rõ ràng</span>
-                </div>
-            </div>
-            <div class="col-lg-6">
-                <div class="home-search card border-0 shadow-lg">
-                    <div class="card-body p-4 p-lg-4">
-                        <div class="d-flex align-items-center gap-2 mb-1">
-                            <span class="home-search__icon-wrap"><i class="bi bi-search"></i></span>
-                            <h2 class="h5 mb-0">Tìm việc ngay</h2>
-                        </div>
-                        <p class="text-muted small mb-3">Lọc theo từ khóa và địa điểm — xem kết quả trên trang Việc làm</p>
-                        <form method="get" asp-page="/Jobs/Index">
-                            <div class="mb-3">
-                                <label class="form-label small fw-semibold" for="q">Từ khóa</label>
-                                <div class="input-group input-group-lg home-search__input">
-                                    <span class="input-group-text bg-white"><i class="bi bi-briefcase"></i></span>
-                                    <input type="search" class="form-control" id="q" name="q" value="@Model.Q"
-                                           placeholder="Thu ngân, phục vụ, giao hàng..." />
-                                </div>
-                            </div>
-                            <div class="mb-4">
-                                <label class="form-label small fw-semibold" for="location">Địa điểm</label>
-                                <div class="input-group input-group-lg home-search__input">
-                                    <span class="input-group-text bg-white"><i class="bi bi-geo-alt"></i></span>
-                                    <input type="search" class="form-control" id="location" name="location" value="@Model.Location"
-                                           placeholder="Hà Nội, TP.HCM, Đà Nẵng..." />
-                                </div>
-                            </div>
-                            <button type="submit" class="btn btn-primary w-100 btn-lg home-btn-primary">
-                                <i class="bi bi-search me-2"></i>Tìm kiếm việc làm
-                            </button>
-                        </form>
-                        <div class="home-search__chips mt-3 pt-3 border-top">
-                            <span class="small text-muted d-block mb-2">Tìm nhanh theo khu vực:</span>
-                            <div class="d-flex flex-wrap gap-2">
-                                <a asp-page="/Jobs/Index" asp-route-location="Hà Nội" class="btn btn-sm btn-outline-secondary rounded-pill">Hà Nội</a>
-                                <a asp-page="/Jobs/Index" asp-route-location="TP.HCM" class="btn btn-sm btn-outline-secondary rounded-pill">TP.HCM</a>
-                                <a asp-page="/Jobs/Index" asp-route-location="Đà Nẵng" class="btn btn-sm btn-outline-secondary rounded-pill">Đà Nẵng</a>
-                                <a asp-page="/Jobs/Index" asp-route-location="Cần Thơ" class="btn btn-sm btn-outline-secondary rounded-pill">Cần Thơ</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
+<partial name="Shared/_HomeJobsGoHero" model="Model" />
 
 <section class="home-stats py-4">
     <div class="container">
@@ -121,27 +52,6 @@ else
         </div>
     </div>
 </section>
-
-@if (Model.Categories.Count > 0)
-{
-    <section class="home-categories py-4 border-top border-bottom bg-white">
-        <div class="container">
-            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-                <h2 class="h6 text-uppercase text-muted mb-0 letter-spacing-sm">Ngành nghề phổ biến</h2>
-                <a asp-page="/Jobs/Index" class="small text-primary text-decoration-none">Xem tất cả việc làm <i class="bi bi-arrow-right"></i></a>
-            </div>
-            <div class="d-flex flex-wrap gap-2">
-                @foreach (var cat in Model.Categories)
-                {
-                    <a asp-page="/Jobs/Index" asp-route-q="@cat.Name"
-                       class="btn btn-sm btn-light border home-category-chip">
-                        <i class="bi bi-tag me-1 text-primary"></i>@cat.Name
-                    </a>
-                }
-            </div>
-        </div>
-    </section>
-}
 
 <section class="home-how py-5">
     <div class="container">
@@ -351,6 +261,14 @@ else
         </div>
     </div>
 </section>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/home-hero.css" asp-append-version="true" />
+}
+
+@section Scripts {
+    <script src="~/js/home-hero.js" asp-append-version="true"></script>
+}
 
 <section class="home-cta py-4 pb-5">
     <div class="container">

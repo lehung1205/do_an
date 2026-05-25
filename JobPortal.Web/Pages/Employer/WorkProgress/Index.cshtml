@@ -1,19 +1,20 @@
 @page
 @model JobPortal.Web.Pages.Employer.WorkProgress.IndexModel
+@using JobPortal.Web.Models
 @{
     ViewData["Title"] = "Tiến độ làm việc";
+    ViewData["EmployerNavActive"] = EmployerPortalNavKeys.WorkProgress;
 }
 
-<div class="container py-4">
-    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
-        <div>
-            <h2 class="mb-1"><i class="bi bi-graph-up-arrow me-2"></i>Tiến độ làm việc</h2>
-            <p class="text-muted mb-0">Theo dõi việc part-time ngắn hạn: xác nhận, đang làm, nghiệm thu, hoàn tất</p>
-        </div>
-        <a asp-page="/Employer/Applicants" asp-route-filter="accepted" class="btn btn-outline-secondary btn-sm">
-            <i class="bi bi-people me-1"></i> Danh sách ứng viên
-        </a>
-    </div>
+<partial name="Shared/_EmployerPageHeader" model='new EmployerPageHeaderModel {
+    Title = "Tiến độ làm việc",
+    Subtitle = "Theo dõi việc part-time ngắn hạn: xác nhận, đang làm, nghiệm thu, hoàn tất",
+    CtaText = "Ứng viên đã chấp nhận",
+    CtaPage = "/Employer/Applicants",
+    CtaIconClass = "bi-people"
+}' />
+
+<div class="employer-dash__panel-stack">
 
     @if (!string.IsNullOrEmpty(Model.ErrorMessage))
     {

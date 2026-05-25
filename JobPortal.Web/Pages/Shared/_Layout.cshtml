@@ -1,4 +1,11 @@
-﻿<!DOCTYPE html>
+﻿@{
+    var isLoggedIn = !string.IsNullOrEmpty(Context.Session.GetString("JwtToken"));
+    var layoutUserRole = Context.Session.GetString("UserRole");
+    var layoutIsEmployer = string.Equals(layoutUserRole, "EMPLOYER", StringComparison.Ordinal);
+    var isEmployerPortalChrome = layoutIsEmployer
+        && ViewData["EmployerPortalChrome"] as bool? == true;
+}
+<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="utf-8" />
@@ -10,8 +17,11 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/JobPortal.Web.styles.css" asp-append-version="true" />
     @await RenderSectionAsync("Styles", required: false)
+    @await RenderSectionAsync("EmployerStyles", required: false)
 </head>
-<body class="site-body">
+<body class="site-body@(isEmployerPortalChrome ? " employer-portal-mode" : "")">
+    @if (!isEmployerPortalChrome)
+    {
     <header class="site-header">
         <nav class="navbar navbar-expand-lg navbar-light">
             @{
@@ -60,28 +70,7 @@
                         else if (isLoggedIn && isEmployer)
                         {
                             <li class="nav-item">
-                                <a class="nav-link @(isEmployerStats ? "active fw-semibold" : "")" asp-page="/Index">Thống kê</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-page="/Employer/Jobs">Tin tuyển dụng</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-page="/Employer/Applicants">Ứng viên</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link d-inline-flex align-items-center" asp-page="/Messages/Index">
-                                    Tin nhắn
-                                    @await Component.InvokeAsync("ChatNavBadge")
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-page="/Employer/WorkProgress/Index">Tiến độ làm việc</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-page="/Employer/PostJob">Đăng tin</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-page="/Employer/BuyPackages">Gói dịch vụ</a>
+                                <a class="nav-link @(isEmployerStats ? "active fw-semibold" : "")" asp-page="/Index">Bảng thông tin</a>
                             </li>
                         }
                         else
@@ -112,7 +101,7 @@
                         </li>
                     </ul>
                     <ul class="navbar-nav align-items-lg-center gap-2 nav-auth">
-                        @if (isLoggedIn)
+                        @if (isLoggedIn && !isEmployerPortalChrome)
                         {
                             <li class="nav-item dropdown nav-account">
                                 <button class="btn nav-avatar dropdown-toggle" type="button"
@@ -189,8 +178,9 @@
             </div>
         </nav>
     </header>
+    }
 
-    <main role="main">
+    <main role="main" class="@(isEmployerPortalChrome ? "employer-portal-main" : "")">
         @RenderBody()
     </main>
 
@@ -206,5 +196,6 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+    @await RenderSectionAsync("EmployerScripts", required: false)
 </body>
 </html>

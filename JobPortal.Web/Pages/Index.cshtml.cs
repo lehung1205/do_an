@@ -27,6 +27,21 @@ public class IndexModel : PageModel
 
     public IndexModel(ApiService api) => _api = api;
 
+    public async Task<IActionResult> OnGetApplicantChartAsync(int days = 7)
+    {
+        if (string.IsNullOrEmpty(HttpContext.Session.GetString("JwtToken"))
+            || !string.Equals(HttpContext.Session.GetString("UserRole"), "EMPLOYER", StringComparison.Ordinal))
+        {
+            return Forbid();
+        }
+
+        days = Math.Clamp(days, 7, 30);
+        var chart = await _api.GetApiDataAsync<EmployerApplicantChartDto>(
+            $"/api/employers/me/dashboard/applicant-chart?days={days}");
+
+        return new JsonResult(chart ?? new EmployerApplicantChartDto());
+    }
+
     public async Task<IActionResult> OnGetAsync(string? q, string? location)
     {
         var role = HttpContext.Session.GetString("UserRole");

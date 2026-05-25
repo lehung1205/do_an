@@ -1,3 +1,4 @@
+using JobPortal.Web.Models;
 using JobPortal.Web.Services;
 
 
@@ -5,6 +6,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+builder.Services.Configure<EmployerSupportOptions>(
+    builder.Configuration.GetSection("EmployerSupport"));
 
 builder.Services.AddHttpClient("JobPortalAPI", client =>
 {

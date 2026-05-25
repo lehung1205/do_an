@@ -1,0 +1,22 @@
+@model JobPortal.Web.Models.EmployerPageHeaderModel
+
+<div class="employer-dash__page-head mb-4">
+    <div>
+        <h1 class="employer-dash__page-title">@Model.Title</h1>
+        <p class="employer-dash__breadcrumb mb-0">
+            <a asp-page="/Index">Bảng thông tin</a>
+            <span class="mx-1">/</span>
+            <span>@Model.DisplayBreadcrumb</span>
+        </p>
+        @if (!string.IsNullOrWhiteSpace(Model.Subtitle))
+        {
+            <p class="text-muted small mb-0 mt-2">@Model.Subtitle</p>
+        }
+    </div>
+    @if (!string.IsNullOrWhiteSpace(Model.CtaText) && !string.IsNullOrWhiteSpace(Model.CtaPage))
+    {
+        <a asp-page="@Model.CtaPage" class="btn employer-dash__cta">
+            <i class="bi @Model.CtaIconClass me-1"></i> @Model.CtaText
+        </a>
+    }
+</div>

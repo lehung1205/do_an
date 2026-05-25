@@ -42,6 +42,24 @@ public class EmployerDashboardController : ControllerBase
         return Ok(ApiResponse<EmployerDashboardDto>.SuccessResponse(dashboard, "Employer dashboard retrieved successfully."));
     }
 
+    [HttpGet("portal-nav")]
+    public async Task<IActionResult> GetPortalNav(CancellationToken cancellationToken)
+    {
+        var userId = GetCurrentUserId();
+        var nav = await _dashboardService.GetPortalNavForUserAsync(userId, cancellationToken);
+        return Ok(ApiResponse<EmployerPortalNavDto>.SuccessResponse(nav, "Portal navigation retrieved successfully."));
+    }
+
+    [HttpGet("dashboard/applicant-chart")]
+    public async Task<IActionResult> GetApplicantChart(
+        [FromQuery] int days = 7,
+        CancellationToken cancellationToken = default)
+    {
+        var userId = GetCurrentUserId();
+        var chart = await _dashboardService.GetApplicantChartForUserAsync(userId, days, cancellationToken);
+        return Ok(ApiResponse<EmployerApplicantChartDto>.SuccessResponse(chart, "Applicant chart retrieved successfully."));
+    }
+
     [HttpGet("jobs")]
     public async Task<IActionResult> GetJobs(
         [FromQuery] string? status,

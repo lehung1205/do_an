@@ -35,6 +35,13 @@ public class JobsController : ControllerBase
         return Ok(ApiResponse<JobDto>.SuccessResponse(job, "Job retrieved successfully."));
     }
 
+    [HttpGet("{id:long}/related")]
+    public async Task<IActionResult> GetRelatedJobs(long id, CancellationToken cancellationToken)
+    {
+        var related = await _jobService.GetRelatedJobsAsync(id, cancellationToken);
+        return Ok(ApiResponse<JobRelatedListsDto>.SuccessResponse(related, "Related jobs retrieved successfully."));
+    }
+
     [HttpPost]
     public async Task<IActionResult> CreateJob([FromBody] CreateJobRequest request, CancellationToken cancellationToken)
     {

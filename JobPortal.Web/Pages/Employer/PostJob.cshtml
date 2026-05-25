@@ -1,13 +1,18 @@
 @page
 @model JobPortal.Web.Pages.Employer.PostJobModel
+@using JobPortal.Web.Models
 @{
     ViewData["Title"] = "Đăng bài";
+    ViewData["EmployerNavActive"] = EmployerPortalNavKeys.PostJob;
 }
 
-<div class="container py-4" style="max-width: 720px;">
-    <h2 class="mb-2"><i class="bi bi-megaphone me-2"></i>Đăng tin tuyển dụng</h2>
-    <p class="text-muted small mb-4">Sau khi gửi, tin ở trạng thái <strong>chờ duyệt</strong>. Admin có thể duyệt sớm; nếu quá <strong>24 giờ</strong> chưa duyệt, hệ thống tự chuyển sang <strong>đang tuyển</strong>.</p>
+<partial name="Shared/_EmployerPageHeader" model='new EmployerPageHeaderModel {
+    Title = "Đăng tin tuyển dụng",
+    Subtitle = "Sau khi gửi, tin ở trạng thái chờ duyệt. Admin có thể duyệt sớm; nếu quá 24 giờ chưa duyệt, hệ thống tự chuyển sang đang tuyển.",
+    BreadcrumbLabel = "Tạo việc làm mới"
+}' />
 
+<div class="employer-dash__section employer-dash__section--narrow">
     @if (!string.IsNullOrEmpty(Model.SuccessMessage))
     {
         <div class="alert alert-success">@Model.SuccessMessage</div>
@@ -17,53 +22,51 @@
         <div class="alert alert-danger">@Model.ErrorMessage</div>
     }
 
-    <form method="post" enctype="multipart/form-data" class="card border-0 shadow-sm">
-        <div class="card-body">
-            @Html.AntiForgeryToken()
-            <div class="mb-3">
-                <label asp-for="Input.Title" class="form-label">Tiêu đề</label>
-                <input asp-for="Input.Title" class="form-control" maxlength="255" required />
-            </div>
-            <div class="mb-3">
-                <label asp-for="Input.CategoryId" class="form-label">Danh mục</label>
-                <select asp-for="Input.CategoryId" class="form-select" required>
-                    <option value="0">— Chọn danh mục —</option>
-                    @foreach (var c in Model.Categories)
-                    {
-                        <option value="@c.Id">@c.Name</option>
-                    }
-                </select>
-            </div>
-            <div class="mb-3">
-                <label asp-for="Input.Description" class="form-label">Mô tả công việc</label>
-                <textarea asp-for="Input.Description" class="form-control" rows="6" required></textarea>
-            </div>
-            <div class="row g-3 mb-3">
-                <div class="col-md-6">
-                    <label asp-for="Input.Salary" class="form-label">Mức lương</label>
-                    <input asp-for="Input.Salary" class="form-control" maxlength="255" required
-                           placeholder="VD: 200.000đ/ngày, 50k/giờ, Thỏa thuận" />
-                    <div class="form-text">Nhập tự do theo ngày, giờ hoặc thỏa thuận.</div>
-                </div>
-                <div class="col-md-6">
-                    <label asp-for="Input.Location" class="form-label">Địa điểm</label>
-                    <input asp-for="Input.Location" class="form-control" maxlength="255" required />
-                </div>
-            </div>
-            <div class="mb-3">
-                <label asp-for="Input.WorkingHours" class="form-label">Thời gian làm việc</label>
-                <input asp-for="Input.WorkingHours" class="form-control" maxlength="50" placeholder="VD: 8h-17h, 14h-16h" />
-                <div class="form-text">Mô tả khung giờ làm việc (tuỳ chọn).</div>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Hình ảnh công việc (tuỳ chọn)</label>
-                <input type="file" name="JobImages" class="form-control" accept="image/jpeg,image/png,image/gif,image/webp" multiple />
-                <div class="form-text">JPG, PNG, GIF, WebP — tối đa 8 ảnh, mỗi ảnh tối đa 5 MB.</div>
-            </div>
-            <button type="submit" class="btn btn-primary">
-                <i class="bi bi-send me-1"></i> Đăng tin
-            </button>
-            <a asp-page="/Jobs/Index" class="btn btn-outline-secondary ms-2">Xem việc làm</a>
+    <form method="post" enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
+        <div class="mb-3">
+            <label asp-for="Input.Title" class="form-label">Tiêu đề</label>
+            <input asp-for="Input.Title" class="form-control" maxlength="255" required />
         </div>
+        <div class="mb-3">
+            <label asp-for="Input.CategoryId" class="form-label">Danh mục</label>
+            <select asp-for="Input.CategoryId" class="form-select" required>
+                <option value="0">— Chọn danh mục —</option>
+                @foreach (var c in Model.Categories)
+                {
+                    <option value="@c.Id">@c.Name</option>
+                }
+            </select>
+        </div>
+        <div class="mb-3">
+            <label asp-for="Input.Description" class="form-label">Mô tả công việc</label>
+            <textarea asp-for="Input.Description" class="form-control" rows="6" required></textarea>
+        </div>
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <label asp-for="Input.Salary" class="form-label">Mức lương</label>
+                <input asp-for="Input.Salary" class="form-control" maxlength="255" required
+                       placeholder="VD: 200.000đ/ngày, 50k/giờ, Thỏa thuận" />
+                <div class="form-text">Nhập tự do theo ngày, giờ hoặc thỏa thuận.</div>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Input.Location" class="form-label">Địa điểm</label>
+                <input asp-for="Input.Location" class="form-control" maxlength="255" required />
+            </div>
+        </div>
+        <div class="mb-3">
+            <label asp-for="Input.WorkingHours" class="form-label">Thời gian làm việc</label>
+            <input asp-for="Input.WorkingHours" class="form-control" maxlength="50" placeholder="VD: 8h-17h, 14h-16h" />
+            <div class="form-text">Mô tả khung giờ làm việc (tuỳ chọn).</div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Hình ảnh công việc (tuỳ chọn)</label>
+            <input type="file" name="JobImages" class="form-control" accept="image/jpeg,image/png,image/gif,image/webp" multiple />
+            <div class="form-text">JPG, PNG, GIF, WebP — tối đa 8 ảnh, mỗi ảnh tối đa 5 MB.</div>
+        </div>
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-send me-1"></i> Đăng tin
+        </button>
+        <a asp-page="/Employer/Jobs" class="btn btn-outline-secondary ms-2">Danh sách tin</a>
     </form>
 </div>

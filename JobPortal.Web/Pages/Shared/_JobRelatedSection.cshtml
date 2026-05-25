@@ -1,0 +1,23 @@
+@model (string Title, bool ShowLink, IReadOnlyList<JobPortal.Web.Dtos.JobDto> Jobs, bool CompactTitle)
+
+@if (Model.Jobs.Count > 0)
+{
+    <section class="job-related-section">
+        <div class="job-related-section__head">
+            <h2 class="job-related-section__title">@Model.Title</h2>
+            @if (Model.ShowLink && Model.Jobs.Count > 0)
+            {
+                <a asp-page="/Jobs/Index" class="job-related-section__more" aria-label="Xem thêm @Model.Title">
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+            }
+        </div>
+        <div class="job-related-section__list">
+            @foreach (var job in Model.Jobs)
+            {
+                <partial name="Shared/_JobRelatedListItem"
+                         model="JobPortal.Web.Models.JobRelatedListItemModel.FromJobDto(job, Model.CompactTitle)" />
+            }
+        </div>
+    </section>
+}

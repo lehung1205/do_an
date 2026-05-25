@@ -1,38 +1,41 @@
 @page
 @model JobPortal.Web.Pages.Employer.BuyPackagesModel
+@using JobPortal.Web.Models
 @{
     ViewData["Title"] = "Mua gói";
+    ViewData["EmployerNavActive"] = EmployerPortalNavKeys.Packages;
 }
 
-<div class="container py-4">
-    <h2 class="mb-2"><i class="bi bi-bag-heart me-2"></i>Mua gói đăng tin</h2>
-    <p class="text-muted mb-4">Chọn gói phù hợp để tăng hạn mức đăng bài và thanh toán qua VNPay.</p>
+<partial name="Shared/_EmployerPageHeader" model='new EmployerPageHeaderModel {
+    Title = "Mua gói đăng tin",
+    Subtitle = "Chọn gói phù hợp để tăng hạn mức đăng bài và thanh toán qua VNPay.",
+    BreadcrumbLabel = "Mua gói dịch vụ"
+}' />
 
-    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
-    {
-        <div class="alert alert-warning">@Model.ErrorMessage</div>
-    }
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="alert alert-warning">@Model.ErrorMessage</div>
+}
 
-    @if (Model.Packages.Count > 0)
-    {
-        <div class="row g-4">
-            @foreach (var p in Model.Packages)
-            {
-                <div class="col-md-6 col-lg-4">
-                    <div class="employer-package-card h-100 d-flex flex-column">
-                        <h5 class="employer-package-card__title">@p.Name</h5>
-                        <p class="text-muted small mb-2">Số tin đăng: <strong>@p.PostingLimit</strong></p>
-                        <p class="h5 text-primary mb-3">@p.Price.ToString("N0") <span class="fs-6 fw-normal">VNĐ</span></p>
-                        <form method="post" asp-page-handler="Buy" class="mt-auto">
-                            <input type="hidden" name="packageId" value="@p.Id" />
-                            <button type="submit" class="btn btn-outline-primary w-100">
-                                Thanh toán VNPay
-                            </button>
-                        </form>
-                    </div>
+@if (Model.Packages.Count > 0)
+{
+    <div class="row g-4">
+        @foreach (var p in Model.Packages)
+        {
+            <div class="col-md-6 col-lg-4">
+                <div class="employer-package-card h-100 d-flex flex-column">
+                    <h5 class="employer-package-card__title">@p.Name</h5>
+                    <p class="text-muted small mb-2">Số tin đăng: <strong>@p.PostingLimit</strong></p>
+                    <p class="h5 text-primary mb-3">@p.Price.ToString("N0") <span class="fs-6 fw-normal">VNĐ</span></p>
+                    <form method="post" asp-page-handler="Buy" class="mt-auto">
+                        <input type="hidden" name="packageId" value="@p.Id" />
+                        <button type="submit" class="btn btn-outline-primary w-100">
+                            Thanh toán VNPay
+                        </button>
+                    </form>
                 </div>
-            }
-        </div>
-        <p class="small text-muted mt-4 mb-0">Sau khi VNPay xác nhận thành công, hạn mức đăng tin sẽ được cộng vào tài khoản nhà tuyển dụng.</p>
-    }
-</div>
+            </div>
+        }
+    </div>
+    <p class="small text-muted mt-4 mb-0">Sau khi VNPay xác nhận thành công, hạn mức đăng tin sẽ được cộng vào tài khoản nhà tuyển dụng.</p>
+}

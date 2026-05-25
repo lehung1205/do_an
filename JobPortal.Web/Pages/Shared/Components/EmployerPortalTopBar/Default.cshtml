@@ -1,0 +1,126 @@
+@model JobPortal.Web.ViewComponents.EmployerPortalTopBarViewModel
+
+<div class="employer-portal-topbar" role="banner">
+    <div class="container-fluid px-3 px-lg-4">
+        <div class="employer-portal-topbar__inner">
+            <a class="employer-portal-topbar__brand" asp-page="/Index">
+                <span class="employer-portal-topbar__brand-name">JobPortal</span>
+                <span class="employer-portal-topbar__brand-tag">real-time recruiting</span>
+            </a>
+
+            <div class="employer-portal-topbar__support">
+                <span class="employer-portal-topbar__support-label">CSKH:</span>
+                <span class="employer-portal-topbar__support-name">@Model.Support.Name</span>
+                @if (!string.IsNullOrWhiteSpace(Model.Support.Phone))
+                {
+                    <a href="tel:@Model.Support.Phone.Replace(" ", "")" class="employer-portal-topbar__support-item">
+                        <i class="bi bi-telephone-fill"></i> @Model.Support.Phone
+                    </a>
+                }
+                @if (!string.IsNullOrWhiteSpace(Model.Support.Email))
+                {
+                    <a href="mailto:@Model.Support.Email" class="employer-portal-topbar__support-item">
+                        <i class="bi bi-envelope-fill"></i> @Model.Support.Email
+                    </a>
+                }
+                @if (!string.IsNullOrWhiteSpace(Model.Support.ZaloUrl))
+                {
+                    <a href="@Model.Support.ZaloUrl" target="_blank" rel="noopener noreferrer"
+                       class="employer-portal-topbar__support-zalo">
+                        <i class="bi bi-chat-dots-fill"></i> @Model.Support.ZaloLabel
+                    </a>
+                }
+            </div>
+
+            <div class="employer-portal-topbar__actions">
+                <a asp-page="/Messages/Index" class="employer-portal-topbar__icon-btn" title="Tin nhắn" aria-label="Tin nhắn">
+                    <i class="bi bi-bell"></i>
+                    @if (Model.Nav.UnreadMessages > 0)
+                    {
+                        <span class="employer-portal-topbar__icon-badge">@Model.Nav.UnreadMessages</span>
+                    }
+                </a>
+
+                <a asp-page="/Employer/BuyPackages" class="btn employer-portal-topbar__buy-btn">
+                    <i class="bi bi-bag-heart-fill"></i>
+                    <span>Mua dịch vụ</span>
+                </a>
+
+                <div class="dropdown">
+                    <button class="employer-portal-topbar__credits dropdown-toggle" type="button"
+                            data-bs-toggle="dropdown" aria-expanded="false" title="Lượt đăng tin">
+                        <i class="bi bi-gem"></i>
+                        <span>@Model.Nav.PostingLimit</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                        <li class="dropdown-header small">Hạn mức đăng tin</li>
+                        <li class="px-3 py-2 small">
+                            Còn <strong class="text-primary">@Model.Nav.PostingLimit</strong> lượt đăng tin
+                        </li>
+                        <li><hr class="dropdown-divider" /></li>
+                        <li>
+                            <a class="dropdown-item" asp-page="/Employer/BuyPackages">
+                                <i class="bi bi-bag-heart me-2"></i> Mua thêm gói
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" asp-page="/Employer/PostJob">
+                                <i class="bi bi-plus-circle me-2"></i> Đăng tin mới
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="dropdown employer-portal-topbar__account">
+                    <button class="employer-portal-topbar__avatar-btn dropdown-toggle" type="button"
+                            data-bs-toggle="dropdown" aria-expanded="false" aria-label="Menu tài khoản">
+                        @if (!string.IsNullOrWhiteSpace(Model.UserAvatarUrl))
+                        {
+                            <img src="@Model.UserAvatarUrl" alt="" class="employer-portal-topbar__avatar-img" width="36" height="36" />
+                        }
+                        else
+                        {
+                            <span class="employer-portal-topbar__avatar-fallback">@Model.UserInitials</span>
+                        }
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                        @{
+                            var accountLabel = !string.IsNullOrWhiteSpace(Model.Nav.CompanyName)
+                                ? Model.Nav.CompanyName
+                                : Model.UserName;
+                            var showAccountSub = !string.IsNullOrWhiteSpace(Model.Nav.CompanyName)
+                                && !string.IsNullOrWhiteSpace(Model.UserName)
+                                && !string.Equals(Model.Nav.CompanyName, Model.UserName, StringComparison.OrdinalIgnoreCase);
+                        }
+                        <li class="dropdown-header small text-muted">@accountLabel</li>
+                        @if (showAccountSub)
+                        {
+                            <li class="dropdown-header small pt-0 text-muted">@Model.UserName</li>
+                        }
+                        <li>
+                            <button type="button" class="dropdown-item" data-account-open data-account-tab="view">
+                                <i class="bi bi-person me-2"></i> Thông tin cá nhân
+                            </button>
+                        </li>
+                        <li>
+                            <button type="button" class="dropdown-item" data-account-open data-account-tab="edit">
+                                <i class="bi bi-pencil me-2"></i> Chỉnh sửa thông tin
+                            </button>
+                        </li>
+                        <li>
+                            <button type="button" class="dropdown-item" data-account-open data-account-tab="password">
+                                <i class="bi bi-shield-lock me-2"></i> Đổi mật khẩu
+                            </button>
+                        </li>
+                        <li><hr class="dropdown-divider" /></li>
+                        <li>
+                            <a class="dropdown-item text-danger" asp-page="/Auth/Logout">
+                                <i class="bi bi-box-arrow-right me-2"></i> Đăng xuất
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

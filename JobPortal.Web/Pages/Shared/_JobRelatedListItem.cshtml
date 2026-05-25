@@ -1,0 +1,23 @@
+@model JobPortal.Web.Models.JobRelatedListItemModel
+
+<a asp-page="/Jobs/Detail" asp-route-id="@Model.Id" class="job-related-item">
+    <span class="job-related-item__logo" aria-hidden="true">
+        @if (!string.IsNullOrWhiteSpace(Model.ThumbnailUrl))
+        {
+            <img src="@Model.ThumbnailUrl" alt="" loading="lazy" />
+        }
+        else
+        {
+            <i class="bi bi-building"></i>
+        }
+    </span>
+    <span class="job-related-item__body">
+        <span class="job-related-item__title">@Model.Title</span>
+        <span class="job-related-item__company">@Model.EmployerName</span>
+        <span class="job-related-item__tags">
+            <span class="job-related-item__tag"><i class="bi bi-geo-alt"></i>@Model.Location</span>
+            <span class="job-related-item__tag"><i class="bi bi-cash-stack"></i>@Model.Salary</span>
+        </span>
+    </span>
+    <i class="bi bi-chevron-right job-related-item__arrow" aria-hidden="true"></i>
+</a>

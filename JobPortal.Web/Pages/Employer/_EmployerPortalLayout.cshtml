@@ -1,0 +1,29 @@
+@{
+    Layout = "_Layout";
+    ViewData["EmployerPortalChrome"] = true;
+    var activeKey = ViewData["EmployerNavActive"] as string ?? "";
+}
+
+@await Component.InvokeAsync("EmployerPortalTopBar")
+
+<div class="employer-dash">
+    <div class="container-fluid px-3 px-lg-4">
+        <div class="employer-dash__shell">
+            @await Component.InvokeAsync("EmployerPortalNav", new { activeKey })
+            <div class="employer-dash__main">
+                @RenderBody()
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/employer-dashboard.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+    @await RenderSectionAsync("EmployerStyles", required: false)
+}
+
+@section Scripts {
+    @await RenderSectionAsync("Scripts", required: false)
+    @await RenderSectionAsync("EmployerScripts", required: false)
+}

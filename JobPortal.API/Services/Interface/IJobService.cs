@@ -12,6 +12,7 @@ public interface IJobService
         string? location = null,
         CancellationToken cancellationToken = default);
     Task<JobDto> GetJobByIdAsync(long id, CancellationToken cancellationToken = default);
+    Task<JobRelatedListsDto> GetRelatedJobsAsync(long id, CancellationToken cancellationToken = default);
     Task<JobDto> CreateJobAsync(CreateJobRequest request, CancellationToken cancellationToken = default);
     Task UpdateJobAsync(long id, JobDto jobDto, CancellationToken cancellationToken = default);
     Task DeleteJobAsync(long id, CancellationToken cancellationToken = default);

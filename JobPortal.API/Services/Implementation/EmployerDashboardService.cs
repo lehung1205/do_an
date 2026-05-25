@@ -13,11 +13,16 @@ public class EmployerDashboardService : IEmployerDashboardService
 {
     private readonly AppDbContext _context;
     private readonly IJobExpiryService _jobExpiryService;
+    private readonly IChatService _chatService;
 
-    public EmployerDashboardService(AppDbContext context, IJobExpiryService jobExpiryService)
+    public EmployerDashboardService(
+        AppDbContext context,
+        IJobExpiryService jobExpiryService,
+        IChatService chatService)
     {
         _context = context;
         _jobExpiryService = jobExpiryService;
+        _chatService = chatService;
     }
 
     public async Task<EmployerDashboardDto> GetDashboardForUserAsync(long userId, CancellationToken cancellationToken = default)
@@ -112,6 +117,8 @@ public class EmployerDashboardService : IEmployerDashboardService
             });
         }
 
+        var applicantChart = await BuildApplicantChartAsync(employer.Id, 7, cancellationToken);
+
         return new EmployerDashboardDto
         {
             CompanyName = employer.Name,
@@ -122,11 +129,111 @@ public class EmployerDashboardService : IEmployerDashboardService
                 OpenJobs = openJobs,
                 NewCvCount = newCv,
                 TotalCvCount = totalCv,
-                ExpiringSoonCount = expiringSoon
+                ExpiringSoonCount = expiringSoon,
+                UnreadApplications = unreadCv,
+                TotalJobs = jobs.Count
             },
             RecentJobs = jobs.Take(5).Select(j => MapJobDto(j, employerRating)).ToList(),
             RecentApplications = applications.Select(a => MapApplicationDto(a, seekerRatings)).ToList(),
-            Notifications = notifications
+            Notifications = notifications,
+            ApplicantChart = applicantChart
+        };
+    }
+
+    public async Task<EmployerPortalNavDto> GetPortalNavForUserAsync(
+        long userId,
+        CancellationToken cancellationToken = default)
+    {
+        await _jobExpiryService.CloseExpiredJobsAsync(cancellationToken);
+
+        var employer = await _context.Employers
+            .AsNoTracking()
+            .FirstOrDefaultAsync(e => e.UserId == userId, cancellationToken);
+
+        if (employer == null)
+        {
+            throw new NotFoundException("Employer profile not found for this user.");
+        }
+
+        var totalJobs = await _context.Jobs
+            .AsNoTracking()
+            .CountAsync(j => j.EmployerId == employer.Id, cancellationToken);
+
+        var unreadCv = await _context.Applications
+            .AsNoTracking()
+            .CountAsync(
+                a => a.Job.EmployerId == employer.Id &&
+                     (a.Status == "submitted" || a.Status == "pending"),
+                cancellationToken);
+
+        var unreadMessages = await _chatService.GetTotalUnreadCountAsync(
+            userId,
+            "EMPLOYER",
+            cancellationToken);
+
+        return new EmployerPortalNavDto
+        {
+            CompanyName = employer.Name,
+            PostingLimit = employer.PostingLimit,
+            TotalJobs = totalJobs,
+            UnreadApplications = unreadCv,
+            UnreadMessages = unreadMessages
+        };
+    }
+
+    public async Task<EmployerApplicantChartDto> GetApplicantChartForUserAsync(
+        long userId,
+        int days = 7,
+        CancellationToken cancellationToken = default)
+    {
+        var employer = await _context.Employers
+            .AsNoTracking()
+            .FirstOrDefaultAsync(e => e.UserId == userId, cancellationToken);
+
+        if (employer == null)
+        {
+            throw new NotFoundException("Employer profile not found for this user.");
+        }
+
+        days = Math.Clamp(days, 7, 30);
+        return await BuildApplicantChartAsync(employer.Id, days, cancellationToken);
+    }
+
+    private async Task<EmployerApplicantChartDto> BuildApplicantChartAsync(
+        long employerId,
+        int days,
+        CancellationToken cancellationToken)
+    {
+        var utcToday = DateTime.UtcNow.Date;
+        var startDate = utcToday.AddDays(-(days - 1));
+
+        var counts = await _context.Applications
+            .AsNoTracking()
+            .Where(a =>
+                a.Job.EmployerId == employerId &&
+                a.AppliedAt >= startDate)
+            .GroupBy(a => a.AppliedAt.Date)
+            .Select(g => new { Date = g.Key, Count = g.Count() })
+            .ToListAsync(cancellationToken);
+
+        var countByDate = counts.ToDictionary(x => x.Date, x => x.Count);
+        var points = new List<EmployerApplicantChartPointDto>();
+
+        for (var i = 0; i < days; i++)
+        {
+            var date = startDate.AddDays(i);
+            var count = countByDate.GetValueOrDefault(date, 0);
+            points.Add(new EmployerApplicantChartPointDto
+            {
+                Label = date.ToString("dd/MM"),
+                Count = count
+            });
+        }
+
+        return new EmployerApplicantChartDto
+        {
+            Days = days,
+            Points = points
         };
     }
 

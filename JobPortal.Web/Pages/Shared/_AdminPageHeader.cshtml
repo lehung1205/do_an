@@ -1,0 +1,15 @@
+@model (string Title, string? Subtitle, string? IconClass)
+
+<div class="admin-portal__page-head">
+    <h1 class="admin-portal__page-title">
+        @if (!string.IsNullOrWhiteSpace(Model.IconClass))
+        {
+            <i class="bi @Model.IconClass me-2"></i>
+        }
+        @Model.Title
+    </h1>
+    @if (!string.IsNullOrWhiteSpace(Model.Subtitle))
+    {
+        <p class="admin-portal__page-subtitle">@Model.Subtitle</p>
+    }
+</div>

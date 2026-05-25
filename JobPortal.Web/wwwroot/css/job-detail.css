@@ -1,0 +1,204 @@
+/* Trang chi tiết việc làm — danh sách gợi ý kiểu JobsGO */
+.job-detail-page {
+  --jd-accent: #0000ee;
+  --jd-tag-bg: #e8f0ff;
+  --jd-tag-text: #0b4da2;
+}
+
+.job-detail-block__title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #313131;
+}
+
+.job-detail-meta {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px 16px;
+}
+
+.job-detail-meta dt {
+  font-size: 13px;
+  font-weight: 600;
+  color: #6b7280;
+  margin: 0;
+}
+
+.job-detail-meta dd {
+  font-size: 14px;
+  color: #313131;
+  margin: 0;
+}
+
+.job-related-section + .job-related-section {
+  margin-top: 0;
+}
+
+.job-related-section__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.job-related-section__title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #313131;
+  margin: 0;
+}
+
+.job-related-section__more {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  color: #6b7280;
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+}
+
+.job-related-section__more:hover {
+  background: #f3f4f6;
+  color: var(--jd-accent);
+}
+
+.job-related-section__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.job-related-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 0;
+  text-decoration: none;
+  color: inherit;
+  border-bottom: 1px solid #e5e7eb;
+  transition: background 0.15s;
+}
+
+.job-related-section__list .job-related-item:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.job-related-section__list .job-related-item:first-child {
+  padding-top: 0;
+}
+
+.job-related-item:hover {
+  color: inherit;
+}
+
+.job-related-item:hover .job-related-item__title {
+  color: var(--jd-accent);
+}
+
+.job-related-item__logo {
+  flex: 0 0 52px;
+  width: 52px;
+  height: 52px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f9fafb;
+  color: #9ca3af;
+  font-size: 1.35rem;
+}
+
+.job-related-item__logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.job-related-item__body {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.job-related-item__title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #313131;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.job-related-item__company {
+  font-size: 13px;
+  color: #6b7280;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.job-related-item__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.job-related-item__tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  padding: 3px 8px;
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--jd-tag-text);
+  background: var(--jd-tag-bg);
+  border-radius: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.job-related-item__tag .bi {
+  flex-shrink: 0;
+  font-size: 11px;
+}
+
+.job-related-item__arrow {
+  flex: 0 0 auto;
+  margin-top: 14px;
+  color: #d1d5db;
+  font-size: 14px;
+}
+
+/* Gợi ý ở cột chính: card nền trắng */
+.col-lg-8 > .job-related-section {
+  background: #fff;
+  border: 1px solid #dce1e8;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 4px 14px rgba(15, 23, 42, 0.07);
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.col-lg-8 > .job-related-section:empty {
+  display: none;
+}
+
+@media (max-width: 991.98px) {
+  .job-detail-sidebar.sticky-top {
+    position: static !important;
+  }
+}

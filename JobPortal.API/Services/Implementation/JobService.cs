@@ -40,6 +40,7 @@ public class JobService : IJobService
         int pageSize,
         string? search = null,
         string? location = null,
+        long? categoryId = null,
         CancellationToken cancellationToken = default)
     {
         ValidatePagination(page, pageSize);
@@ -52,6 +53,7 @@ public class JobService : IJobService
             recruitingOnly: true,
             search,
             location,
+            categoryId,
             cancellationToken);
         var dtos = _mapper.Map<List<JobDto>>(items);
         await ApplyEmployerRatingsAsync(dtos, cancellationToken);
@@ -84,6 +86,117 @@ public class JobService : IJobService
         var dto = _mapper.Map<JobDto>(entity);
         await ApplyEmployerRatingsAsync(new List<JobDto> { dto }, cancellationToken);
         return dto;
+    }
+
+    public async Task<JobRelatedListsDto> GetRelatedJobsAsync(long id, CancellationToken cancellationToken = default)
+    {
+        await _jobExpiryService.CloseExpiredJobsAsync(cancellationToken);
+
+        var current = await _repository.GetByIdAsync(id, cancellationToken);
+        if (current == null || !JobPostingCatalog.IsPubliclyVisible(current.PostingStatus))
+        {
+            throw new NotFoundException($"Job with id {id} was not found.");
+        }
+
+        var now = DateTime.UtcNow;
+        var locationToken = GetPrimaryLocationToken(current.Location);
+
+        IQueryable<Job> ActiveRecruitingJobs() =>
+            _context.Jobs.AsNoTracking()
+                .Where(j =>
+                    j.Id != id &&
+                    j.PostingStatus == JobPostingCatalog.Recruiting &&
+                    j.ExpiryDate >= now);
+
+        var sameCompanyEntities = await ActiveRecruitingJobs()
+            .Where(j => j.EmployerId == current.EmployerId)
+            .OrderByDescending(j => j.Id)
+            .Take(5)
+            .Include(j => j.Employer)
+            .Include(j => j.Images.OrderBy(i => i.Id).Take(1))
+            .ToListAsync(cancellationToken);
+
+        var excludeIds = new HashSet<long> { id };
+        foreach (var job in sameCompanyEntities)
+        {
+            excludeIds.Add(job.Id);
+        }
+
+        var similarEntities = await ActiveRecruitingJobs()
+            .Where(j => !excludeIds.Contains(j.Id) &&
+                        (j.CategoryId == current.CategoryId ||
+                         (locationToken != null && j.Location.Contains(locationToken))))
+            .OrderByDescending(j => j.CategoryId == current.CategoryId)
+            .ThenByDescending(j => j.Id)
+            .Take(5)
+            .Include(j => j.Employer)
+            .Include(j => j.Images.OrderBy(i => i.Id).Take(1))
+            .ToListAsync(cancellationToken);
+
+        foreach (var job in similarEntities)
+        {
+            excludeIds.Add(job.Id);
+        }
+
+        var suggestedQuery = ActiveRecruitingJobs().Where(j => !excludeIds.Contains(j.Id));
+        if (!string.IsNullOrWhiteSpace(locationToken))
+        {
+            suggestedQuery = suggestedQuery.Where(j =>
+                j.Location.Contains(locationToken) || j.CategoryId == current.CategoryId);
+        }
+
+        var suggestedEntities = await suggestedQuery
+            .OrderByDescending(j => j.CategoryId == current.CategoryId)
+            .ThenByDescending(j => j.Id)
+            .Take(5)
+            .Include(j => j.Employer)
+            .Include(j => j.Images.OrderBy(i => i.Id).Take(1))
+            .ToListAsync(cancellationToken);
+
+        if (suggestedEntities.Count < 5)
+        {
+            var fillerIds = suggestedEntities.Select(j => j.Id).ToHashSet();
+            foreach (var existingId in excludeIds)
+            {
+                fillerIds.Add(existingId);
+            }
+
+            var filler = await ActiveRecruitingJobs()
+                .Where(j => !fillerIds.Contains(j.Id))
+                .OrderByDescending(j => j.Id)
+                .Take(5 - suggestedEntities.Count)
+                .Include(j => j.Employer)
+                .Include(j => j.Images.OrderBy(i => i.Id).Take(1))
+                .ToListAsync(cancellationToken);
+
+            suggestedEntities.AddRange(filler);
+        }
+
+        var sameCompany = _mapper.Map<List<JobDto>>(sameCompanyEntities);
+        var similar = _mapper.Map<List<JobDto>>(similarEntities);
+        var suggested = _mapper.Map<List<JobDto>>(suggestedEntities);
+
+        await ApplyEmployerRatingsAsync(sameCompany, cancellationToken);
+        await ApplyEmployerRatingsAsync(similar, cancellationToken);
+        await ApplyEmployerRatingsAsync(suggested, cancellationToken);
+
+        return new JobRelatedListsDto
+        {
+            SameCompanyJobs = sameCompany,
+            SimilarJobs = similar,
+            SuggestedJobs = suggested
+        };
+    }
+
+    private static string? GetPrimaryLocationToken(string? location)
+    {
+        if (string.IsNullOrWhiteSpace(location))
+        {
+            return null;
+        }
+
+        var part = location.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)[0];
+        return string.IsNullOrWhiteSpace(part) ? null : part;
     }
 
     public async Task<JobDto> CreateJobAsync(CreateJobRequest request, CancellationToken cancellationToken = default)

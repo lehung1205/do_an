@@ -1,23 +1,24 @@
 .admin-dash {
     --adm-bg: #313131;
-    --adm-surface: #ffffff;
-    --adm-muted: #313131;
-    --adm-border: #d9d9d9;
-    --adm-primary: #0000ee;
-    --adm-primary-soft: #fafafa;
+    --adm-surface: var(--jp-card-bg, #ffffff);
+    --adm-muted: var(--jp-muted, #5c6370);
+    --adm-border: var(--jp-border, #dce1e8);
+    --adm-primary: var(--jp-primary, #0000ee);
+    --adm-primary-soft: #eef2ff;
     --adm-success: #059669;
     --adm-warning: #d97706;
     --adm-danger: #dc2626;
-    --adm-radius: 4px;
-    background: #fafafa;
+    --adm-radius: 12px;
+    background: transparent;
     min-height: calc(100vh - 4rem);
     padding-bottom: 3rem;
 }
 
 .admin-dash__hero {
-    background: #fff;
+    background: var(--jp-card-bg, #fff);
     color: var(--adm-text, #313131);
     border-bottom: 1px solid var(--adm-border);
+    box-shadow: var(--jp-card-shadow, 0 1px 2px rgba(15, 23, 42, 0.05));
     padding: 1.5rem 0 1.75rem;
     margin-bottom: 1rem;
     position: relative;
@@ -114,12 +115,14 @@
     border: 1px solid var(--adm-border);
     border-radius: var(--adm-radius);
     padding: 1.25rem 1.35rem;
-    box-shadow: none;
+    box-shadow: var(--jp-card-shadow, 0 1px 2px rgba(15, 23, 42, 0.05));
     height: 100%;
+    transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .admin-stat-card:hover {
-    border-color: var(--adm-primary);
+    border-color: rgba(0, 0, 238, 0.3);
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
 }
 
 .admin-stat-card__icon {
@@ -155,7 +158,7 @@
     background: var(--adm-surface);
     border: 1px solid var(--adm-border);
     border-radius: var(--adm-radius);
-    box-shadow: none;
+    box-shadow: var(--jp-card-shadow, 0 1px 2px rgba(15, 23, 42, 0.05));
     height: 100%;
     display: flex;
     flex-direction: column;

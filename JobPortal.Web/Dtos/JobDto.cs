@@ -8,6 +8,8 @@ public class JobDto
     public double? EmployerAverageRating { get; set; }
     public int EmployerReviewCount { get; set; }
     public long CategoryId { get; set; }
+    public string? CategoryName { get; set; }
+    public DateTime CreatedAt { get; set; }
     public string Title { get; set; } = null!;
     public string Description { get; set; } = null!;
     public string Salary { get; set; } = null!;

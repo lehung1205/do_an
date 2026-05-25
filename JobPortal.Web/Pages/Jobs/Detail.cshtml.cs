@@ -20,6 +20,12 @@ public class DetailModel : PageModel
 
     public IReadOnlyList<ImageDto> JobImages { get; set; } = Array.Empty<ImageDto>();
 
+    public IReadOnlyList<JobDto> SuggestedJobs { get; set; } = Array.Empty<JobDto>();
+
+    public IReadOnlyList<JobDto> SameCompanyJobs { get; set; } = Array.Empty<JobDto>();
+
+    public IReadOnlyList<JobDto> SimilarJobs { get; set; } = Array.Empty<JobDto>();
+
     /// <summary>Hiện nút ứng tuyển cho ứng viên (và khách); ẩn với employer/admin.</summary>
     public bool ShowApplyButton { get; set; }
 
@@ -58,6 +64,14 @@ public class DetailModel : PageModel
         EmployerProfile = await _api.GetApiDataAsync<EmployerPublicProfileDto>(
             $"/api/employers/{job.EmployerId}/public-profile");
         JobImages = await _api.GetApiDataAsync<List<ImageDto>>($"/api/images/job/{id}") ?? new List<ImageDto>();
+
+        var related = await _api.GetApiDataAsync<JobRelatedListsDto>($"/api/jobs/{id}/related");
+        if (related != null)
+        {
+            SuggestedJobs = related.SuggestedJobs;
+            SameCompanyJobs = related.SameCompanyJobs;
+            SimilarJobs = related.SimilarJobs;
+        }
 
         var role = HttpContext.Session.GetString("UserRole");
         ShowApplyButton = !string.Equals(role, "EMPLOYER", StringComparison.Ordinal)

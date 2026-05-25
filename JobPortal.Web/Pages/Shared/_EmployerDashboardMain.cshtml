@@ -1,0 +1,202 @@
+@model JobPortal.Web.Pages.IndexModel
+@using System.Text.Json
+
+@if (Model.EmployerDashboard != null)
+{
+    var dash = Model.EmployerDashboard;
+    var stats = dash.Stats;
+    var firstAlert = dash.Notifications.FirstOrDefault(n => n.Type == "warning") ?? dash.Notifications.FirstOrDefault();
+    var chartJson = JsonSerializer.Serialize(new
+    {
+        points = dash.ApplicantChart.Points.Select(p => new { label = p.Label, count = p.Count })
+    });
+
+    @if (firstAlert != null)
+    {
+        <div class="employer-dash__alert" role="status">
+            <i class="bi bi-exclamation-circle me-2"></i>@firstAlert.Message
+        </div>
+    }
+
+    <div class="employer-dash__page-head">
+        <div>
+            <h1 class="employer-dash__page-title">Nhà tuyển dụng</h1>
+            <p class="employer-dash__breadcrumb">
+                <a asp-page="/Index">Bảng thông tin</a>
+                <span class="mx-1">/</span>
+                <span>@dash.CompanyName</span>
+            </p>
+            <p class="text-muted small mb-0 mt-2">
+                Xin chào, <strong>@dash.CompanyName</strong>
+                @if (dash.NewApplicantsToday > 0)
+                {
+                    <span> — hôm nay có <strong class="text-primary">@dash.NewApplicantsToday</strong> ứng viên mới</span>
+                }
+            </p>
+        </div>
+        <a asp-page="/Employer/PostJob" class="btn employer-dash__cta">
+            <i class="bi bi-plus-lg me-1"></i> Đăng tin tuyển dụng mới
+        </a>
+    </div>
+
+    <div class="employer-dash__promos">
+        <div class="employer-dash__promo">
+            <div class="employer-dash__promo-title">Thu hút thêm ứng viên</div>
+            <p class="employer-dash__promo-text">
+                Đăng tin rõ ràng, hiển thị mức lương và gia hạn tin đúng hạn để tăng lượt ứng tuyển.
+            </p>
+            <a asp-page="/Employer/BuyPackages" class="btn btn-sm btn-outline-primary">Mua gói đăng tin</a>
+        </div>
+        <div class="employer-dash__promo employer-dash__promo--tips">
+            <div class="employer-dash__promo-title">Bí kíp đăng tin hiệu quả</div>
+            <div class="employer-dash__promo-tips">
+                <span>Nội dung rõ ràng</span>
+                <span>Hiển thị lương</span>
+                <span>Đăng đúng giờ</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="employer-dash__chart-card">
+        <div class="employer-dash__chart-head">
+            <h2 class="employer-dash__chart-title">Số liệu ứng viên</h2>
+            <div class="employer-dash__chart-filter">
+                <label for="employerChartDays">Hiển thị theo</label>
+                <select id="employerChartDays" class="form-select form-select-sm">
+                    <option value="7" selected>7 ngày gần nhất</option>
+                    <option value="14">14 ngày gần nhất</option>
+                    <option value="30">30 ngày gần nhất</option>
+                </select>
+            </div>
+        </div>
+        <div class="employer-dash__chart-legend">
+            <i aria-hidden="true"></i> Số lượt apply
+        </div>
+        <div class="employer-dash__chart-wrap">
+            <canvas id="employerApplicantChart"
+                    data-api-base="@Url.Page("/Index", "ApplicantChart")"
+                    aria-label="Biểu đồ số lượt ứng viên theo ngày"></canvas>
+        </div>
+        <script type="application/json" id="employerChartData">@Html.Raw(chartJson)</script>
+    </div>
+
+    <div class="employer-dash__kpi-row">
+        <div class="employer-dash__kpi">
+            <div class="employer-dash__kpi-value">@stats.OpenJobs</div>
+            <div class="employer-dash__kpi-label">Job đang tuyển</div>
+        </div>
+        <div class="employer-dash__kpi">
+            <div class="employer-dash__kpi-value">@stats.NewCvCount</div>
+            <div class="employer-dash__kpi-label">CV mới (48h)</div>
+        </div>
+        <div class="employer-dash__kpi">
+            <div class="employer-dash__kpi-value">@stats.TotalCvCount</div>
+            <div class="employer-dash__kpi-label">Tổng CV</div>
+        </div>
+        <div class="employer-dash__kpi">
+            <div class="employer-dash__kpi-value">@stats.ExpiringSoonCount</div>
+            <div class="employer-dash__kpi-label">Sắp hết hạn</div>
+        </div>
+    </div>
+
+    <section class="employer-dash__section">
+        <div class="employer-dash__section-head">
+            <h2 class="employer-dash__section-title">Tin tuyển dụng gần đây</h2>
+            <a asp-page="/Employer/Jobs" class="employer-dash__section-link">
+                Xem tất cả <i class="bi bi-chevron-right"></i>
+            </a>
+        </div>
+        @if (dash.RecentJobs.Count == 0)
+        {
+            <p class="text-muted mb-0">Chưa có tin tuyển dụng. <a asp-page="/Employer/PostJob">Đăng tin đầu tiên</a></p>
+        }
+        else
+        {
+            <div class="employer-dash__recent-jobs">
+                @foreach (var job in dash.RecentJobs)
+                {
+                    <partial name="Shared/_EmployerDashboardJobCard"
+                             model="JobPortal.Web.Models.JobGridCardModel.FromEmployerDashboardJob(job)" />
+                }
+            </div>
+        }
+    </section>
+
+    <section class="employer-dash__section">
+        <div class="employer-dash__section-head">
+            <h2 class="employer-dash__section-title">Ứng viên mới apply</h2>
+            <a asp-page="/Employer/Applicants" class="employer-dash__section-link">
+                Xem tất cả <i class="bi bi-chevron-right"></i>
+            </a>
+        </div>
+        @if (dash.RecentApplications.Count == 0)
+        {
+            <p class="text-muted mb-0">Chưa có đơn ứng tuyển nào.</p>
+        }
+        else
+        {
+            <div class="d-flex flex-column gap-3">
+                @foreach (var app in dash.RecentApplications)
+                {
+                    <div class="employer-panel @(app.IsUnread ? "border-warning" : "")">
+                        <div class="d-flex flex-wrap justify-content-between gap-2 mb-1">
+                            <h3 class="h6 mb-0 fw-semibold">
+                                @app.ApplicantName
+                                @if (app.IsUnread)
+                                {
+                                    <span class="badge bg-warning text-dark ms-1">Mới</span>
+                                }
+                            </h3>
+                            <span class="badge @(app.Status.ToLowerInvariant() switch {
+                                "submitted" or "pending" => "bg-warning text-dark",
+                                "reviewed" => "bg-info text-dark",
+                                "accepted" => "bg-success",
+                                "rejected" => "bg-danger",
+                                _ => "bg-secondary"
+                            })">@IndexModel.FormatApplicationStatus(app.Status)</span>
+                        </div>
+                        <partial name="Shared/_ApplicantRatingStars"
+                                 model="JobPortal.Web.Models.ApplicantRatingStarsModel.FromApplication(app)" />
+                        <p class="text-muted small mb-3">
+                            @app.JobTitle • @IndexModel.FormatRelativeTime(app.AppliedAt)
+                        </p>
+                        <div class="d-flex flex-wrap gap-2">
+                            <a asp-page="/Employer/Applicants" asp-route-filter="@(app.IsUnread ? "unread" : "all")" class="btn btn-sm btn-outline-primary">
+                                Duyệt CV
+                            </a>
+                            @if (!string.IsNullOrWhiteSpace(app.ResumeUrl))
+                            {
+                                <a href="@app.ResumeUrl" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-secondary">
+                                    Mở file CV
+                                </a>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </section>
+
+    @if (dash.Notifications.Count > 1)
+    {
+        <section class="employer-dash__section">
+            <h2 class="employer-dash__section-title mb-3">Thông báo</h2>
+            <ul class="list-unstyled mb-0">
+                @foreach (var n in dash.Notifications)
+                {
+                    <li class="employer-notification employer-notification--@n.Type py-2 border-bottom">
+                        @if (n.Type == "warning")
+                        {
+                            <i class="bi bi-exclamation-triangle text-warning me-2"></i>
+                        }
+                        else
+                        {
+                            <i class="bi bi-info-circle text-primary me-2"></i>
+                        }
+                        @n.Message
+                    </li>
+                }
+            </ul>
+        </section>
+    }
+}

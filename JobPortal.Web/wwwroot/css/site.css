@@ -3,8 +3,12 @@
   --jp-primary-dark: #0000cc;
   --jp-accent: #0000ee;
   --jp-dark: #313131;
-  --jp-muted: #313131;
-  --jp-surface: #fafafa;
+  --jp-muted: #5c6370;
+  --jp-page-bg: #eef1f6;
+  --jp-card-bg: #ffffff;
+  --jp-surface: #f5f7fa;
+  --jp-border: #dce1e8;
+  --jp-card-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 4px 14px rgba(15, 23, 42, 0.07);
   --jp-radius: 4px;
 }
 
@@ -25,10 +29,34 @@ body.site-body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background-color: var(--jp-page-bg);
 }
 
 main {
   flex: 1;
+  background-color: var(--jp-page-bg);
+}
+
+/* Nền trang xám nhạt — card/panel trắng nổi bật hơn */
+.site-body .card {
+  background-color: var(--jp-card-bg);
+  border: 1px solid var(--jp-border);
+  box-shadow: var(--jp-card-shadow);
+}
+
+.site-body .card.border-0,
+.site-body .card.shadow-sm {
+  border: 1px solid var(--jp-border) !important;
+  box-shadow: var(--jp-card-shadow) !important;
+}
+
+.site-body .bg-light {
+  background-color: #e4e8f0 !important;
+}
+
+.site-body .list-group-item {
+  background-color: var(--jp-card-bg);
+  border-color: var(--jp-border);
 }
 
 /* Header — JobsGo: flat white bar */
@@ -36,6 +64,9 @@ main {
   position: sticky;
   top: 0;
   z-index: 1030;
+  background: var(--jp-card-bg) !important;
+  border-bottom: 1px solid var(--jp-border);
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.06);
 }
 
 .site-brand {
@@ -405,14 +436,14 @@ main {
 }
 
 .home-dual-cta__card {
-  background: #fff;
-  border: 1px solid #d9d9d9;
+  background: var(--jp-card-bg);
+  border: 1px solid var(--jp-border);
   border-radius: var(--jp-radius);
-  box-shadow: none;
+  box-shadow: var(--jp-card-shadow);
 }
 
 .home-dual-cta__card--employer {
-  background: #fafafa;
+  background: var(--jp-card-bg);
 }
 
 .job-active-filters__chip {
@@ -427,11 +458,11 @@ main {
 }
 
 .home-stat-card {
-  background: #fff;
-  border: 1px solid #d9d9d9;
+  background: var(--jp-card-bg);
+  border: 1px solid var(--jp-border);
   border-radius: var(--jp-radius);
   padding: 1.25rem;
-  box-shadow: none;
+  box-shadow: var(--jp-card-shadow);
 }
 
 .home-stat-card__value {
@@ -574,9 +605,10 @@ main {
 
 /* Features */
 .feature-card {
-  background: #fff;
+  background: var(--jp-card-bg);
   border-radius: var(--jp-radius);
-  border: 1px solid #d9d9d9;
+  border: 1px solid var(--jp-border);
+  box-shadow: var(--jp-card-shadow);
 }
 
 .feature-card:hover {
@@ -779,13 +811,13 @@ main {
 
 /* Employer dashboard */
 .employer-dashboard {
-  background: var(--jp-surface);
+  background: transparent;
 }
 
 .employer-welcome__card {
-  background: #fff;
-  border: 1px solid #d9d9d9;
-  box-shadow: none;
+  background: var(--jp-card-bg);
+  border: 1px solid var(--jp-border);
+  box-shadow: var(--jp-card-shadow);
 }
 
 .employer-welcome__title {
@@ -794,11 +826,11 @@ main {
 }
 
 .employer-stat-card {
-  background: #fff;
-  border: 1px solid #e2e8f0;
+  background: var(--jp-card-bg);
+  border: 1px solid var(--jp-border);
   border-radius: var(--jp-radius);
   padding: 1.25rem 1rem;
-  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
+  box-shadow: var(--jp-card-shadow);
 }
 
 .employer-stat-card__value {
@@ -825,11 +857,11 @@ main {
 }
 
 .employer-panel {
-  background: #fff;
-  border: 1px solid #e2e8f0;
+  background: var(--jp-card-bg);
+  border: 1px solid var(--jp-border);
   border-radius: var(--jp-radius);
   padding: 1.25rem;
-  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.04);
+  box-shadow: var(--jp-card-shadow);
 }
 
 .employer-package-card {

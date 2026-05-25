@@ -47,6 +47,7 @@ public class JobRepository : IJobRepository
         bool recruitingOnly = false,
         string? search = null,
         string? location = null,
+        long? categoryId = null,
         CancellationToken cancellationToken = default)
     {
         var query = _context.Jobs.AsNoTracking();
@@ -73,12 +74,19 @@ public class JobRepository : IJobRepository
             query = query.Where(j => j.Location.Contains(loc));
         }
 
+        if (categoryId is > 0)
+        {
+            query = query.Where(j => j.CategoryId == categoryId.Value);
+        }
+
         var totalCount = await query.CountAsync(cancellationToken);
         var items = await query
-            .OrderByDescending(j => j.Id)
+            .OrderByDescending(j => j.CreatedAt)
+            .ThenByDescending(j => j.Id)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .Include(j => j.Employer)
+            .Include(j => j.Category)
             .Include(j => j.Images.OrderBy(i => i.Id).Take(1))
             .ToListAsync(cancellationToken);
 

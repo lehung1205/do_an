@@ -1,16 +1,23 @@
 @page
 @model JobPortal.Web.Pages.Employer.WorkProgress.DetailModel
+@using JobPortal.Web.Models
 @{
     ViewData["Title"] = "Chi tiết tiến độ";
+    ViewData["EmployerNavActive"] = EmployerPortalNavKeys.WorkProgress;
 }
 
-<div class="container py-4">
-    <nav aria-label="breadcrumb" class="mb-3">
-        <ol class="breadcrumb small">
-            <li class="breadcrumb-item"><a asp-page="/Employer/WorkProgress/Index">Tiến độ làm việc</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Chi tiết</li>
-        </ol>
-    </nav>
+<partial name="Shared/_EmployerPageHeader" model='new EmployerPageHeaderModel {
+    Title = Model.Progress?.ApplicantName ?? "Chi tiết tiến độ",
+    Subtitle = Model.Progress != null ? Model.Progress.JobTitle : null,
+    BreadcrumbLabel = "Chi tiết tiến độ"
+}' />
+
+<div class="employer-dash__panel-stack">
+    <p class="mb-3">
+        <a asp-page="/Employer/WorkProgress/Index" class="small text-decoration-none">
+            <i class="bi bi-arrow-left me-1"></i> Quay lại danh sách tiến độ
+        </a>
+    </p>
 
     @if (Model.Progress == null)
     {

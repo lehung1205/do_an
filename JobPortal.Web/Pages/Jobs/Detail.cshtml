@@ -4,7 +4,7 @@
     ViewData["Title"] = Model.Job.Title;
 }
 
-<div class="container mt-5">
+<div class="container job-detail-page mt-4 mb-5">
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a asp-page="/Jobs/Index">Việc làm</a></li>
@@ -13,7 +13,7 @@
     </nav>
 
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-lg-8">
             <div class="card shadow-sm border-0 mb-4">
                 <div class="card-body p-4">
                     <div class="d-flex justify-content-between align-items-start mb-3">
@@ -203,35 +203,72 @@
                     }
                 </div>
             </div>
+
+            <div class="job-detail-location card shadow-sm border-0 mb-4">
+                <div class="card-body p-4">
+                    <h4 class="job-detail-block__title mb-3">Địa điểm làm việc</h4>
+                    <p class="mb-1">
+                        <i class="bi bi-geo-alt-fill text-primary me-2"></i>
+                        <strong>@Model.Job.Location</strong>
+                    </p>
+                </div>
+            </div>
+
+            <partial name="Shared/_JobRelatedSection"
+                     model='("Việc làm gợi ý", false, Model.SuggestedJobs, false)' />
         </div>
 
-        <div class="col-md-4">
-            <div class="card shadow-sm border-0 sticky-top" style="top: 20px;">
-                <div class="card-body">
-                    <h5 class="card-title mb-3">Thông tin tóm tắt</h5>
-                    <ul class="list-unstyled mb-0">
-                        <li class="mb-2"><strong>Mức lương:</strong> @Model.Job.Salary</li>
-                        <li class="mb-2">
-                            <strong>Nhà tuyển dụng:</strong>
-                            @if (Model.EmployerProfile != null)
-                            {
-                                <button type="button"
-                                        class="btn btn-link employer-profile-trigger p-0 align-baseline"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#employerProfileModal">
+        <div class="col-lg-4">
+            <div class="job-detail-sidebar sticky-top" style="top: 20px;">
+                <div class="card shadow-sm border-0 mb-3">
+                    <div class="card-body p-4">
+                        <h5 class="job-detail-block__title mb-3">Thông tin chung</h5>
+                        <dl class="job-detail-meta mb-0">
+                            <dt>Mức lương</dt>
+                            <dd>@Model.Job.Salary</dd>
+                            <dt>Nhà tuyển dụng</dt>
+                            <dd>
+                                @if (Model.EmployerProfile != null)
+                                {
+                                    <button type="button"
+                                            class="btn btn-link employer-profile-trigger p-0 align-baseline"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#employerProfileModal">
+                                        @Model.Job.EmployerName
+                                    </button>
+                                }
+                                else
+                                {
                                     @Model.Job.EmployerName
-                                </button>
-                            }
-                            else
-                            {
-                                @Model.Job.EmployerName
-                            }
-                        </li>
-                        <li class="mb-2"><strong>Địa điểm:</strong> @Model.Job.Location</li>
-                        <li class="mb-2"><strong>Thời gian làm việc:</strong> @(string.IsNullOrWhiteSpace(Model.Job.WorkingHours) ? "—" : Model.Job.WorkingHours)</li>
-                        <li class="mb-2"><strong>Hết hạn tin:</strong> @Model.Job.ExpiryDate.ToLocalTime().ToString("dd/MM/yyyy")</li>
-                    </ul>
+                                }
+                            </dd>
+                            <dt>Thời gian làm việc</dt>
+                            <dd>@(string.IsNullOrWhiteSpace(Model.Job.WorkingHours) ? "—" : Model.Job.WorkingHours)</dd>
+                            <dt>Hết hạn tin</dt>
+                            <dd>@Model.Job.ExpiryDate.ToLocalTime().ToString("dd/MM/yyyy")</dd>
+                        </dl>
+                    </div>
                 </div>
+
+                @if (Model.SameCompanyJobs.Count > 0)
+                {
+                    <div class="card shadow-sm border-0 mb-3">
+                        <div class="card-body p-4">
+                            <partial name="Shared/_JobRelatedSection"
+                                     model='("Việc làm cùng công ty", true, Model.SameCompanyJobs, true)' />
+                        </div>
+                    </div>
+                }
+
+                @if (Model.SimilarJobs.Count > 0)
+                {
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body p-4">
+                            <partial name="Shared/_JobRelatedSection"
+                                     model='("Việc làm tương tự", true, Model.SimilarJobs, true)' />
+                        </div>
+                    </div>
+                }
             </div>
         </div>
     </div>
@@ -363,12 +400,6 @@
     </script>
 }
 
-<style>
-    .job-description {
-        line-height: 1.7;
-        color: #444;
-    }
-    .breadcrumb-item a {
-        text-decoration: none;
-    }
-</style>
+@section Styles {
+    <link rel="stylesheet" href="~/css/job-detail.css" asp-append-version="true" />
+}

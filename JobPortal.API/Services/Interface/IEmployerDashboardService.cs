@@ -6,6 +6,11 @@ namespace JobPortal.API.Services.Interface;
 public interface IEmployerDashboardService
 {
     Task<EmployerDashboardDto> GetDashboardForUserAsync(long userId, CancellationToken cancellationToken = default);
+    Task<EmployerApplicantChartDto> GetApplicantChartForUserAsync(
+        long userId,
+        int days = 7,
+        CancellationToken cancellationToken = default);
+    Task<EmployerPortalNavDto> GetPortalNavForUserAsync(long userId, CancellationToken cancellationToken = default);
 
     Task<IReadOnlyList<EmployerDashboardApplicationDto>> GetApplicationsForUserAsync(
         long userId,

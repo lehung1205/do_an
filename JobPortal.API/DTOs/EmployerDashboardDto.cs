@@ -9,6 +9,7 @@ public class EmployerDashboardDto
     public IReadOnlyList<EmployerDashboardJobDto> RecentJobs { get; set; } = Array.Empty<EmployerDashboardJobDto>();
     public IReadOnlyList<EmployerDashboardApplicationDto> RecentApplications { get; set; } = Array.Empty<EmployerDashboardApplicationDto>();
     public IReadOnlyList<EmployerDashboardNotificationDto> Notifications { get; set; } = Array.Empty<EmployerDashboardNotificationDto>();
+    public EmployerApplicantChartDto ApplicantChart { get; set; } = new();
 }
 
 public class EmployerDashboardStatsDto
@@ -17,6 +18,8 @@ public class EmployerDashboardStatsDto
     public int NewCvCount { get; set; }
     public int TotalCvCount { get; set; }
     public int ExpiringSoonCount { get; set; }
+    public int UnreadApplications { get; set; }
+    public int TotalJobs { get; set; }
 }
 
 public class EmployerDashboardJobDto

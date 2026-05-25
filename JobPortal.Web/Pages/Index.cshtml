@@ -1,6 +1,12 @@
 @page
 @model JobPortal.Web.Pages.IndexModel
+@using JobPortal.Web.Models
 @{
+    if (Model.IsEmployerHome)
+    {
+        Layout = "/Pages/Employer/_EmployerPortalLayout.cshtml";
+        ViewData["EmployerNavActive"] = EmployerPortalNavKeys.Dashboard;
+    }
     ViewData["Title"] = Model.IsEmployerHome ? "Thống kê" : "Trang chủ";
     var isLoggedIn = !string.IsNullOrEmpty(HttpContext.Session.GetString("JwtToken"));
     var isJobSeeker = string.Equals(HttpContext.Session.GetString("UserRole"), "JOB_SEEKER", StringComparison.Ordinal);
@@ -9,7 +15,7 @@
 
 @if (Model.IsEmployerHome)
 {
-    <partial name="Shared/_EmployerHome" model="Model" />
+    <partial name="Shared/_EmployerDashboardMain" model="Model" />
 }
 else
 {
@@ -290,4 +296,12 @@ else
     </div>
 </section>
 
+}
+
+@section EmployerScripts {
+    @if (Model.IsEmployerHome)
+    {
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+        <script src="~/js/employer-dashboard.js" asp-append-version="true"></script>
+    }
 }

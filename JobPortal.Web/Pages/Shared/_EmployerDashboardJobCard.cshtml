@@ -1,0 +1,53 @@
+@model JobPortal.Web.Models.JobGridCardModel
+@{
+    var isRecruiting = string.Equals(Model.PostingStatus, "recruiting", StringComparison.OrdinalIgnoreCase);
+    var statusBadgeClass = isRecruiting ? "employer-badge--open"
+        : string.Equals(Model.PostingStatus, "pending", StringComparison.OrdinalIgnoreCase) ? "employer-badge--pending"
+        : string.Equals(Model.PostingStatus, "rejected", StringComparison.OrdinalIgnoreCase) ? "employer-badge--rejected"
+        : string.Equals(Model.PostingStatus, "closed", StringComparison.OrdinalIgnoreCase) ? "employer-badge--closed"
+        : "employer-badge--draft";
+}
+
+<article class="employer-dash-job">
+    <a asp-page="/Jobs/Detail" asp-route-id="@Model.Id" class="employer-dash-job__thumb" tabindex="-1" aria-hidden="true">
+        @if (!string.IsNullOrWhiteSpace(Model.ThumbnailUrl))
+        {
+            <img src="@Model.ThumbnailUrl" alt="" class="employer-dash-job__img" loading="lazy" />
+        }
+        else
+        {
+            <span class="employer-dash-job__placeholder"><i class="bi bi-briefcase"></i></span>
+        }
+    </a>
+    <div class="employer-dash-job__body">
+        <div class="employer-dash-job__head">
+            <h3 class="employer-dash-job__title">
+                <a asp-page="/Jobs/Detail" asp-route-id="@Model.Id">@Model.Title</a>
+            </h3>
+            <span class="badge @statusBadgeClass employer-dash-job__status flex-shrink-0">
+                @JobPortal.Web.Pages.IndexModel.FormatJobStatus(Model.PostingStatus)
+            </span>
+        </div>
+        <ul class="employer-dash-job__meta list-unstyled mb-0">
+            <li><i class="bi bi-geo-alt"></i> @Model.Location</li>
+            <li><i class="bi bi-cash-stack"></i> @JobPortal.Web.Pages.IndexModel.FormatSalary(Model.Salary)</li>
+            @if (Model.ApplicantCount is int count)
+            {
+                <li><i class="bi bi-people"></i> @count ứng viên</li>
+            }
+        </ul>
+        <div class="employer-dash-job__foot">
+            <span class="employer-dash-job__expiry">
+                <i class="bi bi-clock"></i> Hết hạn @Model.ExpiryDate.ToLocalTime().ToString("dd/MM/yyyy")
+            </span>
+            @if (isRecruiting)
+            {
+                <a asp-page="/Employer/Applicants" class="btn btn-sm btn-outline-primary employer-dash-job__btn">Xem CV</a>
+            }
+            else
+            {
+                <a asp-page="/Jobs/Detail" asp-route-id="@Model.Id" class="btn btn-sm btn-link employer-dash-job__btn p-0">Chi tiết</a>
+            }
+        </div>
+    </div>
+</article>

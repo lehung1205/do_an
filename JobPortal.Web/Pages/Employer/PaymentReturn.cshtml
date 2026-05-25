@@ -1,12 +1,17 @@
 @page
 @model JobPortal.Web.Pages.Employer.PaymentReturnModel
+@using JobPortal.Web.Models
 @{
     ViewData["Title"] = Model.IsSuccess ? "Thanh toán thành công" : "Thanh toán thất bại";
+    ViewData["EmployerNavActive"] = EmployerPortalNavKeys.Packages;
 }
 
-<div class="container py-5">
-    <div class="mx-auto" style="max-width: 720px;">
-        <div class="border rounded-3 p-4 p-md-5 bg-white shadow-sm">
+<partial name="Shared/_EmployerPageHeader" model='new EmployerPageHeaderModel {
+    Title = Model.IsSuccess ? "Thanh toán thành công" : "Thanh toán chưa thành công",
+    BreadcrumbLabel = "Kết quả thanh toán"
+}' />
+
+<div class="employer-dash__section employer-dash__section--narrow">
             @if (Model.IsSuccess)
             {
                 <div class="text-success display-6 mb-3"><i class="bi bi-check-circle me-2"></i>Thanh toán thành công</div>
@@ -32,11 +37,9 @@
                 </dl>
             }
 
-            <div class="d-flex flex-wrap gap-2">
-                <a asp-page="/Employer/BuyPackages" class="btn btn-outline-primary">Quay lại gói dịch vụ</a>
-                <a asp-page="/Index" class="btn btn-primary">Về thống kê</a>
-            </div>
-        </div>
+    <div class="d-flex flex-wrap gap-2">
+        <a asp-page="/Employer/BuyPackages" class="btn btn-outline-primary">Quay lại gói dịch vụ</a>
+        <a asp-page="/Index" class="btn btn-primary">Về bảng thông tin</a>
     </div>
 </div>
 

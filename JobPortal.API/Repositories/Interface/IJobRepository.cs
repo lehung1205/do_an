@@ -10,6 +10,7 @@ public interface IJobRepository
         bool recruitingOnly = false,
         string? search = null,
         string? location = null,
+        long? categoryId = null,
         CancellationToken cancellationToken = default);
     Task<int> CloseExpiredRecruitingJobsAsync(CancellationToken cancellationToken = default);
     Task<int> AutoApproveStalePendingJobsAsync(TimeSpan pendingMaxAge, CancellationToken cancellationToken = default);

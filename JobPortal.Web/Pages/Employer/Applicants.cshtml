@@ -1,23 +1,21 @@
 @page
 @model JobPortal.Web.Pages.Employer.ApplicantsModel
 @using static JobPortal.Web.Pages.Employer.ApplicantsModel
+@using JobPortal.Web.Models
 @{
     ViewData["Title"] = "Ứng viên";
+    ViewData["EmployerNavActive"] = EmployerPortalNavKeys.Applicants;
 }
 
-<div class="container py-4 applicant-review-page">
-    <header class="applicant-review-header mb-4">
-        <h2 class="h4 mb-1 fw-semibold">
-            <i class="bi bi-people me-2"></i>Duyệt CV ứng viên
-        </h2>
-        <p class="text-muted mb-0">Xem hồ sơ, đánh giá và cập nhật trạng thái tuyển dụng</p>
-        @if (Model.UnreadCount > 0)
-        {
-            <p class="small mb-0 mt-2">
-                <span class="badge bg-warning text-dark">@Model.UnreadCount CV chưa xem</span>
-            </p>
-        }
-    </header>
+<partial name="Shared/_EmployerPageHeader" model='new EmployerPageHeaderModel {
+    Title = "Duyệt CV ứng viên",
+    Subtitle = Model.UnreadCount > 0
+        ? $"{Model.UnreadCount} CV chưa xem — xem hồ sơ, đánh giá và cập nhật trạng thái tuyển dụng"
+        : "Xem hồ sơ, đánh giá và cập nhật trạng thái tuyển dụng",
+    BreadcrumbLabel = "Ứng viên ứng tuyển"
+}' />
+
+<div class="applicant-review-page employer-dash__panel-stack">
 
     @if (!string.IsNullOrEmpty(Model.SuccessMessage))
     {
@@ -307,6 +305,6 @@
     </div>
 </div>
 
-@section Scripts {
+@section EmployerScripts {
     <script src="~/js/applicant-profile-modal.js" asp-append-version="true"></script>
 }

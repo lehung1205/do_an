@@ -48,6 +48,7 @@
                 var isAdminDashboard = string.Equals(currentPage, "/Admin/Dashboard/Index", StringComparison.OrdinalIgnoreCase);
                 var isAdminJobs = string.Equals(currentPage, "/Admin/Jobs/Index", StringComparison.OrdinalIgnoreCase);
                 var isAdminUsers = string.Equals(currentPage, "/Admin/Users/Index", StringComparison.OrdinalIgnoreCase);
+                var isAdminPayments = string.Equals(currentPage, "/Admin/Payments/Index", StringComparison.OrdinalIgnoreCase);
                 var isEmployerStats = isEmployer && (
                     string.Equals(currentPage, "/Index", StringComparison.OrdinalIgnoreCase)
                     || string.IsNullOrEmpty(currentPage));
@@ -72,6 +73,9 @@
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link @(isAdminUsers ? "active fw-semibold" : "")" asp-page="/Admin/Users/Index">Quản lý tài khoản</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @(isAdminPayments ? "active fw-semibold" : "")" asp-page="/Admin/Payments/Index">Doanh thu</a>
                             </li>
                         }
                         else if (isLoggedIn && isEmployer)

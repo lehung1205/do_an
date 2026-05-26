@@ -76,6 +76,47 @@ body.admin-portal-mode main {
   padding: 1.25rem;
 }
 
+.admin-payments__kpi {
+  background: var(--jp-card-bg, #fff);
+  border: 1px solid var(--jp-border, #dce1e8);
+  border-radius: 12px;
+  box-shadow: var(--jp-card-shadow);
+}
+
+.admin-payments__kpi-label {
+  font-size: 0.8125rem;
+  color: var(--jp-muted, #5c6370);
+  margin-bottom: 0.35rem;
+}
+
+.admin-payments__kpi-value {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #313131;
+  letter-spacing: -0.02em;
+}
+
+.admin-payments__kpi-meta {
+  font-size: 0.75rem;
+  margin-top: 0.35rem;
+}
+
+.admin-payments__chart-wrap {
+  position: relative;
+  min-height: 220px;
+  max-height: 320px;
+}
+
+.admin-payments__table th {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.admin-payments__table td {
+  font-size: 0.875rem;
+}
+
 .admin-portal__toolbar {
   font-size: 0.875rem;
   color: var(--jp-muted, #5c6370);

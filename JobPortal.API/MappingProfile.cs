@@ -1,5 +1,6 @@
 using AutoMapper;
 using JobPortal.API.DTOs;
+using JobPortal.API.Helpers;
 using JobPortal.API.Models;
 
 namespace JobPortal.API;
@@ -22,6 +23,22 @@ public class MappingProfile : Profile
             .ForMember(d => d.PostingStatus, o => o.MapFrom(s => s.PostingStatus))
             .ForMember(d => d.WorkingHours, o => o.MapFrom(s => s.WorkingHours))
             .ForMember(d => d.ExpiryDate, o => o.MapFrom(s => s.ExpiryDate))
+            .ForMember(
+                d => d.ThumbnailUrl,
+                o => o.MapFrom(s => s.Images.OrderBy(i => i.Id).Select(i => i.Url).FirstOrDefault()));
+
+        CreateMap<Job, JobListItemDto>()
+            .ForMember(d => d.EmployerName, o => o.MapFrom(s => s.Employer.Name))
+            .ForMember(d => d.CategoryName, o => o.MapFrom(s => s.Category.Name))
+            .ForMember(d => d.DescriptionPreview, o => o.MapFrom(s => JobDescriptionPreview.Create(s.Description)))
+            .ForMember(
+                d => d.ThumbnailUrl,
+                o => o.MapFrom(s => s.Images.OrderBy(i => i.Id).Select(i => i.Url).FirstOrDefault()))
+            .ForMember(d => d.EmployerAverageRating, o => o.Ignore())
+            .ForMember(d => d.EmployerReviewCount, o => o.Ignore());
+
+        CreateMap<Job, JobSummaryDto>()
+            .ForMember(d => d.EmployerName, o => o.MapFrom(s => s.Employer.Name))
             .ForMember(
                 d => d.ThumbnailUrl,
                 o => o.MapFrom(s => s.Images.OrderBy(i => i.Id).Select(i => i.Url).FirstOrDefault()));

@@ -20,11 +20,11 @@ public class DetailModel : PageModel
 
     public IReadOnlyList<ImageDto> JobImages { get; set; } = Array.Empty<ImageDto>();
 
-    public IReadOnlyList<JobDto> SuggestedJobs { get; set; } = Array.Empty<JobDto>();
+    public IReadOnlyList<JobSummaryDto> SuggestedJobs { get; set; } = Array.Empty<JobSummaryDto>();
 
-    public IReadOnlyList<JobDto> SameCompanyJobs { get; set; } = Array.Empty<JobDto>();
+    public IReadOnlyList<JobSummaryDto> SameCompanyJobs { get; set; } = Array.Empty<JobSummaryDto>();
 
-    public IReadOnlyList<JobDto> SimilarJobs { get; set; } = Array.Empty<JobDto>();
+    public IReadOnlyList<JobSummaryDto> SimilarJobs { get; set; } = Array.Empty<JobSummaryDto>();
 
     /// <summary>Hiện nút ứng tuyển cho ứng viên (và khách); ẩn với employer/admin.</summary>
     public bool ShowApplyButton { get; set; }

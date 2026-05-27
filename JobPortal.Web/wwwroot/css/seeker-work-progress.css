@@ -1,0 +1,127 @@
+.seeker-work-progress-page {
+  max-width: 1080px;
+}
+
+.seeker-work-progress-hero {
+  background: linear-gradient(135deg, #eef2ff 0%, #f8fafc 55%, #fff 100%);
+  border: 1px solid #dce1e8;
+  border-radius: 14px;
+  padding: 1rem 1.15rem;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+}
+
+.seeker-work-progress-hero__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--jp-primary, #0000ee);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: rgba(0, 0, 238, 0.08);
+  border-radius: 999px;
+  padding: 0.22rem 0.6rem;
+  margin-bottom: 0.5rem;
+}
+
+.seeker-work-progress-hero h2 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #1e293b;
+}
+
+.seeker-work-progress-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.7rem;
+}
+
+@media (max-width: 767px) {
+  .seeker-work-progress-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.seeker-work-progress-stat {
+  background: #fff;
+  border: 1px solid #dce1e8;
+  border-radius: 12px;
+  padding: 0.7rem 0.85rem;
+}
+
+.seeker-work-progress-stat__label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+}
+
+.seeker-work-progress-stat__value {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #1e293b;
+}
+
+.seeker-work-progress-filter .form-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.seeker-work-progress-card {
+  border-radius: 14px;
+}
+
+.seeker-work-progress-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.seeker-work-progress-card__locked {
+  color: #b45309;
+  font-weight: 600;
+}
+
+.seeker-work-progress-empty {
+  border-radius: 14px;
+}
+
+.seeker-work-progress-breadcrumb .breadcrumb {
+  margin-bottom: 0;
+}
+
+.seeker-work-progress-detail-hero {
+  border-radius: 14px;
+}
+
+.seeker-work-progress-lock-alert {
+  border-radius: 12px;
+}
+
+.seeker-work-progress-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.8rem;
+}
+
+.seeker-work-progress-section-head h3 {
+  color: #1e293b;
+  font-weight: 800;
+}
+
+.seeker-work-progress-timeline .seeker-work-progress-step {
+  border-radius: 12px;
+}
+
+.seeker-work-progress-detail-actions {
+  padding-top: 0.35rem;
+}

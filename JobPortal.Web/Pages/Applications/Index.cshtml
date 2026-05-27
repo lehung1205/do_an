@@ -4,8 +4,16 @@
     ViewData["Title"] = "Đơn ứng tuyển của tôi";
 }
 
-<div class="container mt-5 mb-5">
-    <h1 class="h3 mb-4">Đơn ứng tuyển của tôi</h1>
+<div class="container mt-4 mb-5 seeker-applications-page">
+    <section class="seeker-applications-hero">
+        <div class="seeker-applications-hero__eyebrow">
+            <i class="bi bi-inboxes me-1"></i> Hồ sơ ứng tuyển
+        </div>
+        <h1 class="seeker-applications-hero__title">Đơn ứng tuyển của tôi</h1>
+        <p class="seeker-applications-hero__subtitle">
+            Theo dõi trạng thái từng đơn, nhắn tin với nhà tuyển dụng và xem tiến độ công việc khi được chấp nhận.
+        </p>
+    </section>
 
     @if (!string.IsNullOrEmpty(Model.ErrorMessage))
     {
@@ -13,59 +21,170 @@
     }
     else if (Model.Applications.Count == 0)
     {
-        <div class="alert alert-light border text-center py-5">
+        <div class="seeker-applications-empty text-center py-5">
+            <i class="bi bi-briefcase display-6 d-block mb-2"></i>
             <p class="mb-3 text-muted">Bạn chưa ứng tuyển việc làm nào.</p>
-            <a asp-page="/Jobs/Index" class="btn btn-primary">Xem việc làm</a>
+            <a asp-page="/Jobs/Index" class="btn app-action-btn app-action-btn--primary px-3">
+                <i class="bi bi-briefcase me-1"></i>Xem việc làm
+            </a>
         </div>
     }
     else
     {
-        <div class="table-responsive">
-            <table class="table align-middle">
-                <thead>
-                    <tr>
-                        <th>Việc làm</th>
-                        <th>Địa điểm</th>
-                        <th>Lương (VNĐ)</th>
-                        <th>Hồ sơ</th>
-                        <th>Ngày nộp</th>
-                        <th>Trạng thái</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var app in Model.Applications)
-                    {
-                        <tr>
-                            <td class="fw-semibold">@app.JobTitle</td>
-                            <td>@app.JobLocation</td>
-                            <td>@app.JobSalary</td>
-                            <td>
-                                @if (!string.IsNullOrWhiteSpace(app.ResumeUrl))
-                                {
-                                    <a href="@app.ResumeUrl" target="_blank" rel="noopener noreferrer">@app.ResumeTitle</a>
-                                }
-                                else
-                                {
-                                    @app.ResumeTitle
-                                }
-                            </td>
-                            <td>@app.AppliedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
-                            <td><span class="badge @IndexModel.StatusBadgeClass(app.Status)">@IndexModel.FormatStatus(app.Status)</span></td>
-                            <td class="text-nowrap">
-                                <a asp-page="/Messages/Index" asp-route-applicationId="@app.Id"
-                                   class="btn btn-sm btn-outline-secondary">Nhắn tin</a>
-                                <a asp-page="/Jobs/Detail" asp-route-id="@app.JobId" class="btn btn-sm btn-outline-primary ms-1">Xem tin</a>
-                                @if (string.Equals(app.Status, "accepted", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    <a asp-page="/Applications/WorkProgress/Detail" asp-route-applicationId="@app.Id"
-                                       class="btn btn-sm btn-primary ms-1">Tiến độ</a>
-                                }
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
+        <section class="seeker-applications-stats mb-4">
+            <div class="seeker-applications-stat">
+                <span class="seeker-applications-stat__label">Đang chờ</span>
+                <span class="seeker-applications-stat__value">@Model.SubmittedCount</span>
+            </div>
+            <div class="seeker-applications-stat">
+                <span class="seeker-applications-stat__label">Đã xem</span>
+                <span class="seeker-applications-stat__value">@Model.ReviewedCount</span>
+            </div>
+            <div class="seeker-applications-stat">
+                <span class="seeker-applications-stat__label">Chấp nhận</span>
+                <span class="seeker-applications-stat__value">@Model.AcceptedCount</span>
+            </div>
+            <div class="seeker-applications-stat">
+                <span class="seeker-applications-stat__label">Từ chối</span>
+                <span class="seeker-applications-stat__value">@Model.RejectedCount</span>
+            </div>
+        </section>
+
+        <form method="get" class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label" for="status">Trạng thái</label>
+                        <select class="form-select" id="status" name="status">
+                            @if (Model.StatusFilter == "all")
+                            {
+                                <option value="all" selected>Tất cả</option>
+                            }
+                            else
+                            {
+                                <option value="all">Tất cả</option>
+                            }
+                            @if (Model.StatusFilter == "submitted")
+                            {
+                                <option value="submitted" selected>Đang chờ</option>
+                            }
+                            else
+                            {
+                                <option value="submitted">Đang chờ</option>
+                            }
+                            @if (Model.StatusFilter == "reviewed")
+                            {
+                                <option value="reviewed" selected>Đã xem</option>
+                            }
+                            else
+                            {
+                                <option value="reviewed">Đã xem</option>
+                            }
+                            @if (Model.StatusFilter == "accepted")
+                            {
+                                <option value="accepted" selected>Được chấp nhận</option>
+                            }
+                            else
+                            {
+                                <option value="accepted">Được chấp nhận</option>
+                            }
+                            @if (Model.StatusFilter == "rejected")
+                            {
+                                <option value="rejected" selected>Bị từ chối</option>
+                            }
+                            else
+                            {
+                                <option value="rejected">Bị từ chối</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-7">
+                        <label class="form-label" for="q">Tìm kiếm</label>
+                        <input id="q" name="q" type="search" class="form-control" value="@Model.Search"
+                               placeholder="Tên công việc, địa điểm, mức lương, CV..." />
+                    </div>
+                    <div class="col-md-2 d-flex gap-2">
+                        <button type="submit" class="btn app-action-btn app-action-btn--primary flex-grow-1">
+                            <i class="bi bi-search me-1"></i>Lọc
+                        </button>
+                        <a asp-page="/Applications/Index" class="btn app-action-btn app-action-btn--muted" title="Xóa bộ lọc">
+                            <i class="bi bi-x-lg"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        @if (Model.FilteredApplications.Count == 0)
+        {
+            <div class="seeker-applications-empty text-center py-5">
+                <i class="bi bi-funnel display-6 d-block mb-2"></i>
+                <p class="mb-2 text-muted">Không có đơn phù hợp bộ lọc.</p>
+                <a asp-page="/Applications/Index" class="btn btn-sm app-action-btn app-action-btn--info">Xóa bộ lọc</a>
+            </div>
+        }
+        else
+        {
+            <div class="d-flex flex-column gap-3">
+                @foreach (var app in Model.FilteredApplications)
+                {
+                    <article class="seeker-application-card">
+                        <div class="seeker-application-card__main">
+                            <div class="seeker-application-card__content">
+                                <div class="seeker-application-card__head">
+                                    <div>
+                                        <h3 class="seeker-application-card__title">@app.JobTitle</h3>
+                                        <p class="seeker-application-card__meta mb-0">
+                                            <i class="bi bi-geo-alt me-1"></i>@app.JobLocation
+                                            <span class="mx-1">·</span>
+                                            <i class="bi bi-cash-stack me-1"></i>@app.JobSalary
+                                        </p>
+                                    </div>
+                                    <span class="badge @IndexModel.StatusBadgeClass(app.Status) seeker-application-card__badge">
+                                        @IndexModel.FormatStatus(app.Status)
+                                    </span>
+                                </div>
+
+                                <div class="seeker-application-card__details">
+                                    <div>
+                                        <span class="seeker-application-card__label">Hồ sơ đã nộp</span>
+                                        @if (!string.IsNullOrWhiteSpace(app.ResumeUrl))
+                                        {
+                                            <a href="@app.ResumeUrl" target="_blank" rel="noopener noreferrer" class="seeker-application-card__link">@app.ResumeTitle</a>
+                                        }
+                                        else
+                                        {
+                                            <span class="seeker-application-card__text">@app.ResumeTitle</span>
+                                        }
+                                    </div>
+                                    <div>
+                                        <span class="seeker-application-card__label">Ngày nộp</span>
+                                        <span class="seeker-application-card__text">@app.AppliedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="seeker-application-card__actions-wrap">
+                                <div class="app-action-group">
+                                    <a asp-page="/Messages/Index" asp-route-applicationId="@app.Id"
+                                       class="btn btn-sm app-action-btn app-action-btn--muted">Nhắn tin</a>
+                                    <a asp-page="/Jobs/Detail" asp-route-id="@app.JobId"
+                                       class="btn btn-sm app-action-btn app-action-btn--info">Xem tin</a>
+                                    @if (string.Equals(app.Status, "accepted", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        <a asp-page="/Applications/WorkProgress/Detail" asp-route-applicationId="@app.Id"
+                                           class="btn btn-sm app-action-btn app-action-btn--primary">Tiến độ</a>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                }
+            </div>
+        }
     }
 </div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/seeker-applications.css" asp-append-version="true" />
+}

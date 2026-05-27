@@ -47,6 +47,11 @@ public class ApiService
         return await res.Content.ReadFromJsonAsync<T>(JsonOptions);
     }
 
+    public async Task<HttpResponseMessage> GetRawAsync(string endpoint)
+    {
+        return await CreateClient().GetAsync(endpoint);
+    }
+
     public async Task<ApiResponse<T>?> GetApiResponseAsync<T>(string endpoint)
     {
         var res = await CreateClient().GetAsync(endpoint);

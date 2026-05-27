@@ -25,14 +25,14 @@ public class JobGridCardModel
     public int ListPageNumber { get; init; } = 1;
     public int ListPageSize { get; init; } = 9;
 
-    public static JobGridCardModel FromJobDto(JobDto job) => new()
+    public static JobGridCardModel FromJobListItem(JobListItemDto job) => new()
     {
         Id = job.Id,
         Title = job.Title,
-        Description = job.Description,
+        Description = job.DescriptionPreview,
         Location = job.Location,
         Salary = job.Salary,
-        PostingStatus = job.PostingStatus,
+        PostingStatus = "recruiting",
         EmployerName = job.EmployerName,
         EmployerAverageRating = job.EmployerAverageRating,
         EmployerReviewCount = job.EmployerReviewCount,

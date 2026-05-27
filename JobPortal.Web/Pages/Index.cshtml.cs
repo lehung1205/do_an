@@ -12,7 +12,7 @@ public class IndexModel : PageModel
 {
     private readonly ApiService _api;
 
-    public List<JobDto> FeaturedJobs { get; set; } = new();
+    public List<JobListItemDto> FeaturedJobs { get; set; } = new();
     public List<CategoryDto> Categories { get; set; } = new();
     public List<HomeCategoryPanel> CategoryPanels { get; set; } = new();
     public int TotalJobCount { get; set; }
@@ -76,12 +76,12 @@ public class IndexModel : PageModel
             featuredQuery.Add($"location={Uri.EscapeDataString(Location)}");
         }
 
-        var featuredTask = _api.GetApiDataAsync<PagedResult<JobDto>>(
+        var featuredTask = _api.GetApiDataAsync<PagedResult<JobListItemDto>>(
             $"/api/jobs?{string.Join("&", featuredQuery)}");
-        var totalJobsTask = _api.GetApiDataAsync<PagedResult<JobDto>>("/api/jobs?page=1&pageSize=1");
+        var totalJobsTask = _api.GetApiDataAsync<PagedResult<JobListItemDto>>("/api/jobs?page=1&pageSize=1");
         var statsTask = _api.GetApiDataAsync<HomeStatsDto>("/api/stats");
         var categoriesTask = _api.GetApiDataAsync<List<CategoryDto>>("/api/categories");
-        var jobsForCategoriesTask = _api.GetApiDataAsync<PagedResult<JobDto>>("/api/jobs?page=1&pageSize=120");
+        var jobsForCategoriesTask = _api.GetApiDataAsync<PagedResult<JobListItemDto>>("/api/jobs?page=1&pageSize=120");
         await Task.WhenAll(featuredTask, totalJobsTask, statsTask, categoriesTask, jobsForCategoriesTask);
 
         var featured = await featuredTask;
@@ -95,13 +95,13 @@ public class IndexModel : PageModel
         var jobsForCategories = await jobsForCategoriesTask;
         CategoryPanels = BuildCategoryPanels(
             Categories,
-            jobsForCategories?.Items ?? new List<JobDto>());
+            jobsForCategories?.Items ?? new List<JobListItemDto>());
         return Page();
     }
 
     private static List<HomeCategoryPanel> BuildCategoryPanels(
         IReadOnlyList<CategoryDto> categories,
-        IReadOnlyList<JobDto> jobs)
+        IReadOnlyList<JobListItemDto> jobs)
     {
         var titlesByCategory = jobs
             .GroupBy(j => j.CategoryId)

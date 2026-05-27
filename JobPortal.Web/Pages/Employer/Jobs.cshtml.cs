@@ -15,6 +15,7 @@ public class JobsModel : PageModel
     public JobsModel(ApiService api) => _api = api;
 
     public List<EmployerDashboardJobDto> Jobs { get; set; } = new();
+    public EmployerDashboardStatsDto? Stats { get; set; }
     public string? ErrorMessage { get; set; }
     public string? ActionErrorMessage { get; set; }
     public string? SuccessMessage { get; set; }
@@ -54,6 +55,8 @@ public class JobsModel : PageModel
         SuccessMessage = TempData["JobManageSuccessMessage"] as string;
         ActionErrorMessage = TempData["JobManageErrorMessage"] as string;
 
+        var dashboardTask = _api.GetApiDataAsync<EmployerDashboardDto>("/api/employers/me/dashboard");
+
         var query = new List<string>
         {
             $"pageNumber={pageNumber}",
@@ -70,8 +73,12 @@ public class JobsModel : PageModel
             query.Add($"q={Uri.EscapeDataString(Search)}");
         }
 
-        var paged = await _api.GetApiDataAsync<PagedResult<EmployerDashboardJobDto>>(
+        var jobsTask = _api.GetApiDataAsync<PagedResult<EmployerDashboardJobDto>>(
             $"/api/employers/me/jobs?{string.Join("&", query)}");
+        await Task.WhenAll(dashboardTask, jobsTask);
+
+        Stats = (await dashboardTask)?.Stats;
+        var paged = await jobsTask;
 
         if (paged == null)
         {

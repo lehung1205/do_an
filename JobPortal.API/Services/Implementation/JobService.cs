@@ -35,7 +35,7 @@ public class JobService : IJobService
         _mapper = mapper;
     }
 
-    public async Task<PagedResult<JobDto>> GetJobsPagedAsync(
+    public async Task<PagedResult<JobListItemDto>> GetJobsPagedAsync(
         int page,
         int pageSize,
         string? search = null,
@@ -55,10 +55,10 @@ public class JobService : IJobService
             location,
             categoryId,
             cancellationToken);
-        var dtos = _mapper.Map<List<JobDto>>(items);
-        await ApplyEmployerRatingsAsync(dtos, cancellationToken);
+        var dtos = _mapper.Map<List<JobListItemDto>>(items);
+        await ApplyEmployerRatingsToListItemsAsync(dtos, items, cancellationToken);
 
-        return new PagedResult<JobDto>
+        return new PagedResult<JobListItemDto>
         {
             Items = dtos,
             Page = page,
@@ -172,20 +172,33 @@ public class JobService : IJobService
             suggestedEntities.AddRange(filler);
         }
 
-        var sameCompany = _mapper.Map<List<JobDto>>(sameCompanyEntities);
-        var similar = _mapper.Map<List<JobDto>>(similarEntities);
-        var suggested = _mapper.Map<List<JobDto>>(suggestedEntities);
-
-        await ApplyEmployerRatingsAsync(sameCompany, cancellationToken);
-        await ApplyEmployerRatingsAsync(similar, cancellationToken);
-        await ApplyEmployerRatingsAsync(suggested, cancellationToken);
-
         return new JobRelatedListsDto
         {
-            SameCompanyJobs = sameCompany,
-            SimilarJobs = similar,
-            SuggestedJobs = suggested
+            SameCompanyJobs = _mapper.Map<List<JobSummaryDto>>(sameCompanyEntities),
+            SimilarJobs = _mapper.Map<List<JobSummaryDto>>(similarEntities),
+            SuggestedJobs = _mapper.Map<List<JobSummaryDto>>(suggestedEntities)
         };
+    }
+
+    private async Task ApplyEmployerRatingsToListItemsAsync(
+        IList<JobListItemDto> items,
+        IReadOnlyList<Job> entities,
+        CancellationToken cancellationToken)
+    {
+        if (items.Count == 0 || entities.Count == 0)
+        {
+            return;
+        }
+
+        var ratings = await LoadEmployerRatingsAsync(entities.Select(e => e.EmployerId), cancellationToken);
+        for (var i = 0; i < items.Count && i < entities.Count; i++)
+        {
+            if (ratings.TryGetValue(entities[i].EmployerId, out var rating))
+            {
+                items[i].EmployerAverageRating = rating.Average;
+                items[i].EmployerReviewCount = rating.Count;
+            }
+        }
     }
 
     private static string? GetPrimaryLocationToken(string? location)

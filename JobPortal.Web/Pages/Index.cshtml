@@ -157,7 +157,7 @@ else
                 @foreach (var job in Model.FeaturedJobs)
                 {
                     <div class="col d-flex">
-                        <partial name="Shared/_JobGridCard" model="JobPortal.Web.Models.JobGridCardModel.FromJobDto(job)" />
+                        <partial name="Shared/_JobGridCard" model="JobPortal.Web.Models.JobGridCardModel.FromJobListItem(job)" />
                     </div>
                 }
             </div>

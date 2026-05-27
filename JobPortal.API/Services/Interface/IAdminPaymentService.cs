@@ -14,4 +14,11 @@ public interface IAdminPaymentService
         DateTime? from = null,
         DateTime? to = null,
         CancellationToken cancellationToken = default);
+    Task<(byte[] Content, string ContentType, string FileName)> GenerateInvoiceFileAsync(
+        long paymentId,
+        CancellationToken cancellationToken = default);
+    Task<(byte[] Content, string ContentType, string FileName)> ExportRevenueExcelAsync(
+        DateTime? from = null,
+        DateTime? to = null,
+        CancellationToken cancellationToken = default);
 }

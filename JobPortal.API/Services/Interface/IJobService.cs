@@ -5,7 +5,7 @@ namespace JobPortal.API.Services.Interface;
 
 public interface IJobService
 {
-    Task<PagedResult<JobDto>> GetJobsPagedAsync(
+    Task<PagedResult<JobListItemDto>> GetJobsPagedAsync(
         int page,
         int pageSize,
         string? search = null,

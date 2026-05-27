@@ -1,4 +1,4 @@
-@model (string Title, bool ShowLink, IReadOnlyList<JobPortal.Web.Dtos.JobDto> Jobs, bool CompactTitle)
+@model (string Title, bool ShowLink, IReadOnlyList<JobPortal.Web.Dtos.JobSummaryDto> Jobs, bool CompactTitle)
 
 @if (Model.Jobs.Count > 0)
 {
@@ -16,7 +16,7 @@
             @foreach (var job in Model.Jobs)
             {
                 <partial name="Shared/_JobRelatedListItem"
-                         model="JobPortal.Web.Models.JobRelatedListItemModel.FromJobDto(job, Model.CompactTitle)" />
+                         model="JobPortal.Web.Models.JobRelatedListItemModel.FromJobSummary(job, Model.CompactTitle)" />
             }
         </div>
     </section>

@@ -1,3 +1,4 @@
+using System.Globalization;
 using JobPortal.Web.Dtos;
 using JobPortal.Web.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -12,6 +13,10 @@ public class BuyPackagesModel : PageModel
     public BuyPackagesModel(ApiService api) => _api = api;
 
     public List<PostingPackageDto> Packages { get; set; } = new();
+
+    public int CurrentPostingLimit { get; set; }
+
+    public string? CompanyName { get; set; }
 
     public string? ErrorMessage { get; set; }
 
@@ -31,8 +36,7 @@ public class BuyPackagesModel : PageModel
         if (packageId <= 0)
         {
             ErrorMessage = "Gói đăng tin không hợp lệ. Vui lòng chọn lại.";
-            Packages = await _api.GetApiDataAsync<List<PostingPackageDto>>("/api/postingpackages") ?? new();
-            return Page();
+            return await LoadPageAsync();
         }
 
         try
@@ -54,16 +58,7 @@ public class BuyPackagesModel : PageModel
             ErrorMessage = "Không kết nối được API tại http://localhost:5068. Vui lòng chạy lại JobPortal.API rồi thử lại.";
         }
 
-        try
-        {
-            Packages = await _api.GetApiDataAsync<List<PostingPackageDto>>("/api/postingpackages") ?? new();
-        }
-        catch (HttpRequestException)
-        {
-            Packages = new();
-        }
-
-        return Page();
+        return await LoadPageAsync();
     }
 
     private async Task<IActionResult> LoadPageAsync()
@@ -74,13 +69,50 @@ public class BuyPackagesModel : PageModel
             return redirect;
         }
 
-        Packages = await _api.GetApiDataAsync<List<PostingPackageDto>>("/api/postingpackages") ?? new();
+        var dashboardTask = _api.GetApiDataAsync<EmployerDashboardDto>("/api/employers/me/dashboard");
+        var packagesTask = _api.GetApiDataAsync<List<PostingPackageDto>>("/api/postingpackages");
+        await Task.WhenAll(dashboardTask, packagesTask);
+
+        var dashboard = await dashboardTask;
+        CurrentPostingLimit = dashboard?.PostingLimit ?? 0;
+        CompanyName = dashboard?.CompanyName;
+
+        Packages = await packagesTask ?? new();
+        Packages = Packages.OrderBy(p => p.Price).ToList();
+
         if (Packages.Count == 0)
         {
             ErrorMessage = "Hiện chưa có gói đăng tin. Vui lòng quay lại sau.";
         }
 
         return Page();
+    }
+
+    public static string FormatMoney(int amount) =>
+        amount.ToString("N0", CultureInfo.GetCultureInfo("vi-VN")) + " ₫";
+
+    public static string FormatPricePerPost(int price, int postingLimit)
+    {
+        if (postingLimit <= 0)
+        {
+            return "—";
+        }
+
+        var perPost = (double)price / postingLimit;
+        return perPost.ToString("N0", CultureInfo.GetCultureInfo("vi-VN")) + " ₫/tin";
+    }
+
+    public long? GetBestValuePackageId()
+    {
+        if (Packages.Count == 0)
+        {
+            return null;
+        }
+
+        return Packages
+            .OrderBy(p => (double)p.Price / Math.Max(1, p.PostingLimit))
+            .First()
+            .Id;
     }
 
     private IActionResult? RequireEmployerLogin()

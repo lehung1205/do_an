@@ -41,6 +41,25 @@ public class AdminPaymentsController : ControllerBase
         return Ok(ApiResponse<object>.SuccessResponse(result, "Payment history retrieved successfully."));
     }
 
+    [HttpGet("{id:long}/invoice")]
+    public async Task<IActionResult> ExportInvoice(long id, CancellationToken cancellationToken = default)
+    {
+        _ = GetCurrentUserId();
+        var file = await _paymentService.GenerateInvoiceFileAsync(id, cancellationToken);
+        return File(file.Content, file.ContentType, file.FileName);
+    }
+
+    [HttpGet("revenue/export-excel")]
+    public async Task<IActionResult> ExportRevenueExcel(
+        [FromQuery] DateTime? from = null,
+        [FromQuery] DateTime? to = null,
+        CancellationToken cancellationToken = default)
+    {
+        _ = GetCurrentUserId();
+        var file = await _paymentService.ExportRevenueExcelAsync(from, to, cancellationToken);
+        return File(file.Content, file.ContentType, file.FileName);
+    }
+
     private long GetCurrentUserId()
     {
         var sub = User.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? User.FindFirstValue(ClaimTypes.NameIdentifier);

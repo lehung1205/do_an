@@ -12,7 +12,7 @@ public class JobRelatedListItemModel
     public string? ThumbnailUrl { get; init; }
     public bool CompactTitle { get; init; }
 
-    public static JobRelatedListItemModel FromJobDto(JobDto job, bool compactTitle = false) => new()
+    public static JobRelatedListItemModel FromJobSummary(JobSummaryDto job, bool compactTitle = false) => new()
     {
         Id = job.Id,
         Title = job.Title,

@@ -21,7 +21,7 @@ public class PostingPackageService : IPostingPackageService
 
     public async Task<IReadOnlyList<PostingPackageDto>> GetAllPostingPackagesAsync(CancellationToken cancellationToken = default)
     {
-        var items = await _repository.GetAllAsync(cancellationToken);
+        var items = await _repository.GetActiveAsync(cancellationToken);
         return _mapper.Map<IReadOnlyList<PostingPackageDto>>(items);
     }
 

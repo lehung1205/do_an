@@ -12,7 +12,7 @@ public class IndexModel : PageModel
 
     private readonly ApiService _api;
 
-    public List<JobDto> Jobs { get; set; } = new();
+    public List<JobListItemDto> Jobs { get; set; } = new();
     public List<CategoryDto> Categories { get; set; } = new();
     public string? Q { get; set; }
     public string? Location { get; set; }
@@ -96,7 +96,7 @@ public class IndexModel : PageModel
             query.Add($"categoryId={CategoryId.Value}");
         }
 
-        var jobsTask = _api.GetApiDataAsync<PagedResult<JobDto>>($"/api/jobs?{string.Join("&", query)}");
+        var jobsTask = _api.GetApiDataAsync<PagedResult<JobListItemDto>>($"/api/jobs?{string.Join("&", query)}");
         var categoriesTask = _api.GetApiDataAsync<List<CategoryDto>>("/api/categories");
         var statsTask = _api.GetApiDataAsync<HomeStatsDto>("/api/stats");
 

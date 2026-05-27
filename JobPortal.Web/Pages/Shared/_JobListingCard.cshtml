@@ -1,11 +1,8 @@
-@model JobPortal.Web.Dtos.JobDto
+@model JobPortal.Web.Dtos.JobListItemDto
 @{
     var initial = string.IsNullOrWhiteSpace(Model.EmployerName)
         ? "?"
         : Model.EmployerName.Trim()[0].ToString().ToUpperInvariant();
-    var descPreview = Model.Description.Length > 140
-        ? Model.Description[..140].Trim() + "…"
-        : Model.Description;
 }
 
 <article class="job-listing-card">
@@ -47,7 +44,7 @@
             }
         </div>
 
-        <p class="job-listing-card__desc">@descPreview</p>
+        <p class="job-listing-card__desc">@Model.DescriptionPreview</p>
 
         <div class="job-listing-card__meta">
             <span><i class="bi bi-geo-alt"></i> @Model.Location</span>

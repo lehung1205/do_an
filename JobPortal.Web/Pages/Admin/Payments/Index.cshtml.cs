@@ -31,6 +31,8 @@ public class IndexModel : PageModel
     public int TotalCount { get; set; }
     public int TotalPages { get; set; }
     public bool ShowPagination => TotalPages > 1;
+    [TempData]
+    public string? ActionErrorMessage { get; set; }
 
     public async Task<IActionResult> OnGetAsync(
         string? status,
@@ -105,6 +107,76 @@ public class IndexModel : PageModel
                 : (int)Math.Ceiling(TotalCount / (double)PageSize);
 
         return Page();
+    }
+
+    public async Task<IActionResult> OnGetExportInvoiceAsync(
+        long id,
+        string? status,
+        string? q,
+        DateTime? from,
+        DateTime? to,
+        int pageNumber = 1,
+        int pageSize = DefaultPageSize)
+    {
+        var redirect = RequireAdmin();
+        if (redirect != null)
+        {
+            return redirect;
+        }
+
+        var response = await _api.GetRawAsync($"/api/admin/payments/{id}/invoice");
+        if (!response.IsSuccessStatusCode)
+        {
+            ActionErrorMessage = "Không thể xuất hóa đơn. Vui lòng thử lại.";
+            return RedirectToPage("/Admin/Payments/Index", new { status, q, from, to, pageNumber, pageSize });
+        }
+
+        var bytes = await response.Content.ReadAsByteArrayAsync();
+        var fileName = response.Content.Headers.ContentDisposition?.FileNameStar
+            ?? response.Content.Headers.ContentDisposition?.FileName
+            ?? $"hoa-don-{id}.pdf";
+
+        return File(bytes, response.Content.Headers.ContentType?.ToString() ?? "application/pdf", fileName.Trim('"'));
+    }
+
+    public async Task<IActionResult> OnGetExportRevenueExcelAsync(DateTime? from, DateTime? to)
+    {
+        var redirect = RequireAdmin();
+        if (redirect != null)
+        {
+            return redirect;
+        }
+
+        var query = string.Empty;
+        if (from.HasValue || to.HasValue)
+        {
+            var parts = new List<string>();
+            if (from.HasValue)
+            {
+                parts.Add($"from={from.Value:yyyy-MM-dd}");
+            }
+
+            if (to.HasValue)
+            {
+                parts.Add($"to={to.Value:yyyy-MM-dd}");
+            }
+
+            query = "?" + string.Join("&", parts);
+        }
+
+        var response = await _api.GetRawAsync($"/api/admin/payments/revenue/export-excel{query}");
+        if (!response.IsSuccessStatusCode)
+        {
+            ActionErrorMessage = "Không thể xuất file doanh thu.";
+            return RedirectToPage("/Admin/Payments/Index", new { from, to });
+        }
+
+        var bytes = await response.Content.ReadAsByteArrayAsync();
+        var fileName = response.Content.Headers.ContentDisposition?.FileNameStar
+            ?? response.Content.Headers.ContentDisposition?.FileName
+            ?? "doanh-thu.xlsx";
+
+        return File(bytes, response.Content.Headers.ContentType?.ToString() ?? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName.Trim('"'));
     }
 
     public static string FormatMoney(long amount) =>

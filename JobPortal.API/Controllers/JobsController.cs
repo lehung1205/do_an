@@ -26,7 +26,7 @@ public class JobsController : ControllerBase
         CancellationToken cancellationToken = default)
     {
         var pagedJobs = await _jobService.GetJobsPagedAsync(page, pageSize, q, location, categoryId, cancellationToken);
-        return Ok(ApiResponse<PagedResult<JobDto>>.SuccessResponse(pagedJobs, "Jobs retrieved successfully."));
+        return Ok(ApiResponse<PagedResult<JobListItemDto>>.SuccessResponse(pagedJobs, "Jobs retrieved successfully."));
     }
 
     [HttpGet("{id:long}")]

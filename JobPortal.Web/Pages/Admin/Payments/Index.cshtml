@@ -15,6 +15,10 @@
         {
             <div class="alert alert-warning">@Model.ErrorMessage</div>
         }
+        @if (!string.IsNullOrEmpty(Model.ActionErrorMessage))
+        {
+            <div class="alert alert-warning">@Model.ActionErrorMessage</div>
+        }
 
         @if (revenue != null)
         {
@@ -132,6 +136,15 @@
                     <div class="col-md-2">
                         <button type="submit" class="btn btn-primary w-100">Lọc</button>
                     </div>
+                    <div class="col-md-2">
+                        <a class="btn btn-outline-secondary w-100"
+                           asp-page="/Admin/Payments/Index"
+                           asp-page-handler="ExportRevenueExcel"
+                           asp-route-from="@Model.FromDate?.ToString("yyyy-MM-dd")"
+                           asp-route-to="@Model.ToDate?.ToString("yyyy-MM-dd")">
+                            Xuất doanh thu Excel
+                        </a>
+                    </div>
                 </div>
             </div>
         </form>
@@ -159,6 +172,7 @@
                                     <th>Trạng thái</th>
                                     <th>Thanh toán</th>
                                     <th>Tạo lúc</th>
+                                    <th class="text-end">Hóa đơn</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -185,6 +199,20 @@
                                         </td>
                                         <td class="small">@IndexModel.FormatDateTime(p.PaymentDate)</td>
                                         <td class="small text-muted">@IndexModel.FormatDateTime(p.CreatedAt)</td>
+                                        <td class="text-end">
+                                            <a class="btn btn-sm btn-outline-primary"
+                                               asp-page="/Admin/Payments/Index"
+                                               asp-page-handler="ExportInvoice"
+                                               asp-route-id="@p.Id"
+                                               asp-route-pageNumber="@Model.CurrentPage"
+                                               asp-route-pageSize="@Model.PageSize"
+                                               asp-route-status="@routeStatus"
+                                               asp-route-q="@Model.Search"
+                                               asp-route-from="@Model.FromDate?.ToString("yyyy-MM-dd")"
+                                               asp-route-to="@Model.ToDate?.ToString("yyyy-MM-dd")">
+                                                Xuất hóa đơn
+                                            </a>
+                                        </td>
                                     </tr>
                                 }
                             </tbody>

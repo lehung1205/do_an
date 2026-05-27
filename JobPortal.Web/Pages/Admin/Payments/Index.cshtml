@@ -1,0 +1,251 @@
+@page
+@model JobPortal.Web.Pages.Admin.Payments.IndexModel
+@using System.Text.Json
+@{
+    ViewData["Title"] = "Doanh thu & lịch sử mua";
+    var routeStatus = Model.StatusFilter ?? IndexModel.StatusAll;
+    var revenue = Model.Revenue;
+}
+
+<div class="admin-portal">
+    <div class="container admin-portal__container py-4">
+        <partial name="Shared/_AdminPageHeader" model='("Doanh thu & lịch sử mua", "Theo dõi doanh thu và các giao dịch mua gói đăng tin của nhà tuyển dụng", "bi-cash-stack")' />
+
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="alert alert-warning">@Model.ErrorMessage</div>
+        }
+
+        @if (revenue != null)
+        {
+            <div class="row g-3 mb-4 admin-payments__kpi-row">
+                <div class="col-sm-6 col-xl-3">
+                    <div class="admin-payments__kpi card border-0 h-100">
+                        <div class="card-body">
+                            <div class="admin-payments__kpi-label">Tổng doanh thu</div>
+                            <div class="admin-payments__kpi-value">@IndexModel.FormatMoney(revenue.TotalRevenue)</div>
+                            <div class="admin-payments__kpi-meta text-muted">@revenue.PaidTransactionCount giao dịch thành công</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-xl-3">
+                    <div class="admin-payments__kpi card border-0 h-100">
+                        <div class="card-body">
+                            <div class="admin-payments__kpi-label">Doanh thu tháng này</div>
+                            <div class="admin-payments__kpi-value">@IndexModel.FormatMoney(revenue.MonthRevenue)</div>
+                            <div class="admin-payments__kpi-meta text-muted">Theo ngày thanh toán</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-xl-3">
+                    <div class="admin-payments__kpi card border-0 h-100">
+                        <div class="card-body">
+                            <div class="admin-payments__kpi-label">Doanh thu hôm nay</div>
+                            <div class="admin-payments__kpi-value">@IndexModel.FormatMoney(revenue.TodayRevenue)</div>
+                            <div class="admin-payments__kpi-meta text-muted">UTC</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-xl-3">
+                    <div class="admin-payments__kpi card border-0 h-100">
+                        <div class="card-body">
+                            <div class="admin-payments__kpi-label">Giao dịch</div>
+                            <div class="admin-payments__kpi-value">@revenue.TotalTransactionCount</div>
+                            <div class="admin-payments__kpi-meta">
+                                <span class="text-success">@revenue.PaidTransactionCount thành công</span>
+                                ·
+                                <span class="text-warning">@revenue.PendingTransactionCount chờ</span>
+                                ·
+                                <span class="text-danger">@revenue.FailedTransactionCount lỗi</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="admin-portal__panel mb-4">
+                <div class="card-body">
+                    <h2 class="h6 fw-semibold mb-3">Doanh thu theo tháng (6 tháng gần nhất)</h2>
+                    <div class="admin-payments__chart-wrap">
+                        <canvas id="chartAdminRevenue" height="100" aria-label="Biểu đồ doanh thu theo tháng"></canvas>
+                    </div>
+                    <script type="application/json" id="adminPaymentsChartData">@Html.Raw(JsonSerializer.Serialize(revenue.MonthlyRevenue))</script>
+                </div>
+            </div>
+        }
+
+        <form method="get" class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-2">
+                        <label class="form-label" for="status">Trạng thái</label>
+                        <select class="form-select" id="status" name="status">
+                            @if (routeStatus == "all")
+                            {
+                                <option value="all" selected>Tất cả</option>
+                            }
+                            else
+                            {
+                                <option value="all">Tất cả</option>
+                            }
+                            @if (routeStatus == "paid")
+                            {
+                                <option value="paid" selected>Đã thanh toán</option>
+                            }
+                            else
+                            {
+                                <option value="paid">Đã thanh toán</option>
+                            }
+                            @if (routeStatus == "pending")
+                            {
+                                <option value="pending" selected>Chờ thanh toán</option>
+                            }
+                            else
+                            {
+                                <option value="pending">Chờ thanh toán</option>
+                            }
+                            @if (routeStatus == "failed")
+                            {
+                                <option value="failed" selected>Thất bại</option>
+                            }
+                            else
+                            {
+                                <option value="failed">Thất bại</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label" for="from">Từ ngày</label>
+                        <input class="form-control" type="date" id="from" name="from"
+                               value="@(Model.FromDate?.ToString("yyyy-MM-dd"))" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label" for="to">Đến ngày</label>
+                        <input class="form-control" type="date" id="to" name="to"
+                               value="@(Model.ToDate?.ToString("yyyy-MM-dd"))" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="q">Tìm kiếm</label>
+                        <input class="form-control" type="search" id="q" name="q"
+                               value="@Model.Search" placeholder="Công ty, email, mã đơn, mã giao dịch..." />
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">Lọc</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <div class="admin-portal__panel">
+            <div class="card-body p-0">
+                <div class="admin-portal__toolbar px-3 py-2 border-bottom d-flex justify-content-between align-items-center">
+                    <span>Lịch sử mua gói</span>
+                    <span class="text-muted">@Model.TotalCount kết quả</span>
+                </div>
+                @if (Model.Payments.Count == 0)
+                {
+                    <p class="text-muted text-center py-5 mb-0">Không có giao dịch phù hợp bộ lọc.</p>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 admin-payments__table">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Mã đơn</th>
+                                    <th>Nhà tuyển dụng</th>
+                                    <th>Gói</th>
+                                    <th class="text-end">Số tiền</th>
+                                    <th>Trạng thái</th>
+                                    <th>Thanh toán</th>
+                                    <th>Tạo lúc</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var p in Model.Payments)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="fw-medium">@p.OrderId</div>
+                                            @if (!string.IsNullOrEmpty(p.TransactionCode))
+                                            {
+                                                <div class="small text-muted">@p.TransactionCode</div>
+                                            }
+                                        </td>
+                                        <td>
+                                            <div class="fw-medium">@p.EmployerName</div>
+                                            <div class="small text-muted">@p.EmployerEmail</div>
+                                        </td>
+                                        <td>@p.PackageName</td>
+                                        <td class="text-end fw-semibold">@IndexModel.FormatMoney(p.Amount)</td>
+                                        <td>
+                                            <span class="badge rounded-pill @Model.StatusBadgeClass(p.Status)">
+                                                @Model.StatusLabel(p.Status)
+                                            </span>
+                                        </td>
+                                        <td class="small">@IndexModel.FormatDateTime(p.PaymentDate)</td>
+                                        <td class="small text-muted">@IndexModel.FormatDateTime(p.CreatedAt)</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+
+        @if (Model.ShowPagination)
+        {
+            <nav class="mt-4" aria-label="Phân trang lịch sử mua">
+                <ul class="pagination justify-content-center flex-wrap gap-1">
+                    @{
+                        var prev = Model.CurrentPage > 1 ? Model.CurrentPage - 1 : 1;
+                        var next = Model.CurrentPage < Model.TotalPages ? Model.CurrentPage + 1 : Model.TotalPages;
+                    }
+                    <li class="page-item @(Model.CurrentPage <= 1 ? "disabled" : "")">
+                        <a class="page-link" asp-page="/Admin/Payments/Index"
+                           asp-route-pageNumber="@prev"
+                           asp-route-pageSize="@Model.PageSize"
+                           asp-route-status="@routeStatus"
+                           asp-route-q="@Model.Search"
+                           asp-route-from="@Model.FromDate?.ToString("yyyy-MM-dd")"
+                           asp-route-to="@Model.ToDate?.ToString("yyyy-MM-dd")">Trước</a>
+                    </li>
+                    @for (var i = 1; i <= Model.TotalPages; i++)
+                    {
+                        if (i == 1 || i == Model.TotalPages || (i >= Model.CurrentPage - 2 && i <= Model.CurrentPage + 2))
+                        {
+                            <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                                <a class="page-link" asp-page="/Admin/Payments/Index"
+                                   asp-route-pageNumber="@i"
+                                   asp-route-pageSize="@Model.PageSize"
+                                   asp-route-status="@routeStatus"
+                                   asp-route-q="@Model.Search"
+                                   asp-route-from="@Model.FromDate?.ToString("yyyy-MM-dd")"
+                                   asp-route-to="@Model.ToDate?.ToString("yyyy-MM-dd")">@i</a>
+                            </li>
+                        }
+                        else if (i == Model.CurrentPage - 3 || i == Model.CurrentPage + 3)
+                        {
+                            <li class="page-item disabled"><span class="page-link">…</span></li>
+                        }
+                    }
+                    <li class="page-item @(Model.CurrentPage >= Model.TotalPages ? "disabled" : "")">
+                        <a class="page-link" asp-page="/Admin/Payments/Index"
+                           asp-route-pageNumber="@next"
+                           asp-route-pageSize="@Model.PageSize"
+                           asp-route-status="@routeStatus"
+                           asp-route-q="@Model.Search"
+                           asp-route-from="@Model.FromDate?.ToString("yyyy-MM-dd")"
+                           asp-route-to="@Model.ToDate?.ToString("yyyy-MM-dd")">Sau</a>
+                    </li>
+                </ul>
+            </nav>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" crossorigin="anonymous"></script>
+    <script src="~/js/admin-payments.js" asp-append-version="true"></script>
+}

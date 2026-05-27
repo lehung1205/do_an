@@ -90,8 +90,8 @@
             <div class="job-grid-card__actions d-flex flex-wrap gap-2 mt-3">
                 @if (isRecruiting || isClosed)
                 {
-                    <a asp-page="/Employer/Applicants" class="btn btn-sm btn-outline-primary">Xem CV</a>
-                    <a asp-page="/Jobs/Detail" asp-route-id="@Model.Id" class="btn btn-sm btn-outline-secondary">Chi tiết</a>
+                    <a asp-page="/Employer/Applicants" class="btn btn-sm employer-jobs-btn employer-jobs-btn--info">Xem CV</a>
+                    <a asp-page="/Jobs/Detail" asp-route-id="@Model.Id" class="btn btn-sm employer-jobs-btn employer-jobs-btn--muted">Chi tiết</a>
                     @if (isRecruiting)
                     {
                         <form method="post"
@@ -104,21 +104,21 @@
                               asp-route-pageSize="@Model.ListPageSize"
                               class="d-inline"
                               onsubmit="return confirm('Đóng tin này? Ứng viên sẽ không thể nộp CV mới.');">
-                            <button type="submit" class="btn btn-sm btn-outline-danger">Đóng tin</button>
+                            <button type="submit" class="btn btn-sm employer-jobs-btn employer-jobs-btn--danger">Đóng tin</button>
                         </form>
                     }
                 }
                 else if (isPending)
                 {
-                    <span class="btn btn-sm btn-outline-secondary disabled" tabindex="-1" aria-disabled="true">Chờ admin duyệt</span>
+                    <span class="btn btn-sm employer-jobs-btn employer-jobs-btn--muted disabled" tabindex="-1" aria-disabled="true">Chờ admin duyệt</span>
                 }
                 else if (isRejected)
                 {
-                    <a asp-page="/Employer/PostJob" class="btn btn-sm btn-primary">Đăng tin mới</a>
+                    <a asp-page="/Employer/PostJob" class="btn btn-sm employer-jobs-btn employer-jobs-btn--primary">Đăng tin mới</a>
                 }
                 else
                 {
-                    <a asp-page="/Employer/PostJob" class="btn btn-sm btn-outline-primary">Tiếp tục chỉnh sửa</a>
+                    <a asp-page="/Employer/PostJob" class="btn btn-sm employer-jobs-btn employer-jobs-btn--info">Tiếp tục chỉnh sửa</a>
                 }
             </div>
         }

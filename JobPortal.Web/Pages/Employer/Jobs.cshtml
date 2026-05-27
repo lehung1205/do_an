@@ -13,7 +13,7 @@
     CtaPage = "/Employer/PostJob"
 }' />
 
-<div class="employer-dash__panel-stack">
+<div class="employer-dash__panel-stack employer-jobs-page">
     @if (!string.IsNullOrEmpty(Model.SuccessMessage))
     {
         <div class="alert alert-success">@Model.SuccessMessage</div>
@@ -28,7 +28,45 @@
     }
     @if (string.IsNullOrEmpty(Model.ErrorMessage))
     {
-        <form method="get" class="employer-panel mb-0">
+        <section class="employer-jobs-overview">
+            <div class="employer-jobs-overview__card">
+                <span class="employer-jobs-overview__icon employer-jobs-overview__icon--primary"><i class="bi bi-briefcase"></i></span>
+                <div>
+                    <p class="employer-jobs-overview__label">Tổng tin</p>
+                    <p class="employer-jobs-overview__value">@((Model.Stats?.TotalJobs ?? Model.TotalCount).ToString())</p>
+                </div>
+            </div>
+            <div class="employer-jobs-overview__card">
+                <span class="employer-jobs-overview__icon employer-jobs-overview__icon--success"><i class="bi bi-broadcast-pin"></i></span>
+                <div>
+                    <p class="employer-jobs-overview__label">Đang tuyển</p>
+                    <p class="employer-jobs-overview__value">@((Model.Stats?.OpenJobs ?? 0).ToString())</p>
+                </div>
+            </div>
+            <div class="employer-jobs-overview__card">
+                <span class="employer-jobs-overview__icon employer-jobs-overview__icon--warning"><i class="bi bi-person-lines-fill"></i></span>
+                <div>
+                    <p class="employer-jobs-overview__label">CV chưa đọc</p>
+                    <p class="employer-jobs-overview__value">@((Model.Stats?.UnreadApplications ?? 0).ToString())</p>
+                </div>
+            </div>
+            <div class="employer-jobs-overview__card">
+                <span class="employer-jobs-overview__icon employer-jobs-overview__icon--info"><i class="bi bi-people"></i></span>
+                <div>
+                    <p class="employer-jobs-overview__label">Tổng CV</p>
+                    <p class="employer-jobs-overview__value">@((Model.Stats?.TotalCvCount ?? 0).ToString())</p>
+                </div>
+            </div>
+        </section>
+
+        <form method="get" class="employer-panel employer-jobs-filter mb-0">
+            <div class="employer-jobs-filter__head">
+                <h3><i class="bi bi-funnel me-2"></i>Bộ lọc tin tuyển dụng</h3>
+                @if (Model.HasActiveFilter)
+                {
+                    <span class="employer-jobs-filter__hint">Đang áp dụng bộ lọc</span>
+                }
+            </div>
             <div class="row g-3 align-items-end">
                 <div class="col-md-3">
                     <label class="form-label" for="status">Trạng thái</label>
@@ -81,10 +119,10 @@
                            placeholder="Tiêu đề, mô tả, địa điểm, lương..." maxlength="200" />
                 </div>
                 <div class="col-md-3 d-flex gap-2">
-                    <button type="submit" class="btn btn-primary flex-grow-1">
+                    <button type="submit" class="btn employer-jobs-btn employer-jobs-btn--primary flex-grow-1">
                         <i class="bi bi-search me-1"></i> Lọc
                     </button>
-                    <a asp-page="/Employer/Jobs" class="btn btn-outline-secondary" title="Xóa bộ lọc">
+                    <a asp-page="/Employer/Jobs" class="btn employer-jobs-btn employer-jobs-btn--muted" title="Xóa bộ lọc">
                         <i class="bi bi-x-lg"></i>
                     </a>
                 </div>
@@ -95,21 +133,38 @@
 
         @if (Model.Jobs.Count == 0)
         {
-            <div class="employer-panel text-center py-5 text-muted">
+            <div class="employer-panel employer-jobs-empty text-center py-5 text-muted">
                 @if (Model.HasActiveFilter)
                 {
                     <i class="bi bi-funnel display-6 d-block mb-2"></i>
                     <p class="mb-2">Không có tin phù hợp bộ lọc.</p>
-                    <a asp-page="/Employer/Jobs" class="btn btn-sm btn-outline-primary">Xóa bộ lọc</a>
+                    <a asp-page="/Employer/Jobs" class="btn btn-sm employer-jobs-btn employer-jobs-btn--info">Xóa bộ lọc</a>
                 }
                 else
                 {
-                    <text>Chưa có tin nào. <a asp-page="/Employer/PostJob">Đăng tin đầu tiên</a></text>
+                    <p class="mb-2">Bạn chưa có tin tuyển dụng nào.</p>
+                    <a asp-page="/Employer/PostJob" class="btn btn-sm employer-jobs-btn employer-jobs-btn--primary">
+                        <i class="bi bi-plus-circle me-1"></i>Đăng tin đầu tiên
+                    </a>
                 }
             </div>
         }
         else
         {
+            <div class="employer-jobs-list-head">
+                <h3>Danh sách tin tuyển dụng</h3>
+                <p>
+                    Hiển thị <strong>@Model.Jobs.Count</strong> / <strong>@Model.TotalCount</strong> tin
+                    @if (!string.IsNullOrEmpty(Model.StatusFilter))
+                    {
+                        <span> · trạng thái <strong>@JobsModel.FormatJobStatus(Model.StatusFilter)</strong></span>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(Model.Search))
+                    {
+                        <span> · từ khóa "<strong>@Model.Search</strong>"</span>
+                    }
+                </p>
+            </div>
             <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3 g-lg-4 job-grid">
                 @foreach (var job in Model.Jobs)
                 {
@@ -169,3 +224,7 @@
         }
     }
 </div>
+
+@section EmployerStyles {
+    <link rel="stylesheet" href="~/css/employer-jobs.css" asp-append-version="true" />
+}

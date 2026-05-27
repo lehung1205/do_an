@@ -2,18 +2,45 @@
 @model JobPortal.Web.Pages.Applications.WorkProgress.IndexModel
 @{
     ViewData["Title"] = "Tiến độ làm việc";
+    var total = Model.Items.Count;
+    var activeCount = Model.Items.Count(x => !x.IsProgressLocked);
+    var lockedCount = Model.Items.Count(x => x.IsProgressLocked);
+    var withUpdateCount = Model.Items.Count(x => x.LastProgressAt.HasValue);
 }
 
-<div class="container py-4">
-    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
-        <div>
-            <h2 class="mb-1"><i class="bi bi-graph-up-arrow me-2"></i>Tiến độ làm việc</h2>
-            <p class="text-muted mb-0">Theo dõi tiến độ các công việc part-time đã được nhà tuyển dụng chấp nhận</p>
+<div class="container py-4 seeker-work-progress-page">
+    <section class="seeker-work-progress-hero mb-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+            <div>
+                <div class="seeker-work-progress-hero__eyebrow">
+                    <i class="bi bi-graph-up-arrow me-1"></i> Theo dõi tiến độ
+                </div>
+                <h2 class="mb-1">Tiến độ làm việc</h2>
+                <p class="text-muted mb-0">Theo dõi các công việc part-time đã được chấp nhận, trạng thái hiện tại và lịch sử cập nhật.</p>
+            </div>
+            <a asp-page="/Applications/Index" class="btn btn-sm work-progress-btn work-progress-btn--muted">
+                <i class="bi bi-inbox me-1"></i> Đơn ứng tuyển
+            </a>
         </div>
-        <a asp-page="/Applications/Index" class="btn btn-sm work-progress-btn work-progress-btn--muted">
-            <i class="bi bi-inbox me-1"></i> Đơn ứng tuyển
-        </a>
-    </div>
+        <div class="seeker-work-progress-stats mt-3">
+            <div class="seeker-work-progress-stat">
+                <span class="seeker-work-progress-stat__label">Tổng công việc</span>
+                <span class="seeker-work-progress-stat__value">@total</span>
+            </div>
+            <div class="seeker-work-progress-stat">
+                <span class="seeker-work-progress-stat__label">Đang theo dõi</span>
+                <span class="seeker-work-progress-stat__value">@activeCount</span>
+            </div>
+            <div class="seeker-work-progress-stat">
+                <span class="seeker-work-progress-stat__label">Đã kết thúc</span>
+                <span class="seeker-work-progress-stat__value">@lockedCount</span>
+            </div>
+            <div class="seeker-work-progress-stat">
+                <span class="seeker-work-progress-stat__label">Có cập nhật</span>
+                <span class="seeker-work-progress-stat__value">@withUpdateCount</span>
+            </div>
+        </div>
+    </section>
 
     @if (!string.IsNullOrEmpty(Model.ErrorMessage))
     {
@@ -21,7 +48,7 @@
     }
     else
     {
-        <form method="get" class="card border-0 shadow-sm mb-4">
+        <form method="get" class="card border-0 shadow-sm mb-4 seeker-work-progress-filter">
             <div class="card-body">
                 <div class="row g-3 align-items-end">
                     <div class="col-md-9">
@@ -43,7 +70,7 @@
 
         @if (Model.Items.Count == 0)
         {
-            <div class="card border-0 shadow-sm text-center py-5 text-muted">
+            <div class="card border-0 shadow-sm text-center py-5 text-muted seeker-work-progress-empty">
                 @if (Model.HasActiveFilter)
                 {
                     <i class="bi bi-funnel display-6 d-block mb-2"></i>
@@ -63,7 +90,7 @@
             <div class="d-flex flex-column gap-3">
                 @foreach (var item in Model.Items)
                 {
-                    <div class="card border-0 shadow-sm">
+                    <article class="card border-0 shadow-sm seeker-work-progress-card">
                         <div class="card-body">
                             <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-2">
                                 <div class="min-w-0">
@@ -85,19 +112,26 @@
                                     <span class="badge bg-secondary">Chưa có tiến độ</span>
                                 }
                             </div>
-                            <p class="text-muted small mb-3">
-                                @item.StepCount bước tiến độ
-                                @(item.LastProgressAt.HasValue ? $" · Cập nhật {IndexModel.FormatRelativeTime(item.LastProgressAt.Value)}" : "")
-                                @(item.IsProgressLocked ? " · Đã kết thúc" : "")
-                            </p>
+                            <div class="seeker-work-progress-card__meta">
+                                <span><i class="bi bi-list-check me-1"></i>@item.StepCount bước tiến độ</span>
+                                <span>@(item.LastProgressAt.HasValue ? $"· Cập nhật {IndexModel.FormatRelativeTime(item.LastProgressAt.Value)}" : "· Chưa có cập nhật")</span>
+                                @if (item.IsProgressLocked)
+                                {
+                                    <span class="seeker-work-progress-card__locked">· Đã kết thúc</span>
+                                }
+                            </div>
                             <a asp-page="/Applications/WorkProgress/Detail" asp-route-applicationId="@item.ApplicationId"
-                               class="btn btn-sm work-progress-btn work-progress-btn--primary">
+                               class="btn btn-sm work-progress-btn work-progress-btn--primary mt-3">
                                 <i class="bi bi-eye me-1"></i> Xem tiến độ
                             </a>
                         </div>
-                    </div>
+                    </article>
                 }
             </div>
         }
     }
 </div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/seeker-work-progress.css" asp-append-version="true" />
+}

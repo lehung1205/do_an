@@ -131,34 +131,34 @@
                                asp-route-filter="@Model.Filter"
                                target="_blank"
                                rel="noopener noreferrer"
-                               class="btn btn-sm btn-outline-dark applicant-card__btn">
-                                <i class="bi bi-eye me-1"></i> Xem CV
+                               class="btn btn-sm applicant-card__btn applicant-card__btn--muted">
+                                <i class="bi bi-eye me-1"></i>Xem CV
                             </a>
                         }
 
                         <a asp-page="/Messages/Index" asp-route-applicationId="@app.Id"
-                           class="btn btn-sm btn-outline-primary applicant-card__btn">
-                            <i class="bi bi-chat-dots me-1"></i> Nhắn tin
+                           class="btn btn-sm applicant-card__btn applicant-card__btn--info">
+                            <i class="bi bi-chat-dots me-1"></i>Nhắn tin
                         </a>
                         @if (isFinalAccepted)
                         {
                             <a asp-page="/Employer/WorkProgress/Detail"
                                asp-route-applicationId="@app.Id"
-                               class="btn btn-sm btn-outline-dark applicant-card__btn">
-                                <i class="bi bi-clipboard-check me-1"></i> Quản lý tiến độ
+                               class="btn btn-sm applicant-card__btn applicant-card__btn--primary">
+                                <i class="bi bi-clipboard-check me-1"></i>Quản lý tiến độ
                             </a>
                             <a asp-page="/Jobs/Detail"
                                asp-route-id="@app.JobId"
-                               class="btn btn-sm btn-outline-dark applicant-card__btn">
-                                Xem tin
+                               class="btn btn-sm applicant-card__btn applicant-card__btn--muted">
+                                <i class="bi bi-briefcase me-1"></i>Xem tin
                             </a>
                         }
                         else if (isFinalRejected)
                         {
                             <a asp-page="/Jobs/Detail"
                                asp-route-id="@app.JobId"
-                               class="btn btn-sm btn-outline-dark applicant-card__btn">
-                                Xem tin
+                               class="btn btn-sm applicant-card__btn applicant-card__btn--muted">
+                                <i class="bi bi-briefcase me-1"></i>Xem tin
                             </a>
                         }
                         else
@@ -169,8 +169,8 @@
                                     <input type="hidden" name="applicationId" value="@app.Id" />
                                     <input type="hidden" name="status" value="reviewed" />
                                     <input type="hidden" name="filter" value="@Model.Filter" />
-                                    <button type="submit" class="btn btn-sm btn-outline-dark applicant-card__btn">
-                                        Đánh dấu đã xem
+                                    <button type="submit" class="btn btn-sm applicant-card__btn applicant-card__btn--muted">
+                                        <i class="bi bi-check2-circle me-1"></i>Đánh dấu đã xem
                                     </button>
                                 </form>
                             }
@@ -180,8 +180,8 @@
                                 <input type="hidden" name="applicationId" value="@app.Id" />
                                 <input type="hidden" name="status" value="accepted" />
                                 <input type="hidden" name="filter" value="@Model.Filter" />
-                                <button type="submit" class="btn btn-sm btn-success applicant-card__btn">
-                                    <i class="bi bi-check-lg me-1"></i> Chấp nhận
+                                <button type="submit" class="btn btn-sm applicant-card__btn applicant-card__btn--success">
+                                    <i class="bi bi-check-lg me-1"></i>Chấp nhận
                                 </button>
                             </form>
                             <form method="post" asp-page-handler="UpdateStatus" class="d-inline"
@@ -189,14 +189,14 @@
                                 <input type="hidden" name="applicationId" value="@app.Id" />
                                 <input type="hidden" name="status" value="rejected" />
                                 <input type="hidden" name="filter" value="@Model.Filter" />
-                                <button type="submit" class="btn btn-sm btn-outline-danger applicant-card__btn">
-                                    <i class="bi bi-x-lg me-1"></i> Từ chối
+                                <button type="submit" class="btn btn-sm applicant-card__btn applicant-card__btn--danger">
+                                    <i class="bi bi-x-lg me-1"></i>Từ chối
                                 </button>
                             </form>
                             <a asp-page="/Jobs/Detail"
                                asp-route-id="@app.JobId"
-                               class="btn btn-sm btn-outline-dark applicant-card__btn">
-                                Xem tin
+                               class="btn btn-sm applicant-card__btn applicant-card__btn--muted">
+                                <i class="bi bi-briefcase me-1"></i>Xem tin
                             </a>
                         }
                     </div>

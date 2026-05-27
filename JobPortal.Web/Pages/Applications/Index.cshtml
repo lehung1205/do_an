@@ -15,7 +15,9 @@
     {
         <div class="alert alert-light border text-center py-5">
             <p class="mb-3 text-muted">Bạn chưa ứng tuyển việc làm nào.</p>
-            <a asp-page="/Jobs/Index" class="btn btn-primary">Xem việc làm</a>
+            <a asp-page="/Jobs/Index" class="btn app-action-btn app-action-btn--primary">
+                <i class="bi bi-briefcase me-1"></i>Xem việc làm
+            </a>
         </div>
     }
     else
@@ -52,14 +54,14 @@
                             </td>
                             <td>@app.AppliedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
                             <td><span class="badge @IndexModel.StatusBadgeClass(app.Status)">@IndexModel.FormatStatus(app.Status)</span></td>
-                            <td class="text-nowrap">
+                            <td class="text-nowrap app-action-group">
                                 <a asp-page="/Messages/Index" asp-route-applicationId="@app.Id"
-                                   class="btn btn-sm btn-outline-secondary">Nhắn tin</a>
-                                <a asp-page="/Jobs/Detail" asp-route-id="@app.JobId" class="btn btn-sm btn-outline-primary ms-1">Xem tin</a>
+                                   class="btn btn-sm app-action-btn app-action-btn--muted">Nhắn tin</a>
+                                <a asp-page="/Jobs/Detail" asp-route-id="@app.JobId" class="btn btn-sm app-action-btn app-action-btn--info">Xem tin</a>
                                 @if (string.Equals(app.Status, "accepted", StringComparison.OrdinalIgnoreCase))
                                 {
                                     <a asp-page="/Applications/WorkProgress/Detail" asp-route-applicationId="@app.Id"
-                                       class="btn btn-sm btn-primary ms-1">Tiến độ</a>
+                                       class="btn btn-sm app-action-btn app-action-btn--primary">Tiến độ</a>
                                 }
                             </td>
                         </tr>
@@ -69,3 +71,58 @@
         </div>
     }
 </div>
+
+@section Styles {
+    <style>
+        .app-action-group {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+        }
+
+        .app-action-btn {
+            border-radius: 10px;
+            font-weight: 600;
+            border: 1px solid transparent;
+            transition: all 0.16s ease;
+        }
+
+        .app-action-btn--primary {
+            background: var(--jp-primary, #0000ee);
+            border-color: var(--jp-primary, #0000ee);
+            color: #fff;
+        }
+
+        .app-action-btn--primary:hover {
+            background: #1d4ed8;
+            border-color: #1d4ed8;
+            color: #fff;
+            transform: translateY(-1px);
+        }
+
+        .app-action-btn--muted {
+            background: #f8fafc;
+            border-color: #dbe3ef;
+            color: #475569;
+        }
+
+        .app-action-btn--muted:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+            color: #334155;
+        }
+
+        .app-action-btn--info {
+            background: #eff6ff;
+            border-color: #bfdbfe;
+            color: #1d4ed8;
+        }
+
+        .app-action-btn--info:hover {
+            background: #dbeafe;
+            border-color: #93c5fd;
+            color: #1e40af;
+        }
+    </style>
+}

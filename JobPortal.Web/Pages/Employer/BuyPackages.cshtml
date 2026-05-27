@@ -4,38 +4,185 @@
 @{
     ViewData["Title"] = "Mua gói";
     ViewData["EmployerNavActive"] = EmployerPortalNavKeys.Packages;
+    var bestValueId = Model.GetBestValuePackageId();
 }
 
-<partial name="Shared/_EmployerPageHeader" model='new EmployerPageHeaderModel {
-    Title = "Mua gói đăng tin",
-    Subtitle = "Chọn gói phù hợp để tăng hạn mức đăng bài và thanh toán qua VNPay.",
-    BreadcrumbLabel = "Mua gói dịch vụ"
-}' />
-
-@if (!string.IsNullOrEmpty(Model.ErrorMessage))
-{
-    <div class="alert alert-warning">@Model.ErrorMessage</div>
-}
-
-@if (Model.Packages.Count > 0)
-{
-    <div class="row g-4">
-        @foreach (var p in Model.Packages)
-        {
-            <div class="col-md-6 col-lg-4">
-                <div class="employer-package-card h-100 d-flex flex-column">
-                    <h5 class="employer-package-card__title">@p.Name</h5>
-                    <p class="text-muted small mb-2">Số tin đăng: <strong>@p.PostingLimit</strong></p>
-                    <p class="h5 text-primary mb-3">@p.Price.ToString("N0") <span class="fs-6 fw-normal">VNĐ</span></p>
-                    <form method="post" asp-page-handler="Buy" class="mt-auto">
-                        <input type="hidden" name="packageId" value="@p.Id" />
-                        <button type="submit" class="btn btn-outline-primary w-100">
-                            Thanh toán VNPay
-                        </button>
-                    </form>
+<div class="buy-packages-page">
+    <div class="buy-packages-hero">
+        <div class="buy-packages-hero__eyebrow">
+            <i class="bi bi-stars"></i> Gói đăng tin JobPortal
+        </div>
+        <h1 class="buy-packages-hero__title">Mua gói dịch vụ đăng tin tuyển dụng</h1>
+        <p class="buy-packages-hero__subtitle">
+            @(string.IsNullOrWhiteSpace(Model.CompanyName)
+                ? "Nạp thêm lượt đăng tin để đăng bài nhanh hơn, tiếp cận nhiều ứng viên chất lượng."
+                : $"{Model.CompanyName} — nạp thêm lượt đăng tin để đăng bài nhanh hơn, tiếp cận nhiều ứng viên chất lượng.")
+        </p>
+        <div class="buy-packages-hero__stats">
+            <div class="buy-packages-stat">
+                <span class="buy-packages-stat__icon buy-packages-stat__icon--credits" aria-hidden="true">
+                    <i class="bi bi-gem"></i>
+                </span>
+                <div>
+                    <div class="buy-packages-stat__label">Lượt còn lại</div>
+                    <div class="buy-packages-stat__value">@Model.CurrentPostingLimit</div>
                 </div>
             </div>
-        }
+            <div class="buy-packages-stat">
+                <span class="buy-packages-stat__icon buy-packages-stat__icon--secure" aria-hidden="true">
+                    <i class="bi bi-shield-check"></i>
+                </span>
+                <div>
+                    <div class="buy-packages-stat__label">Thanh toán</div>
+                    <div class="buy-packages-stat__value">VNPay</div>
+                </div>
+            </div>
+            <div class="buy-packages-stat">
+                <span class="buy-packages-stat__icon buy-packages-stat__icon--credits" aria-hidden="true">
+                    <i class="bi bi-lightning-charge-fill"></i>
+                </span>
+                <div>
+                    <div class="buy-packages-stat__label">Kích hoạt</div>
+                    <div class="buy-packages-stat__value">Tức thì</div>
+                </div>
+            </div>
+        </div>
     </div>
-    <p class="small text-muted mt-4 mb-0">Sau khi VNPay xác nhận thành công, hạn mức đăng tin sẽ được cộng vào tài khoản nhà tuyển dụng.</p>
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-warning mb-4">@Model.ErrorMessage</div>
+    }
+
+    @if (Model.Packages.Count > 0)
+    {
+        <div class="buy-packages-benefits">
+            <div class="buy-packages-benefit">
+                <span class="buy-packages-benefit__icon"><i class="bi bi-megaphone"></i></span>
+                <div>
+                    <p class="buy-packages-benefit__title">Đăng tin không giới hạn thời gian xử lý</p>
+                    <p class="buy-packages-benefit__text">Mỗi lượt tương ứng một tin tuyển dụng — dùng khi bạn sẵn sàng đăng bài.</p>
+                </div>
+            </div>
+            <div class="buy-packages-benefit">
+                <span class="buy-packages-benefit__icon"><i class="bi bi-people"></i></span>
+                <div>
+                    <p class="buy-packages-benefit__title">Tiếp cận ứng viên nhanh</p>
+                    <p class="buy-packages-benefit__text">Tin hiển thị trên JobPortal, nhận CV và nhắn tin trực tiếp với ứng viên.</p>
+                </div>
+            </div>
+            <div class="buy-packages-benefit">
+                <span class="buy-packages-benefit__icon"><i class="bi bi-graph-up-arrow"></i></span>
+                <div>
+                    <p class="buy-packages-benefit__title">Gói càng lớn — giá mỗi tin càng tốt</p>
+                    <p class="buy-packages-benefit__text">Chọn gói phù hợp quy mô tuyển dụng; gói được gắn nhãn “Tiết kiệm nhất” theo giá/tin.</p>
+                </div>
+            </div>
+        </div>
+
+        <section class="buy-packages-steps" aria-labelledby="buy-packages-steps-title">
+            <h2 id="buy-packages-steps-title" class="buy-packages-steps__title">Quy trình mua gói</h2>
+            <div class="buy-packages-steps__grid">
+                <div class="buy-packages-step">
+                    <div class="buy-packages-step__num">1</div>
+                    <p class="buy-packages-step__label">Chọn gói &amp; thanh toán VNPay</p>
+                </div>
+                <div class="buy-packages-step">
+                    <div class="buy-packages-step__num">2</div>
+                    <p class="buy-packages-step__label">Xác nhận giao dịch thành công</p>
+                </div>
+                <div class="buy-packages-step">
+                    <div class="buy-packages-step__num">3</div>
+                    <p class="buy-packages-step__label">Lượt đăng được cộng ngay vào tài khoản</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="buy-packages-grid" aria-labelledby="buy-packages-grid-title">
+            <div class="buy-packages-grid__head">
+                <h2 id="buy-packages-grid-title">Chọn gói phù hợp</h2>
+                <p>So sánh số lượt đăng và mức giá — thanh toán an toàn qua cổng VNPay.</p>
+            </div>
+
+            <div class="row g-4 justify-content-center">
+                @foreach (var p in Model.Packages)
+                {
+                    var isFeatured = bestValueId == p.Id && Model.Packages.Count > 1;
+                    <div class="col-md-6 col-lg-4">
+                        <article class="buy-packages-card @(isFeatured ? "buy-packages-card--featured" : "")">
+                            @if (isFeatured)
+                            {
+                                <span class="buy-packages-card__badge">Tiết kiệm nhất</span>
+                            }
+                            <h3 class="buy-packages-card__name">@p.Name</h3>
+                            <p class="buy-packages-card__limit">
+                                <strong>@p.PostingLimit</strong>
+                                lượt đăng tin
+                            </p>
+                            <div class="buy-packages-card__price">
+                                <span class="buy-packages-card__price-main">@BuyPackagesModel.FormatMoney(p.Price)</span>
+                            </div>
+                            <p class="buy-packages-card__price-unit">
+                                ≈ @BuyPackagesModel.FormatPricePerPost(p.Price, p.PostingLimit)
+                            </p>
+                            <ul class="buy-packages-card__features">
+                                <li><i class="bi bi-check-circle-fill"></i> Cộng @p.PostingLimit lượt vào tài khoản</li>
+                                <li><i class="bi bi-check-circle-fill"></i> Không hết hạn khi chưa sử dụng</li>
+                                <li><i class="bi bi-check-circle-fill"></i> Hỗ trợ đăng &amp; quản lý tin tuyển dụng</li>
+                                <li><i class="bi bi-check-circle-fill"></i> Nhận CV &amp; chat với ứng viên</li>
+                            </ul>
+                            <form method="post" asp-page-handler="Buy" class="mt-auto">
+                                <input type="hidden" name="packageId" value="@p.Id" />
+                                <button type="submit"
+                                        class="buy-packages-card__btn @(isFeatured ? "buy-packages-card__btn--primary" : "buy-packages-card__btn--outline")">
+                                    <i class="bi bi-credit-card-2-front"></i>
+                                    Thanh toán VNPay
+                                </button>
+                            </form>
+                        </article>
+                    </div>
+                }
+            </div>
+        </section>
+
+        <div class="buy-packages-trust">
+            <div class="buy-packages-trust__item">
+                <i class="bi bi-lock-fill"></i>
+                <div>
+                    <strong>Thanh toán bảo mật</strong>
+                    <span>Giao dịch qua VNPay — không lưu thông tin thẻ trên JobPortal.</span>
+                </div>
+            </div>
+            <div class="buy-packages-trust__item">
+                <i class="bi bi-receipt"></i>
+                <div>
+                    <strong>Lịch sử giao dịch</strong>
+                    <span>Mỗi lần mua được ghi nhận; admin có thể xuất hóa đơn khi cần.</span>
+                </div>
+            </div>
+            <div class="buy-packages-trust__item">
+                <i class="bi bi-headset"></i>
+                <div>
+                    <strong>Cần hỗ trợ?</strong>
+                    <span>Liên hệ CSKH trên thanh menu nếu thanh toán thành công mà chưa nhận lượt.</span>
+                </div>
+            </div>
+        </div>
+
+        <p class="buy-packages-note">
+            Sau khi VNPay xác nhận thành công, hạn mức đăng tin được cộng tự động. Bạn có thể kiểm tra số lượt còn lại ở góc trên menu.
+        </p>
+    }
+    else if (string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="buy-packages-empty">
+            <i class="bi bi-inbox display-4 text-muted d-block mb-3"></i>
+            <p class="text-muted mb-3">Chưa có gói dịch vụ nào được mở bán.</p>
+            <a asp-page="/Index" class="btn btn-primary">Về bảng thông tin</a>
+        </div>
+    }
+</div>
+
+@section EmployerStyles {
+    <link rel="stylesheet" href="~/css/buy-packages.css" asp-append-version="true" />
 }

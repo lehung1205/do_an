@@ -18,7 +18,7 @@
         {
             <div class="alert alert-warning">@Model.ErrorMessage</div>
         }
-        <a asp-page="/Applications/WorkProgress/Index" class="btn btn-outline-secondary">Quay lại</a>
+        <a asp-page="/Applications/WorkProgress/Index" class="btn work-progress-btn work-progress-btn--muted">Quay lại</a>
     }
     else
     {
@@ -105,10 +105,10 @@
         }
 
         <div class="mt-4 d-flex flex-wrap gap-2">
-            <a asp-page="/Applications/WorkProgress/Index" class="btn btn-outline-secondary">
+            <a asp-page="/Applications/WorkProgress/Index" class="btn work-progress-btn work-progress-btn--muted">
                 <i class="bi bi-arrow-left me-1"></i> Danh sách tiến độ
             </a>
-            <a asp-page="/Jobs/Detail" asp-route-id="@p.JobId" class="btn btn-outline-primary">Xem tin tuyển dụng</a>
+            <a asp-page="/Jobs/Detail" asp-route-id="@p.JobId" class="btn work-progress-btn work-progress-btn--info">Xem tin tuyển dụng</a>
         </div>
     }
 </div>

@@ -25,7 +25,7 @@
         {
             <div class="alert alert-warning">@Model.ErrorMessage</div>
         }
-        <a asp-page="/Employer/WorkProgress/Index" class="btn btn-outline-secondary">Quay lại</a>
+        <a asp-page="/Employer/WorkProgress/Index" class="btn work-progress-btn work-progress-btn--muted">Quay lại</a>
     }
     else
     {
@@ -152,7 +152,7 @@
                                 <textarea class="form-control" id="Input_Notes" asp-for="Input.Notes" rows="4"
                                           maxlength="2000" placeholder="VD: Đã giao bài lúc 14h, dự kiến xong tối nay; cần file Word + PDF..."></textarea>
                             </div>
-                            <button type="submit" class="btn btn-primary w-100">
+                            <button type="submit" class="btn work-progress-btn work-progress-btn--primary w-100">
                                 <i class="bi bi-plus-circle me-1"></i> Lưu bước tiến độ
                             </button>
                         </form>

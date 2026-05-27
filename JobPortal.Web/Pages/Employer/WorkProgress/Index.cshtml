@@ -48,10 +48,10 @@
                            placeholder="Tên ứng viên hoặc tên công việc..." maxlength="200" />
                 </div>
                 <div class="col-md-3 d-flex gap-2">
-                    <button type="submit" class="btn btn-primary flex-grow-1">
+                    <button type="submit" class="btn work-progress-btn work-progress-btn--primary flex-grow-1">
                         <i class="bi bi-search me-1"></i> Lọc
                     </button>
-                    <a asp-page="/Employer/WorkProgress/Index" class="btn btn-outline-secondary" title="Xóa bộ lọc">
+                    <a asp-page="/Employer/WorkProgress/Index" class="btn work-progress-btn work-progress-btn--muted" title="Xóa bộ lọc">
                         <i class="bi bi-x-lg"></i>
                     </a>
                 </div>
@@ -66,7 +66,7 @@
         <div class="employer-panel text-center py-5 text-muted">
             <i class="bi bi-person-check display-6 d-block mb-2"></i>
             <p class="mb-2">Chưa có ứng viên nào được chấp nhận.</p>
-            <a asp-page="/Employer/Applicants" class="btn btn-sm btn-primary">Đi tới duyệt CV</a>
+            <a asp-page="/Employer/Applicants" class="btn btn-sm work-progress-btn work-progress-btn--primary">Đi tới duyệt CV</a>
         </div>
     }
     else if (Model.Accepted.Count == 0)
@@ -74,7 +74,7 @@
         <div class="employer-panel text-center py-5 text-muted">
             <i class="bi bi-funnel display-6 d-block mb-2"></i>
             <p class="mb-2">Không có kết quả phù hợp bộ lọc.</p>
-            <a asp-page="/Employer/WorkProgress/Index" class="btn btn-sm btn-outline-primary">Xóa bộ lọc</a>
+            <a asp-page="/Employer/WorkProgress/Index" class="btn btn-sm work-progress-btn work-progress-btn--info">Xóa bộ lọc</a>
         </div>
     }
     else
@@ -127,7 +127,7 @@
                         @(item.LastProgressAt.HasValue ? $" · Cập nhật {IndexModel.FormatRelativeTime(item.LastProgressAt.Value)}" : "")
                     </p>
                     <a asp-page="/Employer/WorkProgress/Detail" asp-route-applicationId="@item.ApplicationId"
-                       class="btn btn-sm btn-primary">
+                       class="btn btn-sm work-progress-btn work-progress-btn--primary">
                         <i class="bi bi-kanban me-1"></i> Quản lý tiến độ
                     </a>
                 </div>

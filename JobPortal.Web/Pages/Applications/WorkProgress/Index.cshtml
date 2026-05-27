@@ -10,7 +10,7 @@
             <h2 class="mb-1"><i class="bi bi-graph-up-arrow me-2"></i>Tiến độ làm việc</h2>
             <p class="text-muted mb-0">Theo dõi tiến độ các công việc part-time đã được nhà tuyển dụng chấp nhận</p>
         </div>
-        <a asp-page="/Applications/Index" class="btn btn-outline-secondary btn-sm">
+        <a asp-page="/Applications/Index" class="btn btn-sm work-progress-btn work-progress-btn--muted">
             <i class="bi bi-inbox me-1"></i> Đơn ứng tuyển
         </a>
     </div>
@@ -30,10 +30,10 @@
                                placeholder="Tên công việc, công ty, địa điểm..." maxlength="200" />
                     </div>
                     <div class="col-md-3 d-flex gap-2">
-                        <button type="submit" class="btn btn-primary flex-grow-1">
+                        <button type="submit" class="btn work-progress-btn work-progress-btn--primary flex-grow-1">
                             <i class="bi bi-search me-1"></i> Tìm
                         </button>
-                        <a asp-page="/Applications/WorkProgress/Index" class="btn btn-outline-secondary" title="Xóa bộ lọc">
+                        <a asp-page="/Applications/WorkProgress/Index" class="btn work-progress-btn work-progress-btn--muted" title="Xóa bộ lọc">
                             <i class="bi bi-x-lg"></i>
                         </a>
                     </div>
@@ -48,13 +48,13 @@
                 {
                     <i class="bi bi-funnel display-6 d-block mb-2"></i>
                     <p class="mb-2">Không có công việc phù hợp bộ lọc.</p>
-                    <a asp-page="/Applications/WorkProgress/Index" class="btn btn-sm btn-outline-primary">Xóa bộ lọc</a>
+                    <a asp-page="/Applications/WorkProgress/Index" class="btn btn-sm work-progress-btn work-progress-btn--info">Xóa bộ lọc</a>
                 }
                 else
                 {
                     <i class="bi bi-briefcase display-6 d-block mb-2"></i>
                     <p class="mb-2">Chưa có công việc nào được chấp nhận.</p>
-                    <a asp-page="/Applications/Index" class="btn btn-sm btn-primary">Xem đơn ứng tuyển</a>
+                    <a asp-page="/Applications/Index" class="btn btn-sm work-progress-btn work-progress-btn--primary">Xem đơn ứng tuyển</a>
                 }
             </div>
         }
@@ -91,7 +91,7 @@
                                 @(item.IsProgressLocked ? " · Đã kết thúc" : "")
                             </p>
                             <a asp-page="/Applications/WorkProgress/Detail" asp-route-applicationId="@item.ApplicationId"
-                               class="btn btn-sm btn-primary">
+                               class="btn btn-sm work-progress-btn work-progress-btn--primary">
                                 <i class="bi bi-eye me-1"></i> Xem tiến độ
                             </a>
                         </div>

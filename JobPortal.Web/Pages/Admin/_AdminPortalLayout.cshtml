@@ -1,0 +1,25 @@
+@{
+    Layout = "_Layout";
+    ViewData["AdminPortalChrome"] = true;
+    var currentPage = ViewContext.RouteData.Values["page"]?.ToString() ?? string.Empty;
+}
+
+<div class="admin-dash">
+    <div class="container-fluid px-3 px-lg-4">
+        <div class="admin-dash__shell">
+            <partial name="~/Pages/Shared/_AdminPortalNav.cshtml" model="currentPage" />
+            <div class="admin-dash__main">
+                @RenderBody()
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/admin-portal.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+}
+
+@section Scripts {
+    @await RenderSectionAsync("Scripts", required: false)
+}

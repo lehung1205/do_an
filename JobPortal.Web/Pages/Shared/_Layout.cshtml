@@ -6,7 +6,8 @@
         && ViewData["EmployerPortalChrome"] as bool? == true;
     var layoutCurrentPage = ViewContext.RouteData.Values["page"]?.ToString() ?? "";
     var isAdminPortalChrome = string.Equals(layoutUserRole, "ADMIN", StringComparison.Ordinal)
-        && layoutCurrentPage.StartsWith("/Admin/", StringComparison.OrdinalIgnoreCase);
+        && (ViewData["AdminPortalChrome"] as bool? == true
+            || layoutCurrentPage.StartsWith("/Admin/", StringComparison.OrdinalIgnoreCase));
 }
 <!DOCTYPE html>
 <html lang="vi">
@@ -27,7 +28,7 @@
     @await RenderSectionAsync("EmployerStyles", required: false)
 </head>
 <body class="site-body@(isEmployerPortalChrome ? " employer-portal-mode" : "")@(isAdminPortalChrome ? " admin-portal-mode" : "")">
-    @if (!isEmployerPortalChrome)
+    @if (!isEmployerPortalChrome && !isAdminPortalChrome)
     {
     <header class="site-header">
         <nav class="navbar navbar-expand-lg navbar-light">
@@ -191,7 +192,7 @@
     </header>
     }
 
-    <main role="main" class="@(isEmployerPortalChrome ? "employer-portal-main" : "")">
+    <main role="main" class="@(isEmployerPortalChrome ? "employer-portal-main" : "")@(isAdminPortalChrome ? " admin-portal-main" : "")">
         @RenderBody()
     </main>
 

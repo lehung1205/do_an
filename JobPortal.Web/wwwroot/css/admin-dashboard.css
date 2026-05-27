@@ -15,12 +15,10 @@
 }
 
 .admin-dash__hero {
-    background: var(--jp-card-bg, #fff);
+    background: transparent;
     color: var(--adm-text, #313131);
-    border-bottom: 1px solid var(--adm-border);
-    box-shadow: var(--jp-card-shadow, 0 1px 2px rgba(15, 23, 42, 0.05));
-    padding: 1.5rem 0 1.75rem;
-    margin-bottom: 1rem;
+    padding: 1rem 0 1.25rem;
+    margin-bottom: 0.5rem;
     position: relative;
 }
 
@@ -39,6 +37,11 @@
     align-items: flex-end;
     justify-content: space-between;
     gap: 1.25rem 2rem;
+    background: var(--jp-card-bg, #fff);
+    border: 1px solid var(--adm-border);
+    border-radius: var(--adm-radius);
+    box-shadow: var(--jp-card-shadow, 0 1px 2px rgba(15, 23, 42, 0.05));
+    padding: 1.5rem;
 }
 
 .admin-dash__eyebrow {

@@ -1,0 +1,77 @@
+@{
+    Layout = "_Layout";
+    ViewData["AdminPortalChrome"] = true;
+    var currentPage = ViewContext.RouteData.Values["page"]?.ToString() ?? string.Empty;
+    var adminName = Context.Session.GetString("UserName") ?? "Admin";
+    var adminAvatarUrl = Context.Session.GetString("UserAvatarUrl");
+    var adminInitials = JobPortal.Web.Models.AccountPanelViewModel.GetInitials(adminName);
+}
+
+<div class="admin-portal-topbar" role="banner">
+    <div class="container-fluid px-3 px-lg-4">
+        <div class="admin-portal-topbar__inner">
+            <a class="admin-portal-topbar__brand" asp-page="/Admin/Dashboard/Index">
+                <span class="admin-portal-topbar__brand-name">JobPortal</span>
+                <span class="admin-portal-topbar__brand-tag">admin portal</span>
+            </a>
+
+            <div class="admin-portal-topbar__support">
+                <span class="admin-portal-topbar__support-label">Quản trị hệ thống</span>
+                <span class="admin-portal-topbar__support-name">@adminName</span>
+            </div>
+
+            <div class="dropdown admin-portal-topbar__account">
+                <button class="admin-portal-topbar__avatar-btn dropdown-toggle" type="button"
+                        data-bs-toggle="dropdown" aria-expanded="false" aria-label="Menu tài khoản">
+                    @if (!string.IsNullOrWhiteSpace(adminAvatarUrl))
+                    {
+                        <img src="@adminAvatarUrl" alt="" class="admin-portal-topbar__avatar-img" width="36" height="36" />
+                    }
+                    else
+                    {
+                        <span class="admin-portal-topbar__avatar-fallback">@adminInitials</span>
+                    }
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                    <li class="dropdown-header small text-muted">@adminName</li>
+                    <li>
+                        <button type="button" class="dropdown-item" data-account-open data-account-tab="view">
+                            <i class="bi bi-person me-2"></i> Thông tin cá nhân
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" class="dropdown-item" data-account-open data-account-tab="password">
+                            <i class="bi bi-shield-lock me-2"></i> Đổi mật khẩu
+                        </button>
+                    </li>
+                    <li><hr class="dropdown-divider" /></li>
+                    <li>
+                        <a class="dropdown-item text-danger" asp-page="/Auth/Logout">
+                            <i class="bi bi-box-arrow-right me-2"></i> Đăng xuất
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="admin-dash">
+    <div class="container-fluid px-3 px-lg-4">
+        <div class="admin-dash__shell">
+            <partial name="~/Pages/Shared/_AdminPortalNav.cshtml" model="currentPage" />
+            <div class="admin-dash__main">
+                @RenderBody()
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/admin-portal.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+}
+
+@section Scripts {
+    @await RenderSectionAsync("Scripts", required: false)
+}

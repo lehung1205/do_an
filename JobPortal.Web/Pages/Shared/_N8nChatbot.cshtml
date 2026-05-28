@@ -1,0 +1,92 @@
+@{
+    var isLoggedIn = !string.IsNullOrEmpty(Context.Session.GetString("JwtToken"));
+    var sessionRole = Context.Session.GetString("UserRole");
+    var userName = Context.Session.GetString("UserName") ?? "bạn";
+    var n8nRole = JobPortal.Web.Pages.Chatbot.WebhookModel.MapRoleForN8n(isLoggedIn ? sessionRole : null);
+    var roleLabel = !isLoggedIn
+        ? "Khách"
+        : sessionRole?.ToUpperInvariant() switch
+        {
+            "ADMIN" => "Quản trị viên",
+            "JOB_SEEKER" => "Ứng viên",
+            _ => "Khách"
+        };
+    var welcomeExtra = !isLoggedIn
+        ? " Bạn đang xem với tư cách khách — đăng nhập để được hỗ trợ cá nhân hóa hơn."
+        : string.Empty;
+}
+
+<div id="n8n-chatbot"
+     class="n8n-chatbot"
+     data-endpoint="/chatbot/webhook"
+     data-user-name="@userName"
+     data-role-label="@roleLabel"
+     data-n8n-role="@n8nRole"
+     aria-live="polite">
+    <button type="button"
+            class="n8n-chatbot__launcher"
+            id="n8nChatbotLauncher"
+            aria-expanded="false"
+            aria-controls="n8nChatbotPanel"
+            aria-label="Mở trợ lý JobPortal">
+        <span class="n8n-chatbot__launcher-icon n8n-chatbot__launcher-icon--open" aria-hidden="true">
+            <i class="bi bi-chat-dots-fill"></i>
+        </span>
+        <span class="n8n-chatbot__launcher-icon n8n-chatbot__launcher-icon--close" aria-hidden="true">
+            <i class="bi bi-x-lg"></i>
+        </span>
+    </button>
+
+    <section class="n8n-chatbot__panel"
+             id="n8nChatbotPanel"
+             role="dialog"
+             aria-labelledby="n8nChatbotTitle"
+             aria-hidden="true"
+             hidden>
+        <header class="n8n-chatbot__header">
+            <div class="n8n-chatbot__header-main">
+                <span class="n8n-chatbot__avatar" aria-hidden="true">
+                    <i class="bi bi-robot"></i>
+                </span>
+                <div>
+                    <h2 class="n8n-chatbot__title" id="n8nChatbotTitle">Trợ lý JobPortal</h2>
+                    <p class="n8n-chatbot__subtitle">
+                        <span class="n8n-chatbot__status-dot" aria-hidden="true"></span>
+                        Sẵn sàng · @roleLabel
+                    </p>
+                </div>
+            </div>
+            <button type="button" class="n8n-chatbot__header-btn" id="n8nChatbotClear" title="Xóa hội thoại">
+                <i class="bi bi-arrow-counterclockwise"></i>
+            </button>
+        </header>
+
+        <div class="n8n-chatbot__messages" id="n8nChatbotMessages" role="log" aria-relevant="additions">
+            <div class="n8n-chatbot__msg n8n-chatbot__msg--bot">
+                <div class="n8n-chatbot__bubble">
+                    Xin chào <strong>@userName</strong>! Tôi là trợ lý ảo JobPortal.
+                    Hỏi về tìm việc, đơn ứng tuyển hoặc cách dùng hệ thống nhé.@welcomeExtra
+                </div>
+                <time class="n8n-chatbot__time">Vừa xong</time>
+            </div>
+        </div>
+
+        <div class="n8n-chatbot__error d-none" id="n8nChatbotError" role="alert"></div>
+
+        <form class="n8n-chatbot__composer" id="n8nChatbotForm">
+            <label class="visually-hidden" for="n8nChatbotInput">Nhập tin nhắn</label>
+            <textarea id="n8nChatbotInput"
+                      class="n8n-chatbot__input"
+                      rows="1"
+                      placeholder="Nhập câu hỏi..."
+                      maxlength="2000"
+                      autocomplete="off"></textarea>
+            <button type="submit" class="n8n-chatbot__send" id="n8nChatbotSend" aria-label="Gửi tin nhắn">
+                <i class="bi bi-send-fill"></i>
+            </button>
+        </form>
+    </section>
+</div>
+
+<link rel="stylesheet" href="~/css/n8n-chatbot.css" asp-append-version="true" />
+<script src="~/js/n8n-chatbot.js" asp-append-version="true"></script>

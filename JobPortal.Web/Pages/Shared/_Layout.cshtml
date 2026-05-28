@@ -8,6 +8,7 @@
     var isAdminPortalChrome = string.Equals(layoutUserRole, "ADMIN", StringComparison.Ordinal)
         && (ViewData["AdminPortalChrome"] as bool? == true
             || layoutCurrentPage.StartsWith("/Admin/", StringComparison.OrdinalIgnoreCase));
+    var showN8nChatbot = JobPortal.Web.Pages.Chatbot.WebhookModel.IsChatbotAllowed(isLoggedIn, layoutUserRole);
 }
 <!DOCTYPE html>
 <html lang="vi">
@@ -202,6 +203,11 @@
     {
         @await Component.InvokeAsync("AccountPanel")
         <partial name="_ValidationScriptsPartial" />
+    }
+
+    @if (showN8nChatbot)
+    {
+        <partial name="_N8nChatbot" />
     }
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>

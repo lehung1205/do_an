@@ -9,10 +9,7 @@ public class IndexModel : PageModel
 {
     private readonly ApiService _api;
 
-    public IndexModel(ApiService api)
-    {
-        _api = api;
-    }
+    public IndexModel(ApiService api) => _api = api;
 
     public IReadOnlyList<MyApplicationDto> Applications { get; set; } = Array.Empty<MyApplicationDto>();
     public IReadOnlyList<MyApplicationDto> FilteredApplications { get; set; } = Array.Empty<MyApplicationDto>();
@@ -78,17 +75,14 @@ public class IndexModel : PageModel
         return s is "all" or "submitted" or "reviewed" or "accepted" or "rejected" ? s : "all";
     }
 
-    private static bool MatchesStatus(MyApplicationDto app, string status)
+    private static bool MatchesStatus(MyApplicationDto app, string status) => status switch
     {
-        return status switch
-        {
-            "submitted" => IsStatus(app.Status, "submitted") || IsStatus(app.Status, "pending"),
-            "reviewed" => IsStatus(app.Status, "reviewed"),
-            "accepted" => IsStatus(app.Status, "accepted"),
-            "rejected" => IsStatus(app.Status, "rejected"),
-            _ => true
-        };
-    }
+        "submitted" => IsStatus(app.Status, "submitted") || IsStatus(app.Status, "pending"),
+        "reviewed" => IsStatus(app.Status, "reviewed"),
+        "accepted" => IsStatus(app.Status, "accepted"),
+        "rejected" => IsStatus(app.Status, "rejected"),
+        _ => true
+    };
 
     private static bool MatchesSearch(MyApplicationDto app, string? search)
     {
@@ -99,6 +93,8 @@ public class IndexModel : PageModel
 
         var term = search.Trim();
         return (app.JobTitle?.Contains(term, StringComparison.OrdinalIgnoreCase) ?? false)
+            || (app.EmployerName?.Contains(term, StringComparison.OrdinalIgnoreCase) ?? false)
+            || (app.CategoryName?.Contains(term, StringComparison.OrdinalIgnoreCase) ?? false)
             || (app.JobLocation?.Contains(term, StringComparison.OrdinalIgnoreCase) ?? false)
             || (app.JobSalary?.Contains(term, StringComparison.OrdinalIgnoreCase) ?? false)
             || (app.ResumeTitle?.Contains(term, StringComparison.OrdinalIgnoreCase) ?? false);
@@ -108,18 +104,61 @@ public class IndexModel : PageModel
     {
         "submitted" => "Đã gửi",
         "pending" => "Chờ xử lý",
-        "reviewed" => "Nhà tuyển dụng đã xem",
+        "reviewed" => "NTD đã xem",
         "accepted" => "Được chấp nhận",
         "rejected" => "Bị từ chối",
         _ => status
     };
 
-    public static string StatusBadgeClass(string status) => status.ToLowerInvariant() switch
+    public static string StatusHint(string status) => status.ToLowerInvariant() switch
     {
-        "submitted" or "pending" => "bg-secondary",
-        "reviewed" => "bg-info text-dark",
-        "accepted" => "bg-success",
-        "rejected" => "bg-danger",
-        _ => "bg-secondary"
+        "submitted" or "pending" => "Đơn đã gửi — chờ nhà tuyển dụng phản hồi.",
+        "reviewed" => "HR đã mở hồ sơ — có thể liên hệ thêm qua tin nhắn.",
+        "accepted" => "Chúc mừng! Bạn có thể theo dõi tiến độ công việc.",
+        "rejected" => "Đơn không được chọn — hãy thử các vị trí khác.",
+        _ => string.Empty
     };
+
+    public static string StatusCardModifier(string status) => status.ToLowerInvariant() switch
+    {
+        "submitted" or "pending" => "seeker-app-card--submitted",
+        "reviewed" => "seeker-app-card--reviewed",
+        "accepted" => "seeker-app-card--accepted",
+        "rejected" => "seeker-app-card--rejected",
+        _ => "seeker-app-card--submitted"
+    };
+
+    public static string FormatJobPostingStatus(string status) => status.ToLowerInvariant() switch
+    {
+        "recruiting" => "Đang tuyển",
+        "closed" => "Đã đóng tin",
+        "pending" => "Chờ duyệt",
+        "rejected" => "Tin bị từ chối",
+        _ => status
+    };
+
+    public static string FormatRelativeApplied(DateTime appliedAtUtc)
+    {
+        var applied = appliedAtUtc.ToLocalTime();
+        var today = DateTime.Today;
+        var appliedDate = applied.Date;
+
+        if (appliedDate == today)
+        {
+            return $"Hôm nay lúc {applied:HH:mm}";
+        }
+
+        if (appliedDate == today.AddDays(-1))
+        {
+            return $"Hôm qua lúc {applied:HH:mm}";
+        }
+
+        var days = (today - appliedDate).Days;
+        if (days is > 0 and < 7)
+        {
+            return $"{days} ngày trước";
+        }
+
+        return applied.ToString("dd/MM/yyyy HH:mm");
+    }
 }

@@ -145,20 +145,7 @@ public class ApplicationService : IApplicationService
 
         await _repository.AddAsync(entity, cancellationToken);
 
-        return new MyApplicationDto
-        {
-            Id = entity.Id,
-            JobId = job.Id,
-            JobTitle = job.Title,
-            JobLocation = job.Location,
-            JobSalary = job.Salary,
-            JobPostingStatus = job.PostingStatus,
-            ResumeId = resume.Id,
-            ResumeTitle = resume.Title,
-            ResumeUrl = resume.Url,
-            AppliedAt = entity.AppliedAt,
-            Status = entity.Status
-        };
+        return MapToMyApplicationDto(entity, job, resume);
     }
 
     public async Task<IReadOnlyList<MyApplicationDto>> GetMyApplicationsAsync(
@@ -330,17 +317,28 @@ public class ApplicationService : IApplicationService
     };
 
     private static MyApplicationDto MapToMyApplicationDto(Application a) =>
+        MapToMyApplicationDto(a, a.Job, a.Resume);
+
+    private static MyApplicationDto MapToMyApplicationDto(Application a, Job job, Resume resume) =>
         new()
         {
             Id = a.Id,
             JobId = a.JobId,
-            JobTitle = a.Job.Title,
-            JobLocation = a.Job.Location,
-            JobSalary = a.Job.Salary,
-            JobPostingStatus = a.Job.PostingStatus,
+            JobTitle = job.Title,
+            EmployerName = job.Employer?.Name ?? "—",
+            CategoryName = job.Category?.Name ?? "—",
+            JobLocation = job.Location,
+            JobSalary = job.Salary,
+            JobWorkingHours = job.WorkingHours,
+            JobPostingStatus = job.PostingStatus,
+            JobExpiryDate = job.ExpiryDate,
+            JobThumbnailUrl = job.Images?
+                .OrderBy(i => i.Id)
+                .Select(i => i.Url)
+                .FirstOrDefault(),
             ResumeId = a.ResumeId,
-            ResumeTitle = a.Resume.Title,
-            ResumeUrl = a.Resume.Url,
+            ResumeTitle = resume.Title,
+            ResumeUrl = resume.Url,
             AppliedAt = a.AppliedAt,
             Status = a.Status
         };

@@ -87,6 +87,11 @@ public class ApplicationRepository : IApplicationRepository
             .Where(a => a.JobSeekerId == jobSeekerId)
             .OrderByDescending(a => a.AppliedAt)
             .Include(a => a.Job)
+                .ThenInclude(j => j.Employer)
+            .Include(a => a.Job)
+                .ThenInclude(j => j.Category)
+            .Include(a => a.Job)
+                .ThenInclude(j => j.Images)
             .Include(a => a.Resume)
             .ToListAsync(cancellationToken);
     }

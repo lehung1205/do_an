@@ -8,10 +8,18 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.Configure<EmployerSupportOptions>(
     builder.Configuration.GetSection("EmployerSupport"));
+builder.Services.Configure<N8nChatbotOptions>(
+    builder.Configuration.GetSection(N8nChatbotOptions.SectionName));
 
 builder.Services.AddHttpClient("JobPortalAPI", client =>
 {
     client.BaseAddress = new Uri(builder.Configuration["ApiSettings:BaseUrl"]!);
+});
+
+builder.Services.AddHttpClient("N8nWebhook", (sp, client) =>
+{
+    var options = sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<N8nChatbotOptions>>().Value;
+    client.Timeout = TimeSpan.FromSeconds(Math.Clamp(options.TimeoutSeconds, 10, 300));
 });
 
 builder.Services.AddSession(options =>

@@ -36,6 +36,25 @@ public class AdminJobsController : ControllerBase
             "Jobs retrieved successfully."));
     }
 
+    [HttpGet("by-category/export-excel")]
+    public async Task<IActionResult> ExportJobsByCategoryExcel(CancellationToken cancellationToken = default)
+    {
+        _ = GetCurrentUserId();
+        var file = await _adminJobService.ExportJobsByCategoryExcelAsync(cancellationToken);
+        return File(file.Content, file.ContentType, file.FileName);
+    }
+
+    [HttpGet("export-excel")]
+    public async Task<IActionResult> ExportJobsListExcel(
+        [FromQuery] string? status = "all",
+        [FromQuery] string? q = null,
+        CancellationToken cancellationToken = default)
+    {
+        _ = GetCurrentUserId();
+        var file = await _adminJobService.ExportJobsListExcelAsync(status, q, cancellationToken);
+        return File(file.Content, file.ContentType, file.FileName);
+    }
+
     [HttpGet("pending")]
     public Task<IActionResult> GetPendingJobs(
         [FromQuery] int page = 1,

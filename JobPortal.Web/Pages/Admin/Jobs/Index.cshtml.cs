@@ -85,6 +85,42 @@ public class IndexModel : PageModel
         return Page();
     }
 
+    public async Task<IActionResult> OnGetExportJobsExcelAsync(string? status, string? q)
+    {
+        var redirect = RequireAdmin();
+        if (redirect != null)
+        {
+            return redirect;
+        }
+
+        StatusFilter = NormalizeStatusFilter(status);
+        Search = string.IsNullOrWhiteSpace(q) ? null : q.Trim();
+
+        var query = $"status={Uri.EscapeDataString(StatusFilter)}";
+        if (!string.IsNullOrEmpty(Search))
+        {
+            query += $"&q={Uri.EscapeDataString(Search)}";
+        }
+
+        var response = await _api.GetRawAsync($"/api/admin/jobs/export-excel?{query}");
+        if (!response.IsSuccessStatusCode)
+        {
+            TempData["AdminJobErrorMessage"] = "Không thể xuất báo cáo danh sách công việc.";
+            return RedirectToPage("/Admin/Jobs/Index", new { status = StatusFilter, q = Search });
+        }
+
+        var bytes = await response.Content.ReadAsByteArrayAsync();
+        var fileName = response.Content.Headers.ContentDisposition?.FileNameStar
+            ?? response.Content.Headers.ContentDisposition?.FileName
+            ?? "danh-sach-cong-viec.xlsx";
+
+        return File(
+            bytes,
+            response.Content.Headers.ContentType?.ToString()
+                ?? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            fileName.Trim('"'));
+    }
+
     public async Task<IActionResult> OnPostApproveAsync(
         long jobId,
         string? status,

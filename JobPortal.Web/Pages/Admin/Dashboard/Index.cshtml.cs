@@ -31,6 +31,34 @@ public class IndexModel : PageModel
         return Page();
     }
 
+    public async Task<IActionResult> OnGetExportJobsByCategoryExcelAsync()
+    {
+        var redirect = RequireAdmin();
+        if (redirect != null)
+        {
+            return redirect;
+        }
+
+        var response = await _api.GetRawAsync("/api/admin/jobs/by-category/export-excel");
+        if (!response.IsSuccessStatusCode)
+        {
+            ErrorMessage = "Không thể xuất báo cáo Excel. Vui lòng thử lại.";
+            Dashboard = await _api.GetApiDataAsync<AdminDashboardDto>("/api/admin/dashboard");
+            return Page();
+        }
+
+        var bytes = await response.Content.ReadAsByteArrayAsync();
+        var fileName = response.Content.Headers.ContentDisposition?.FileNameStar
+            ?? response.Content.Headers.ContentDisposition?.FileName
+            ?? "bao-cao-cong-viec-theo-danh-muc.xlsx";
+
+        return File(
+            bytes,
+            response.Content.Headers.ContentType?.ToString()
+                ?? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            fileName.Trim('"'));
+    }
+
     private IActionResult? RequireAdmin()
     {
         if (string.IsNullOrEmpty(HttpContext.Session.GetString("JwtToken")))

@@ -506,8 +506,9 @@ public class EmployerDashboardService : IEmployerDashboardService
         }
 
         var application = await _context.Applications
-            .Include(a => a.Job)
             .Include(a => a.JobSeeker)
+            .Include(a => a.Job).ThenInclude(j => j.Category)
+            .Include(a => a.Job).ThenInclude(j => j.Images)
             .Include(a => a.Resume)
             .FirstOrDefaultAsync(
                 a => a.Id == applicationId && a.Job.EmployerId == employer.Id,
@@ -529,22 +530,7 @@ public class EmployerDashboardService : IEmployerDashboardService
         {
             if (status == current)
             {
-                return MapApplicationDto(new ApplicationRow
-                {
-                    Id = application.Id,
-                    JobId = application.JobId,
-                    JobSeekerId = application.JobSeekerId,
-                    AppliedAt = application.AppliedAt,
-                    Status = application.Status,
-                    ApplicantName = application.JobSeeker.Name,
-                    ApplicantEmail = application.JobSeeker.Email,
-                    ApplicantPhone = application.JobSeeker.Phone,
-                    ApplicantProfileImage = application.JobSeeker.ProfileImage,
-                    JobTitle = application.Job.Title,
-                    ResumeId = application.ResumeId,
-                    ResumeTitle = application.Resume.Title,
-                    ResumeUrl = application.Resume.Url
-                }, seekerRatings);
+                return MapApplicationDto(MapApplicationRow(application), seekerRatings);
             }
 
             throw new BadRequestException(
@@ -561,22 +547,7 @@ public class EmployerDashboardService : IEmployerDashboardService
             await SeedInitialWorkProgressAsync(application.Id, cancellationToken);
         }
 
-        return MapApplicationDto(new ApplicationRow
-        {
-            Id = application.Id,
-            JobId = application.JobId,
-            JobSeekerId = application.JobSeekerId,
-            AppliedAt = application.AppliedAt,
-            Status = application.Status,
-            ApplicantName = application.JobSeeker.Name,
-            ApplicantEmail = application.JobSeeker.Email,
-            ApplicantPhone = application.JobSeeker.Phone,
-            ApplicantProfileImage = application.JobSeeker.ProfileImage,
-            JobTitle = application.Job.Title,
-            ResumeId = application.ResumeId,
-            ResumeTitle = application.Resume.Title,
-            ResumeUrl = application.Resume.Url
-        }, seekerRatings);
+        return MapApplicationDto(MapApplicationRow(application), seekerRatings);
     }
 
     public async Task<IReadOnlyList<WorkProgressJobOptionDto>> GetWorkProgressJobOptionsAsync(
@@ -850,6 +821,34 @@ public class EmployerDashboardService : IEmployerDashboardService
         UpdatedAt = p.UpdatedAt
     };
 
+    private static ApplicationRow MapApplicationRow(Application application)
+    {
+        var job = application.Job;
+        return new ApplicationRow
+        {
+            Id = application.Id,
+            JobId = application.JobId,
+            JobSeekerId = application.JobSeekerId,
+            AppliedAt = application.AppliedAt,
+            Status = application.Status,
+            ApplicantName = application.JobSeeker.Name,
+            ApplicantEmail = application.JobSeeker.Email,
+            ApplicantPhone = application.JobSeeker.Phone,
+            ApplicantProfileImage = application.JobSeeker.ProfileImage,
+            JobTitle = job.Title,
+            CategoryName = job.Category?.Name,
+            JobLocation = job.Location,
+            JobSalary = job.Salary,
+            JobWorkingHours = job.WorkingHours,
+            JobExpiryDate = job.ExpiryDate,
+            JobPostingStatus = job.PostingStatus,
+            JobThumbnailUrl = job.Images?.OrderBy(i => i.Id).Select(i => i.Url).FirstOrDefault(),
+            ResumeId = application.ResumeId,
+            ResumeTitle = application.Resume.Title,
+            ResumeUrl = application.Resume.Url
+        };
+    }
+
     private static EmployerDashboardApplicationDto MapApplicationDto(
         ApplicationRow a,
         IReadOnlyDictionary<long, SeekerRatingSnapshot>? seekerRatings = null)
@@ -871,6 +870,13 @@ public class EmployerDashboardService : IEmployerDashboardService
             ApplicantAverageRating = rating?.Average,
             ApplicantReviewCount = rating?.Count ?? 0,
             JobTitle = a.JobTitle,
+            CategoryName = a.CategoryName,
+            JobLocation = a.JobLocation,
+            JobSalary = a.JobSalary,
+            JobWorkingHours = a.JobWorkingHours,
+            JobExpiryDate = a.JobExpiryDate,
+            JobPostingStatus = a.JobPostingStatus,
+            JobThumbnailUrl = a.JobThumbnailUrl,
             AppliedAt = a.AppliedAt,
             ResumeId = a.ResumeId,
             ResumeTitle = a.ResumeTitle,
@@ -1021,6 +1027,13 @@ public class EmployerDashboardService : IEmployerDashboardService
                 ApplicantPhone = a.JobSeeker.Phone,
                 ApplicantProfileImage = a.JobSeeker.ProfileImage,
                 JobTitle = a.Job.Title,
+                CategoryName = a.Job.Category.Name,
+                JobLocation = a.Job.Location,
+                JobSalary = a.Job.Salary,
+                JobWorkingHours = a.Job.WorkingHours,
+                JobExpiryDate = a.Job.ExpiryDate,
+                JobPostingStatus = a.Job.PostingStatus,
+                JobThumbnailUrl = a.Job.Images.OrderBy(i => i.Id).Select(i => i.Url).FirstOrDefault(),
                 ResumeId = a.ResumeId,
                 ResumeTitle = a.Resume.Title,
                 ResumeUrl = a.Resume.Url
@@ -1072,6 +1085,13 @@ public class EmployerDashboardService : IEmployerDashboardService
         public string? ApplicantPhone { get; init; }
         public string? ApplicantProfileImage { get; init; }
         public string JobTitle { get; init; } = null!;
+        public string? CategoryName { get; init; }
+        public string JobLocation { get; init; } = null!;
+        public string JobSalary { get; init; } = null!;
+        public string? JobWorkingHours { get; init; }
+        public DateTime JobExpiryDate { get; init; }
+        public string JobPostingStatus { get; init; } = null!;
+        public string? JobThumbnailUrl { get; init; }
         public long ResumeId { get; init; }
         public string ResumeTitle { get; init; } = null!;
         public string? ResumeUrl { get; init; }

@@ -3,206 +3,370 @@
 @using static JobPortal.Web.Pages.Employer.ApplicantsModel
 @using JobPortal.Web.Models
 @{
-    ViewData["Title"] = "Ứng viên";
+    ViewData["Title"] = "Ứng viên ứng tuyển";
     ViewData["EmployerNavActive"] = EmployerPortalNavKeys.Applicants;
+    var total = Model.AllApplicants.Count;
 }
 
-<partial name="Shared/_EmployerPageHeader" model='new EmployerPageHeaderModel {
-    Title = "Duyệt CV ứng viên",
-    Subtitle = Model.UnreadCount > 0
-        ? $"{Model.UnreadCount} CV chưa xem — xem hồ sơ, đánh giá và cập nhật trạng thái tuyển dụng"
-        : "Xem hồ sơ, đánh giá và cập nhật trạng thái tuyển dụng",
-    BreadcrumbLabel = "Ứng viên ứng tuyển"
-}' />
-
-<div class="applicant-review-page employer-dash__panel-stack">
+<div class="emp-apps">
+    <header class="emp-apps-hero">
+        <div class="emp-apps-hero__text">
+            <p class="emp-apps-hero__eyebrow">
+                <i class="bi bi-people"></i> Tuyển dụng
+            </p>
+            <h1 class="emp-apps-hero__title">Ứng viên ứng tuyển</h1>
+            <p class="emp-apps-hero__subtitle">
+                Xem hồ sơ, đánh giá sao, duyệt CV và cập nhật trạng thái từng đơn — theo dõi tiến độ sau khi chấp nhận.
+            </p>
+        </div>
+        @if (total > 0)
+        {
+            <div class="emp-apps-hero__stats">
+                <div class="emp-apps-hero__pill" aria-label="Tổng đơn">
+                    <span class="emp-apps-hero__pill-value">@total</span>
+                    <span class="emp-apps-hero__pill-label">Tổng CV</span>
+                </div>
+                @if (Model.UnreadCount > 0)
+                {
+                    <div class="emp-apps-hero__pill" aria-label="Chưa xem">
+                        <span class="emp-apps-hero__pill-value emp-apps-hero__pill-value--warn">@Model.UnreadCount</span>
+                        <span class="emp-apps-hero__pill-label">Chưa xem</span>
+                    </div>
+                }
+            </div>
+        }
+    </header>
 
     @if (!string.IsNullOrEmpty(Model.SuccessMessage))
     {
-        <div class="alert alert-success">@Model.SuccessMessage</div>
+        <div class="alert alert-success emp-apps-alert shadow-sm">@Model.SuccessMessage</div>
     }
     @if (!string.IsNullOrEmpty(Model.ErrorMessage))
     {
-        <div class="alert alert-warning">@Model.ErrorMessage</div>
+        <div class="alert alert-warning emp-apps-alert shadow-sm">@Model.ErrorMessage</div>
     }
 
-    <ul class="nav nav-pills mb-4 flex-wrap gap-1">
-        <li class="nav-item">
-            <a class="nav-link @(Model.Filter == "all" ? "active" : "")" asp-page="/Employer/Applicants" asp-route-filter="all">Tất cả</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link @(Model.Filter == "unread" ? "active" : "")" asp-page="/Employer/Applicants" asp-route-filter="unread">
-                Chưa xem
-                @if (Model.UnreadCount > 0)
-                {
-                    <span class="badge bg-dark ms-1">@Model.UnreadCount</span>
-                }
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link @(Model.Filter == "reviewed" ? "active" : "")" asp-page="/Employer/Applicants" asp-route-filter="reviewed">Đã xem</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link @(Model.Filter == "accepted" ? "active" : "")" asp-page="/Employer/Applicants" asp-route-filter="accepted">Chấp nhận</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link @(Model.Filter == "rejected" ? "active" : "")" asp-page="/Employer/Applicants" asp-route-filter="rejected">Từ chối</a>
-        </li>
-    </ul>
-
-    @if (Model.Applicants.Count == 0)
+    @if (total == 0)
     {
-        <div class="applicant-card applicant-card--empty text-center py-5 text-muted">
-            @(Model.Filter == "all" ? "Chưa có ứng viên nào apply." : "Không có ứng viên trong mục này.")
+        <div class="emp-apps-empty">
+            <div class="emp-apps-empty__icon" aria-hidden="true">
+                <i class="bi bi-inbox"></i>
+            </div>
+            <h2 class="h5 mb-2">Chưa có ứng viên</h2>
+            <p class="text-muted mb-4">Khi có người ứng tuyển vào tin của bạn, danh sách sẽ hiển thị tại đây.</p>
+            <a asp-page="/Employer/Jobs" class="btn emp-apps-btn emp-apps-btn--primary">
+                <i class="bi bi-briefcase me-1"></i>Quản lý tin tuyển dụng
+            </a>
         </div>
     }
     else
     {
-        <div class="applicant-review-list d-flex flex-column gap-3">
-            @foreach (var app in Model.Applicants)
-            {
-                var statusKey = app.Status.Trim().ToLowerInvariant();
-                var isFinalAccepted = statusKey == "accepted";
-                var isFinalRejected = statusKey == "rejected";
+        <nav class="emp-apps-stats" aria-label="Lọc theo trạng thái">
+            <a asp-page="/Employer/Applicants"
+               asp-route-filter="all"
+               asp-route-q="@Model.Search"
+               class="emp-apps-stat @(Model.Filter == "all" ? "is-active" : "")">
+                <span class="emp-apps-stat__label">Tất cả</span>
+                <span class="emp-apps-stat__value">@total</span>
+            </a>
+            <a asp-page="/Employer/Applicants"
+               asp-route-filter="unread"
+               asp-route-q="@Model.Search"
+               class="emp-apps-stat emp-apps-stat--unread @(Model.Filter == "unread" ? "is-active" : "")">
+                <span class="emp-apps-stat__label">Chưa xem</span>
+                <span class="emp-apps-stat__value">@Model.UnreadCount</span>
+            </a>
+            <a asp-page="/Employer/Applicants"
+               asp-route-filter="reviewed"
+               asp-route-q="@Model.Search"
+               class="emp-apps-stat emp-apps-stat--reviewed @(Model.Filter == "reviewed" ? "is-active" : "")">
+                <span class="emp-apps-stat__label">Đã xem</span>
+                <span class="emp-apps-stat__value">@Model.ReviewedCount</span>
+            </a>
+            <a asp-page="/Employer/Applicants"
+               asp-route-filter="accepted"
+               asp-route-q="@Model.Search"
+               class="emp-apps-stat emp-apps-stat--accepted @(Model.Filter == "accepted" ? "is-active" : "")">
+                <span class="emp-apps-stat__label">Chấp nhận</span>
+                <span class="emp-apps-stat__value">@Model.AcceptedCount</span>
+            </a>
+            <a asp-page="/Employer/Applicants"
+               asp-route-filter="rejected"
+               asp-route-q="@Model.Search"
+               class="emp-apps-stat emp-apps-stat--rejected @(Model.Filter == "rejected" ? "is-active" : "")">
+                <span class="emp-apps-stat__label">Từ chối</span>
+                <span class="emp-apps-stat__value">@Model.RejectedCount</span>
+            </a>
+        </nav>
 
-                <article class="applicant-card @(app.IsUnread ? "applicant-card--unread" : "")">
-                    <div class="applicant-card__header">
-                        <button type="button"
-                                class="applicant-card__identity applicant-profile-trigger"
-                                data-application-id="@app.Id"
-                                title="Xem thông tin ứng viên"
-                                aria-label="Xem thông tin @app.ApplicantName">
-                            <span class="applicant-card__avatar" aria-hidden="true">
-                                @if (!string.IsNullOrWhiteSpace(app.ApplicantProfileImage))
+        <form method="get" class="emp-apps-filter">
+            <input type="hidden" name="filter" value="@Model.Filter" />
+            <div class="emp-apps-filter__grid">
+                <div class="emp-apps-filter__field">
+                    <label class="form-label" for="q">Tìm kiếm</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                        <input id="q" name="q" type="search" class="form-control border-start-0"
+                               value="@Model.Search"
+                               placeholder="Tên ứng viên, việc làm, CV, email..." />
+                    </div>
+                </div>
+                <div class="emp-apps-filter__actions">
+                    <button type="submit" class="btn emp-apps-btn emp-apps-btn--primary w-100">
+                        <i class="bi bi-funnel me-1"></i>Lọc
+                    </button>
+                    @if (Model.HasActiveFilter)
+                    {
+                        <a asp-page="/Employer/Applicants" class="btn emp-apps-btn emp-apps-btn--muted w-100">
+                            <i class="bi bi-x-lg me-1"></i>Xóa lọc
+                        </a>
+                    }
+                </div>
+            </div>
+        </form>
+
+        <p class="emp-apps-toolbar">
+            Hiển thị <strong>@Model.FilteredApplicants.Count</strong> / @total ứng viên
+        </p>
+
+        @if (Model.FilteredApplicants.Count == 0)
+        {
+            <div class="emp-apps-empty emp-apps-empty--compact">
+                <i class="bi bi-funnel display-6 text-muted mb-2 d-block"></i>
+                <p class="mb-3 text-muted">Không có ứng viên phù hợp bộ lọc.</p>
+                <a asp-page="/Employer/Applicants" class="btn btn-sm emp-apps-btn emp-apps-btn--info">Xem tất cả</a>
+            </div>
+        }
+        else
+        {
+            <div class="emp-apps-list">
+                @foreach (var app in Model.FilteredApplicants)
+                {
+                    var statusKey = app.Status.Trim().ToLowerInvariant();
+                    var isFinalAccepted = statusKey == "accepted";
+                    var isFinalRejected = statusKey == "rejected";
+                    var isJobClosed = string.Equals(app.JobPostingStatus, "closed", StringComparison.OrdinalIgnoreCase);
+                    var hint = StatusHint(app.Status, app.IsUnread);
+
+                    <article class="emp-app-card @StatusCardModifier(app.Status) @(app.IsUnread ? "emp-app-card--new" : "")">
+                        <div class="emp-app-card__aside">
+                            <button type="button"
+                                    class="emp-app-card__avatar-btn applicant-profile-trigger"
+                                    data-application-id="@app.Id"
+                                    title="Xem hồ sơ @app.ApplicantName"
+                                    aria-label="Xem hồ sơ @app.ApplicantName">
+                                <span class="emp-app-card__avatar" aria-hidden="true">
+                                    @if (!string.IsNullOrWhiteSpace(app.ApplicantProfileImage))
+                                    {
+                                        <img src="@app.ApplicantProfileImage" alt="" class="emp-app-card__avatar-img" loading="lazy" />
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-person-fill"></i>
+                                    }
+                                </span>
+                                <span class="emp-app-card__profile-link">Xem hồ sơ</span>
+                            </button>
+                        </div>
+
+                        <div class="emp-app-card__body">
+                            <div class="emp-app-card__head">
+                                <div>
+                                    <h2 class="emp-app-card__name">
+                                        @app.ApplicantName
+                                        @if (app.IsUnread)
+                                        {
+                                            <span class="emp-app-card__badge-new">Mới</span>
+                                        }
+                                    </h2>
+                                    <partial name="Shared/_ApplicantRatingStars"
+                                             model="ApplicantRatingStarsModel.FromApplication(app)" />
+                                    @if (!string.IsNullOrWhiteSpace(app.ApplicantEmail) || !string.IsNullOrWhiteSpace(app.ApplicantPhone))
+                                    {
+                                        <ul class="emp-app-card__contact">
+                                            @if (!string.IsNullOrWhiteSpace(app.ApplicantEmail))
+                                            {
+                                                <li><i class="bi bi-envelope"></i>@app.ApplicantEmail</li>
+                                            }
+                                            @if (!string.IsNullOrWhiteSpace(app.ApplicantPhone))
+                                            {
+                                                <li><i class="bi bi-telephone"></i>@app.ApplicantPhone</li>
+                                            }
+                                        </ul>
+                                    }
+                                </div>
+                                <span class="emp-app-card__status">@FormatStatus(app.Status)</span>
+                            </div>
+
+                            <div class="emp-app-card__job">
+                                <div class="emp-app-card__job-thumb" aria-hidden="true">
+                                    @if (!string.IsNullOrWhiteSpace(app.JobThumbnailUrl))
+                                    {
+                                        <img src="@app.JobThumbnailUrl" alt="" loading="lazy" />
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-briefcase"></i>
+                                    }
+                                </div>
+                                <div>
+                                    <h3 class="emp-app-card__job-title">
+                                        <a asp-page="/Jobs/Detail" asp-route-id="@app.JobId">@app.JobTitle</a>
+                                    </h3>
+                                    <p class="emp-app-card__job-meta mb-0">
+                                        @if (!string.IsNullOrWhiteSpace(app.CategoryName))
+                                        {
+                                            <i class="bi bi-tag"></i> @app.CategoryName
+                                            <span class="mx-1">·</span>
+                                        }
+                                        <i class="bi bi-geo-alt"></i> @app.JobLocation
+                                    </p>
+                                </div>
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(hint))
+                            {
+                                <p class="emp-app-card__hint">
+                                    <i class="bi bi-lightbulb"></i> @hint
+                                </p>
+                            }
+
+                            <ul class="emp-app-card__facts">
+                                <li>
+                                    <i class="bi bi-cash-stack"></i>
+                                    <span>@app.JobSalary</span>
+                                </li>
+                                @if (!string.IsNullOrWhiteSpace(app.JobWorkingHours))
                                 {
-                                    <img src="@app.ApplicantProfileImage" alt="" class="applicant-card__avatar-img" loading="lazy" />
+                                    <li>
+                                        <i class="bi bi-clock"></i>
+                                        <span>@app.JobWorkingHours</span>
+                                    </li>
+                                }
+                                <li>
+                                    <i class="bi bi-calendar-event"></i>
+                                    <span>Hết hạn tin @app.JobExpiryDate.ToLocalTime().ToString("dd/MM/yyyy")</span>
+                                </li>
+                                <li>
+                                    <i class="bi bi-send"></i>
+                                    <span>Ứng tuyển @FormatRelativeTime(app.AppliedAt)</span>
+                                </li>
+                            </ul>
+
+                            <div class="emp-app-card__chips">
+                                @if (isJobClosed)
+                                {
+                                    <span class="emp-app-chip emp-app-chip--muted">
+                                        <i class="bi bi-lock"></i> @FormatJobPostingStatus(app.JobPostingStatus)
+                                    </span>
                                 }
                                 else
                                 {
-                                    <i class="bi bi-person-fill"></i>
+                                    <span class="emp-app-chip emp-app-chip--open">
+                                        <i class="bi bi-broadcast"></i> @FormatJobPostingStatus(app.JobPostingStatus)
+                                    </span>
                                 }
-                            </span>
-                            <span class="applicant-card__name-block">
-                                <span class="applicant-card__name h6 mb-0">
-                                    @app.ApplicantName
-                                    @if (app.IsUnread)
-                                    {
-                                        <span class="badge bg-warning text-dark ms-1 align-middle">Mới</span>
-                                    }
+                                <span class="emp-app-chip emp-app-chip--resume">
+                                    <i class="bi bi-file-earmark-person"></i>
+                                    @app.ResumeTitle
                                 </span>
-                                <partial name="Shared/_ApplicantRatingStars"
-                                         model="JobPortal.Web.Models.ApplicantRatingStarsModel.FromApplication(app)" />
-                            </span>
-                        </button>
-                        <div class="applicant-card__status applicant-card__status--@statusKey">
-                            <span class="applicant-card__status-dot" aria-hidden="true"></span>
-                            @FormatStatus(app.Status)
+                                <span class="emp-app-chip">#@app.Id</span>
+                            </div>
                         </div>
-                    </div>
 
-                    <p class="applicant-card__meta text-muted small mb-2">
-                        <span class="fw-semibold text-body">@app.JobTitle</span>
-                        <span class="applicant-card__sep">·</span>
-                        @FormatRelativeTime(app.AppliedAt)
-                        <span class="applicant-card__sep">·</span>
-                        CV: @app.ResumeTitle
-                    </p>
-
-                    @if (!string.IsNullOrWhiteSpace(app.ApplicantEmail) || !string.IsNullOrWhiteSpace(app.ApplicantPhone))
-                    {
-                        <p class="applicant-card__contact small mb-3">
-                            @if (!string.IsNullOrWhiteSpace(app.ApplicantEmail))
+                        <footer class="emp-app-card__footer">
+                            @if (!string.IsNullOrWhiteSpace(app.ResumeUrl))
                             {
-                                <span><i class="bi bi-envelope me-1"></i>@app.ApplicantEmail</span>
+                                <a asp-page="/Employer/Applicants"
+                                   asp-page-handler="ViewCv"
+                                   asp-route-applicationId="@app.Id"
+                                   asp-route-filter="@Model.Filter"
+                                   asp-route-q="@Model.Search"
+                                   target="_blank"
+                                   rel="noopener noreferrer"
+                                   class="btn btn-sm emp-apps-btn emp-apps-btn--muted">
+                                    <i class="bi bi-file-earmark-pdf me-1"></i>Xem CV
+                                </a>
                             }
-                            @if (!string.IsNullOrWhiteSpace(app.ApplicantPhone))
+
+                            <button type="button"
+                                    class="btn btn-sm emp-apps-btn emp-apps-btn--muted applicant-profile-trigger"
+                                    data-application-id="@app.Id">
+                                <i class="bi bi-person-lines-fill me-1"></i>Hồ sơ
+                            </button>
+
+                            <a asp-page="/Messages/Index" asp-route-applicationId="@app.Id"
+                               class="btn btn-sm emp-apps-btn emp-apps-btn--info">
+                                <i class="bi bi-chat-dots me-1"></i>Nhắn tin
+                            </a>
+
+                            @if (isFinalAccepted)
                             {
-                                <span class="ms-3"><i class="bi bi-telephone me-1"></i>@app.ApplicantPhone</span>
+                                <a asp-page="/Employer/WorkProgress/Detail"
+                                   asp-route-applicationId="@app.Id"
+                                   class="btn btn-sm emp-apps-btn emp-apps-btn--primary">
+                                    <i class="bi bi-clipboard-check me-1"></i>Quản lý tiến độ
+                                </a>
+                                <a asp-page="/Jobs/Detail"
+                                   asp-route-id="@app.JobId"
+                                   class="btn btn-sm emp-apps-btn emp-apps-btn--muted">
+                                    <i class="bi bi-box-arrow-up-right me-1"></i>Xem tin
+                                </a>
                             }
-                        </p>
-                    }
-
-                    <div class="applicant-card__actions">
-                        @if (!string.IsNullOrWhiteSpace(app.ResumeUrl))
-                        {
-                            <a asp-page="/Employer/Applicants"
-                               asp-page-handler="ViewCv"
-                               asp-route-applicationId="@app.Id"
-                               asp-route-filter="@Model.Filter"
-                               target="_blank"
-                               rel="noopener noreferrer"
-                               class="btn btn-sm applicant-card__btn applicant-card__btn--muted">
-                                <i class="bi bi-eye me-1"></i>Xem CV
-                            </a>
-                        }
-
-                        <a asp-page="/Messages/Index" asp-route-applicationId="@app.Id"
-                           class="btn btn-sm applicant-card__btn applicant-card__btn--info">
-                            <i class="bi bi-chat-dots me-1"></i>Nhắn tin
-                        </a>
-                        @if (isFinalAccepted)
-                        {
-                            <a asp-page="/Employer/WorkProgress/Detail"
-                               asp-route-applicationId="@app.Id"
-                               class="btn btn-sm applicant-card__btn applicant-card__btn--primary">
-                                <i class="bi bi-clipboard-check me-1"></i>Quản lý tiến độ
-                            </a>
-                            <a asp-page="/Jobs/Detail"
-                               asp-route-id="@app.JobId"
-                               class="btn btn-sm applicant-card__btn applicant-card__btn--muted">
-                                <i class="bi bi-briefcase me-1"></i>Xem tin
-                            </a>
-                        }
-                        else if (isFinalRejected)
-                        {
-                            <a asp-page="/Jobs/Detail"
-                               asp-route-id="@app.JobId"
-                               class="btn btn-sm applicant-card__btn applicant-card__btn--muted">
-                                <i class="bi bi-briefcase me-1"></i>Xem tin
-                            </a>
-                        }
-                        else
-                        {
-                            @if (app.IsUnread)
+                            else if (isFinalRejected)
                             {
-                                <form method="post" asp-page-handler="UpdateStatus" class="d-inline">
+                                <a asp-page="/Jobs/Detail"
+                                   asp-route-id="@app.JobId"
+                                   class="btn btn-sm emp-apps-btn emp-apps-btn--muted">
+                                    <i class="bi bi-box-arrow-up-right me-1"></i>Xem tin
+                                </a>
+                            }
+                            else
+                            {
+                                @if (app.IsUnread)
+                                {
+                                    <form method="post" asp-page-handler="UpdateStatus" class="d-inline">
+                                        <input type="hidden" name="applicationId" value="@app.Id" />
+                                        <input type="hidden" name="status" value="reviewed" />
+                                        <input type="hidden" name="filter" value="@Model.Filter" />
+                                        <input type="hidden" name="q" value="@Model.Search" />
+                                        <button type="submit" class="btn btn-sm emp-apps-btn emp-apps-btn--muted">
+                                            <i class="bi bi-check2-circle me-1"></i>Đã xem
+                                        </button>
+                                    </form>
+                                }
+
+                                <form method="post" asp-page-handler="UpdateStatus" class="d-inline"
+                                      onsubmit="return confirm('Chấp nhận ứng viên @app.ApplicantName cho vị trí @app.JobTitle?');">
                                     <input type="hidden" name="applicationId" value="@app.Id" />
-                                    <input type="hidden" name="status" value="reviewed" />
+                                    <input type="hidden" name="status" value="accepted" />
                                     <input type="hidden" name="filter" value="@Model.Filter" />
-                                    <button type="submit" class="btn btn-sm applicant-card__btn applicant-card__btn--muted">
-                                        <i class="bi bi-check2-circle me-1"></i>Đánh dấu đã xem
+                                    <input type="hidden" name="q" value="@Model.Search" />
+                                    <button type="submit" class="btn btn-sm emp-apps-btn emp-apps-btn--success">
+                                        <i class="bi bi-check-lg me-1"></i>Chấp nhận
                                     </button>
                                 </form>
+                                <form method="post" asp-page-handler="UpdateStatus" class="d-inline"
+                                      onsubmit="return confirm('Từ chối ứng viên @app.ApplicantName?');">
+                                    <input type="hidden" name="applicationId" value="@app.Id" />
+                                    <input type="hidden" name="status" value="rejected" />
+                                    <input type="hidden" name="filter" value="@Model.Filter" />
+                                    <input type="hidden" name="q" value="@Model.Search" />
+                                    <button type="submit" class="btn btn-sm emp-apps-btn emp-apps-btn--danger">
+                                        <i class="bi bi-x-lg me-1"></i>Từ chối
+                                    </button>
+                                </form>
+                                <a asp-page="/Jobs/Detail"
+                                   asp-route-id="@app.JobId"
+                                   class="btn btn-sm emp-apps-btn emp-apps-btn--muted">
+                                    <i class="bi bi-box-arrow-up-right me-1"></i>Xem tin
+                                </a>
                             }
-
-                            <form method="post" asp-page-handler="UpdateStatus" class="d-inline"
-                                  onsubmit="return confirm('Chấp nhận ứng viên @app.ApplicantName cho vị trí @app.JobTitle?');">
-                                <input type="hidden" name="applicationId" value="@app.Id" />
-                                <input type="hidden" name="status" value="accepted" />
-                                <input type="hidden" name="filter" value="@Model.Filter" />
-                                <button type="submit" class="btn btn-sm applicant-card__btn applicant-card__btn--success">
-                                    <i class="bi bi-check-lg me-1"></i>Chấp nhận
-                                </button>
-                            </form>
-                            <form method="post" asp-page-handler="UpdateStatus" class="d-inline"
-                                  onsubmit="return confirm('Từ chối ứng viên @app.ApplicantName?');">
-                                <input type="hidden" name="applicationId" value="@app.Id" />
-                                <input type="hidden" name="status" value="rejected" />
-                                <input type="hidden" name="filter" value="@Model.Filter" />
-                                <button type="submit" class="btn btn-sm applicant-card__btn applicant-card__btn--danger">
-                                    <i class="bi bi-x-lg me-1"></i>Từ chối
-                                </button>
-                            </form>
-                            <a asp-page="/Jobs/Detail"
-                               asp-route-id="@app.JobId"
-                               class="btn btn-sm applicant-card__btn applicant-card__btn--muted">
-                                <i class="bi bi-briefcase me-1"></i>Xem tin
-                            </a>
-                        }
-                    </div>
-                </article>
-            }
-        </div>
+                        </footer>
+                    </article>
+                }
+            </div>
+        }
     }
 </div>
 
@@ -304,6 +468,10 @@
         </div>
     </div>
 </div>
+
+@section EmployerStyles {
+    <link rel="stylesheet" href="~/css/employer-applicants.css" asp-append-version="true" />
+}
 
 @section EmployerScripts {
     <script src="~/js/applicant-profile-modal.js" asp-append-version="true"></script>

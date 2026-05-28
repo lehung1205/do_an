@@ -23,6 +23,16 @@ public class EmployersController : ControllerBase
         return Ok(ApiResponse<IReadOnlyList<EmployerDto>>.SuccessResponse(items, "Employers retrieved successfully."));
     }
 
+    /// <summary>Tất cả nhà tuyển dụng kèm số sao trung bình (đánh giá từ ứng viên).</summary>
+    [HttpGet("with-rating")]
+    public async Task<IActionResult> GetAllEmployersWithRating(CancellationToken cancellationToken)
+    {
+        var items = await _employerService.GetAllEmployersWithRatingAsync(cancellationToken);
+        return Ok(ApiResponse<IReadOnlyList<EmployerWithRatingDto>>.SuccessResponse(
+            items,
+            "Employers with rating retrieved successfully."));
+    }
+
     [HttpGet("{id:long}")]
     public async Task<IActionResult> GetEmployer(long id, CancellationToken cancellationToken)
     {

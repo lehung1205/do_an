@@ -19,6 +19,7 @@ public class IndexModel : PageModel
     public IndexModel(ApiService api) => _api = api;
 
     public List<AdminPendingJobDto> Jobs { get; set; } = new();
+    public AdminJobModerationSummaryDto? Summary { get; set; }
     public string? ErrorMessage { get; set; }
     public string? SuccessMessage { get; set; }
     public string? ActionErrorMessage { get; set; }
@@ -29,6 +30,16 @@ public class IndexModel : PageModel
     public int TotalCount { get; set; }
     public int TotalPages { get; set; }
     public bool ShowPagination => TotalPages > 1;
+    public bool HasActiveFilter => !string.IsNullOrWhiteSpace(Search);
+
+    public int TabTotalCount => StatusFilter switch
+    {
+        StatusPending => Summary?.PendingCount ?? TotalCount,
+        StatusApproved => Summary?.RecruitingCount ?? TotalCount,
+        StatusRejected => Summary?.RejectedCount ?? TotalCount,
+        StatusAll => (Summary?.PendingCount ?? 0) + (Summary?.RecruitingCount ?? 0) + (Summary?.RejectedCount ?? 0),
+        _ => TotalCount
+    };
 
     public async Task<IActionResult> OnGetAsync(
         string? status,
@@ -57,6 +68,8 @@ public class IndexModel : PageModel
         SuccessMessage = TempData["AdminJobSuccessMessage"] as string;
         ActionErrorMessage = TempData["AdminJobErrorMessage"] as string;
 
+        Summary = await _api.GetApiDataAsync<AdminJobModerationSummaryDto>("/api/admin/jobs/summary");
+
         var query = $"page={pageNumber}&pageSize={pageSize}&status={Uri.EscapeDataString(StatusFilter)}";
         if (!string.IsNullOrEmpty(Search))
         {
@@ -83,6 +96,42 @@ public class IndexModel : PageModel
                 : (int)Math.Ceiling(TotalCount / (double)PageSize);
 
         return Page();
+    }
+
+    public async Task<IActionResult> OnGetExportJobsExcelAsync(string? status, string? q)
+    {
+        var redirect = RequireAdmin();
+        if (redirect != null)
+        {
+            return redirect;
+        }
+
+        StatusFilter = NormalizeStatusFilter(status);
+        Search = string.IsNullOrWhiteSpace(q) ? null : q.Trim();
+
+        var query = $"status={Uri.EscapeDataString(StatusFilter)}";
+        if (!string.IsNullOrEmpty(Search))
+        {
+            query += $"&q={Uri.EscapeDataString(Search)}";
+        }
+
+        var response = await _api.GetRawAsync($"/api/admin/jobs/export-excel?{query}");
+        if (!response.IsSuccessStatusCode)
+        {
+            TempData["AdminJobErrorMessage"] = "Không thể xuất báo cáo danh sách công việc.";
+            return RedirectToPage("/Admin/Jobs/Index", new { status = StatusFilter, q = Search });
+        }
+
+        var bytes = await response.Content.ReadAsByteArrayAsync();
+        var fileName = response.Content.Headers.ContentDisposition?.FileNameStar
+            ?? response.Content.Headers.ContentDisposition?.FileName
+            ?? "danh-sach-cong-viec.xlsx";
+
+        return File(
+            bytes,
+            response.Content.Headers.ContentType?.ToString()
+                ?? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            fileName.Trim('"'));
     }
 
     public async Task<IActionResult> OnPostApproveAsync(
@@ -189,12 +238,52 @@ public class IndexModel : PageModel
 
     public static string StatusBadgeClass(string status) => status.Trim().ToLowerInvariant() switch
     {
-        StatusPending => "bg-warning text-dark",
-        StatusApproved => "bg-success",
-        StatusRejected => "bg-danger",
-        "closed" => "bg-secondary",
-        _ => "bg-secondary"
+        StatusPending => "admin-jobs-badge--pending",
+        StatusApproved => "admin-jobs-badge--approved",
+        StatusRejected => "admin-jobs-badge--rejected",
+        "closed" => "admin-jobs-badge--closed",
+        _ => "admin-jobs-badge--closed"
     };
+
+    public static string StatusCardModifier(string status) => status.Trim().ToLowerInvariant() switch
+    {
+        StatusPending => "admin-job-card--pending",
+        StatusApproved => "admin-job-card--approved",
+        StatusRejected => "admin-job-card--rejected",
+        "closed" => "admin-job-card--closed",
+        _ => ""
+    };
+
+    public static string FormatDate(DateTime value) =>
+        value.ToLocalTime().ToString("dd/MM/yyyy");
+
+    public static string FormatDateTime(DateTime value) =>
+        value.ToLocalTime().ToString("dd/MM/yyyy HH:mm");
+
+    public static string FormatRelativeCreated(DateTime createdAtUtc) =>
+        global::JobPortal.Web.Pages.IndexModel.FormatRelativeTime(createdAtUtc);
+
+    public static bool IsEligibleForAutoApprove(DateTime createdAtUtc) =>
+        DateTime.UtcNow - createdAtUtc >= TimeSpan.FromHours(24);
+
+    public static string StatusHint(string status, DateTime createdAtUtc) => status.Trim().ToLowerInvariant() switch
+    {
+        StatusPending when IsEligibleForAutoApprove(createdAtUtc) =>
+            "Tin đã chờ hơn 24 giờ — hệ thống có thể tự duyệt theo quy tắc.",
+        StatusPending =>
+            "Tin mới đăng — kiểm tra nội dung và duyệt hoặc từ chối (từ chối sẽ hoàn lượt đăng cho NTD).",
+        StatusApproved =>
+            "Tin đang hiển thị công khai — có thể xem trang chi tiết để kiểm tra.",
+        StatusRejected =>
+            "Tin đã bị từ chối — lượt đăng đã được hoàn cho nhà tuyển dụng.",
+        _ => ""
+    };
+
+    public static int DaysUntilExpiry(DateTime expiryUtc)
+    {
+        var days = (expiryUtc.Date - DateTime.UtcNow.Date).Days;
+        return days < 0 ? 0 : days;
+    }
 
     public string ListSummaryLabel => StatusFilter switch
     {

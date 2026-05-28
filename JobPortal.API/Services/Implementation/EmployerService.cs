@@ -94,6 +94,77 @@ public class EmployerService : IEmployerService
         };
     }
 
+    public async Task<IReadOnlyList<EmployerWithRatingDto>> GetAllEmployersWithRatingAsync(
+        CancellationToken cancellationToken = default)
+    {
+        var employers = await _repository.GetAllAsync(cancellationToken);
+        if (employers.Count == 0)
+        {
+            return Array.Empty<EmployerWithRatingDto>();
+        }
+
+        var employerIds = employers.Select(e => e.Id).ToList();
+        var ratings = await LoadEmployerRatingsAsync(employerIds, cancellationToken);
+
+        return employers
+            .Select(entity =>
+            {
+                ratings.TryGetValue(entity.Id, out var rating);
+                return new EmployerWithRatingDto
+                {
+                    Id = entity.Id,
+                    Name = entity.Name,
+                    Description = entity.Description,
+                    Image = entity.Image,
+                    Phone = entity.Phone,
+                    Email = entity.Email,
+                    Gender = entity.Gender,
+                    AverageRating = rating?.Average,
+                    ReviewCount = rating?.Count ?? 0
+                };
+            })
+            .ToList();
+    }
+
+    private async Task<Dictionary<long, EmployerRatingSnapshot>> LoadEmployerRatingsAsync(
+        IEnumerable<long> employerIds,
+        CancellationToken cancellationToken)
+    {
+        var ids = employerIds.Distinct().ToList();
+        if (ids.Count == 0)
+        {
+            return new Dictionary<long, EmployerRatingSnapshot>();
+        }
+
+        var rows = await _context.Reviews
+            .AsNoTracking()
+            .Where(r =>
+                r.ReviewType == ReviewCatalog.SeekerToEmployer &&
+                ids.Contains(r.EmployerId))
+            .GroupBy(r => r.EmployerId)
+            .Select(g => new
+            {
+                EmployerId = g.Key,
+                Average = g.Average(x => (double)x.Rating),
+                Count = g.Count()
+            })
+            .ToListAsync(cancellationToken);
+
+        return rows.ToDictionary(
+            x => x.EmployerId,
+            x => new EmployerRatingSnapshot
+            {
+                Average = Math.Round(x.Average, 1),
+                Count = x.Count
+            });
+    }
+
+    private sealed class EmployerRatingSnapshot
+    {
+        public double Average { get; init; }
+        public int Count { get; init; }
+    }
+
     public async Task<EmployerDto> CreateEmployerAsync(CreateEmployerDto dto, CancellationToken cancellationToken = default)
     {
         var normalizedEmail = dto.Email.Trim().ToLowerInvariant();

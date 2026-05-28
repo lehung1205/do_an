@@ -1,0 +1,610 @@
+/* Trang ứng viên ứng tuyển — nhà tuyển dụng */
+
+.emp-apps {
+  max-width: 100%;
+}
+
+.emp-apps-hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.25rem;
+  padding: 1.35rem 1.4rem;
+  margin-bottom: 1.25rem;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  background: linear-gradient(135deg, #ecfdf5 0%, #f8fafc 45%, #fff 100%);
+  box-shadow: 0 8px 28px rgba(15, 23, 42, 0.06);
+}
+
+.emp-apps-hero__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0 0 0.5rem;
+  padding: 0.2rem 0.65rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #047857;
+  background: rgba(5, 150, 105, 0.1);
+  border-radius: 999px;
+}
+
+.emp-apps-hero__title {
+  margin: 0;
+  font-size: clamp(1.3rem, 3vw, 1.6rem);
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+}
+
+.emp-apps-hero__subtitle {
+  margin: 0.4rem 0 0;
+  max-width: 38rem;
+  font-size: 0.9rem;
+  color: #64748b;
+  line-height: 1.55;
+}
+
+.emp-apps-hero__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.emp-apps-hero__pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 4.5rem;
+  padding: 0.55rem 0.85rem;
+  border-radius: 12px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+}
+
+.emp-apps-hero__pill-value {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.1;
+}
+
+.emp-apps-hero__pill-value--warn {
+  color: #b45309;
+}
+
+.emp-apps-hero__pill-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.emp-apps-alert {
+  border: 0;
+  border-radius: 12px;
+  margin-bottom: 1rem;
+}
+
+.emp-apps-stats {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.55rem;
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 767px) {
+  .emp-apps-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .emp-apps-stats a:first-child {
+    grid-column: 1 / -1;
+  }
+}
+
+.emp-apps-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.7rem 0.85rem;
+  text-decoration: none;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.emp-apps-stat:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+  transform: translateY(-1px);
+}
+
+.emp-apps-stat.is-active {
+  border-color: #059669;
+  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.15);
+}
+
+.emp-apps-stat__label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+}
+
+.emp-apps-stat__value {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #1e293b;
+}
+
+.emp-apps-stat--unread.is-active { border-color: #f59e0b; box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.22); }
+.emp-apps-stat--reviewed.is-active { border-color: #0ea5e9; box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.2); }
+.emp-apps-stat--accepted.is-active { border-color: #22c55e; box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2); }
+.emp-apps-stat--rejected.is-active { border-color: #ef4444; box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.18); }
+
+.emp-apps-filter {
+  padding: 1rem 1.1rem;
+  margin-bottom: 0.75rem;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+}
+
+.emp-apps-filter__grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.75rem;
+  align-items: end;
+}
+
+@media (max-width: 575px) {
+  .emp-apps-filter__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.emp-apps-filter__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  min-width: 7.5rem;
+}
+
+.emp-apps-toolbar {
+  margin: 0 0 0.85rem;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.emp-apps-empty {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  border-radius: 16px;
+  border: 1px dashed #cbd5e1;
+  background: #f8fafc;
+}
+
+.emp-apps-empty--compact {
+  padding: 2rem 1rem;
+}
+
+.emp-apps-empty__icon {
+  width: 4rem;
+  height: 4rem;
+  margin: 0 auto 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(5, 150, 105, 0.1);
+  color: #059669;
+  font-size: 1.5rem;
+}
+
+.emp-apps-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.emp-app-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  gap: 0 1rem;
+  padding: 1rem 1.1rem 0.85rem;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.05);
+  border-left: 4px solid #94a3b8;
+  transition: box-shadow 0.18s ease;
+}
+
+.emp-app-card:hover {
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+}
+
+.emp-app-card--new {
+  border-left-color: #f59e0b;
+  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.12), 0 4px 18px rgba(15, 23, 42, 0.05);
+}
+
+.emp-app-card--reviewed { border-left-color: #0ea5e9; }
+.emp-app-card--accepted { border-left-color: #22c55e; }
+.emp-app-card--rejected { border-left-color: #ef4444; opacity: 0.94; }
+
+.emp-app-card__aside {
+  grid-row: 1 / 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.emp-app-card__avatar-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  border-radius: 12px;
+  transition: background 0.15s ease;
+}
+
+.emp-app-card__avatar-btn:hover,
+.emp-app-card__avatar-btn:focus-visible {
+  background: #f1f5f9;
+  outline: none;
+}
+
+.emp-app-card__avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(145deg, #e2e8f0, #f1f5f9);
+  color: #64748b;
+  font-size: 1.75rem;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.1);
+}
+
+.emp-app-card__avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.emp-app-card__profile-link {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #059669;
+}
+
+.emp-app-card__body {
+  min-width: 0;
+}
+
+.emp-app-card__head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem 0.75rem;
+  margin-bottom: 0.65rem;
+}
+
+.emp-app-card__name {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0f172a;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.emp-app-card__badge-new {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.emp-app-card__status {
+  flex-shrink: 0;
+  padding: 0.28rem 0.65rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.emp-app-card--new .emp-app-card__status {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.emp-app-card--reviewed .emp-app-card__status {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.emp-app-card--accepted .emp-app-card__status {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.emp-app-card--rejected .emp-app-card__status {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.emp-app-card__contact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
+  margin: 0.35rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.emp-app-card__contact i {
+  margin-right: 0.2rem;
+  color: #94a3b8;
+}
+
+.emp-app-card__job {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  gap: 0.65rem;
+  padding: 0.65rem 0.75rem;
+  margin-bottom: 0.65rem;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid #f1f5f9;
+}
+
+.emp-app-card__job-thumb {
+  width: 56px;
+  height: 56px;
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e2e8f0;
+  color: #94a3b8;
+  font-size: 1.25rem;
+}
+
+.emp-app-card__job-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.emp-app-card__job-title {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.emp-app-card__job-title a {
+  color: #0f172a;
+  text-decoration: none;
+}
+
+.emp-app-card__job-title a:hover {
+  color: #059669;
+}
+
+.emp-app-card__job-meta {
+  margin: 0.2rem 0 0;
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+.emp-app-card__hint {
+  margin: 0 0 0.65rem;
+  padding: 0.45rem 0.65rem;
+  font-size: 0.8rem;
+  color: #475569;
+  background: #fff;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.emp-app-card__hint i {
+  color: #059669;
+  margin-right: 0.2rem;
+}
+
+.emp-app-card__facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.35rem 0.85rem;
+  margin: 0 0 0.65rem;
+  padding: 0;
+  list-style: none;
+  font-size: 0.8rem;
+  color: #475569;
+}
+
+@media (max-width: 575px) {
+  .emp-app-card__facts {
+    grid-template-columns: 1fr;
+  }
+}
+
+.emp-app-card__facts li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.35rem;
+}
+
+.emp-app-card__facts i {
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+  color: #94a3b8;
+}
+
+.emp-app-card__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.emp-app-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.55rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.emp-app-chip--resume {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.emp-app-chip--resume a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.emp-app-chip--resume a:hover {
+  text-decoration: underline;
+}
+
+.emp-app-chip--open {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.emp-app-chip--muted {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.emp-app-card__footer {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  padding-top: 0.75rem;
+  margin-top: 0.25rem;
+  border-top: 1px solid #f1f5f9;
+}
+
+@media (max-width: 640px) {
+  .emp-app-card {
+    grid-template-columns: 1fr;
+  }
+
+  .emp-app-card__aside {
+    flex-direction: row;
+    justify-content: flex-start;
+  }
+}
+
+.emp-apps-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  border-radius: 10px;
+  font-weight: 600;
+  border: 1px solid transparent;
+  transition: all 0.16s ease;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8125rem;
+  line-height: 1.25;
+}
+
+.emp-apps-btn--primary {
+  background: #059669;
+  border-color: #059669;
+  color: #fff;
+}
+
+.emp-apps-btn--primary:hover {
+  background: #047857;
+  border-color: #047857;
+  color: #fff;
+}
+
+.emp-apps-btn--success {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #166534;
+}
+
+.emp-apps-btn--success:hover {
+  background: #dcfce7;
+  color: #14532d;
+}
+
+.emp-apps-btn--danger {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #b91c1c;
+}
+
+.emp-apps-btn--danger:hover {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.emp-apps-btn--info {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  color: #1d4ed8;
+}
+
+.emp-apps-btn--info:hover {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.emp-apps-btn--muted {
+  background: #f8fafc;
+  border-color: #dbe3ef;
+  color: #475569;
+}
+
+.emp-apps-btn--muted:hover {
+  background: #f1f5f9;
+  color: #334155;
+}

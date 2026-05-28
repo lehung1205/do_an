@@ -61,6 +61,13 @@ public class EmployerDashboardApplicationDto
     public double? ApplicantAverageRating { get; set; }
     public int ApplicantReviewCount { get; set; }
     public string JobTitle { get; set; } = null!;
+    public string? CategoryName { get; set; }
+    public string JobLocation { get; set; } = null!;
+    public string JobSalary { get; set; } = null!;
+    public string? JobWorkingHours { get; set; }
+    public DateTime JobExpiryDate { get; set; }
+    public string JobPostingStatus { get; set; } = null!;
+    public string? JobThumbnailUrl { get; set; }
     public DateTime AppliedAt { get; set; }
     public long ResumeId { get; set; }
     public string ResumeTitle { get; set; } = null!;

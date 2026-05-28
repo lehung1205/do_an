@@ -21,6 +21,16 @@ public class AdminJobsController : ControllerBase
         _adminJobService = adminJobService;
     }
 
+    [HttpGet("summary")]
+    public async Task<IActionResult> GetSummary(CancellationToken cancellationToken = default)
+    {
+        _ = GetCurrentUserId();
+        var summary = await _adminJobService.GetModerationSummaryAsync(cancellationToken);
+        return Ok(ApiResponse<AdminJobModerationSummaryDto>.SuccessResponse(
+            summary,
+            "Job moderation summary retrieved successfully."));
+    }
+
     [HttpGet]
     public async Task<IActionResult> GetJobs(
         [FromQuery] int page = 1,
@@ -34,6 +44,25 @@ public class AdminJobsController : ControllerBase
         return Ok(ApiResponse<PagedResult<AdminPendingJobDto>>.SuccessResponse(
             result,
             "Jobs retrieved successfully."));
+    }
+
+    [HttpGet("by-category/export-excel")]
+    public async Task<IActionResult> ExportJobsByCategoryExcel(CancellationToken cancellationToken = default)
+    {
+        _ = GetCurrentUserId();
+        var file = await _adminJobService.ExportJobsByCategoryExcelAsync(cancellationToken);
+        return File(file.Content, file.ContentType, file.FileName);
+    }
+
+    [HttpGet("export-excel")]
+    public async Task<IActionResult> ExportJobsListExcel(
+        [FromQuery] string? status = "all",
+        [FromQuery] string? q = null,
+        CancellationToken cancellationToken = default)
+    {
+        _ = GetCurrentUserId();
+        var file = await _adminJobService.ExportJobsListExcelAsync(status, q, cancellationToken);
+        return File(file.Content, file.ContentType, file.FileName);
     }
 
     [HttpGet("pending")]

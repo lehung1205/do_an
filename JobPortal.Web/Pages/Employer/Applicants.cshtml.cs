@@ -11,17 +11,22 @@ public class ApplicantsModel : PageModel
 
     public ApplicantsModel(ApiService api) => _api = api;
 
-    public List<EmployerDashboardApplicationDto> Applicants { get; set; } = new();
+    public IReadOnlyList<EmployerDashboardApplicationDto> AllApplicants { get; set; } = Array.Empty<EmployerDashboardApplicationDto>();
+    public IReadOnlyList<EmployerDashboardApplicationDto> FilteredApplicants { get; set; } = Array.Empty<EmployerDashboardApplicationDto>();
 
     public string Filter { get; set; } = "all";
+    public string? Search { get; set; }
+    public bool HasActiveFilter => !string.Equals(Filter, "all", StringComparison.OrdinalIgnoreCase) || !string.IsNullOrWhiteSpace(Search);
 
     public int UnreadCount { get; set; }
+    public int ReviewedCount { get; set; }
+    public int AcceptedCount { get; set; }
+    public int RejectedCount { get; set; }
 
     public string? ErrorMessage { get; set; }
-
     public string? SuccessMessage { get; set; }
 
-    public async Task<IActionResult> OnGetAsync(string? filter)
+    public async Task<IActionResult> OnGetAsync(string? filter, string? q)
     {
         var redirect = RequireEmployer();
         if (redirect != null)
@@ -30,6 +35,7 @@ public class ApplicantsModel : PageModel
         }
 
         Filter = NormalizeFilter(filter);
+        Search = string.IsNullOrWhiteSpace(q) ? null : q.Trim();
         SuccessMessage = TempData["ApplicantSuccessMessage"] as string;
         ErrorMessage = TempData["ApplicantErrorMessage"] as string;
 
@@ -40,7 +46,8 @@ public class ApplicantsModel : PageModel
     public async Task<IActionResult> OnPostUpdateStatusAsync(
         long applicationId,
         string status,
-        string? filter)
+        string? filter,
+        string? q)
     {
         var redirect = RequireEmployer();
         if (redirect != null)
@@ -49,6 +56,7 @@ public class ApplicantsModel : PageModel
         }
 
         Filter = NormalizeFilter(filter);
+        Search = string.IsNullOrWhiteSpace(q) ? null : q.Trim();
 
         var response = await _api.PutApiResponseAsync<UpdateEmployerApplicationStatusRequest, EmployerDashboardApplicationDto>(
             $"/api/employers/me/applications/{applicationId}/status",
@@ -65,7 +73,7 @@ public class ApplicantsModel : PageModel
             TempData["ApplicantSuccessMessage"] = FormatSuccessMessage(status);
         }
 
-        return RedirectToPage(new { filter = Filter });
+        return RedirectToPage(new { filter = Filter, q = Search });
     }
 
     public async Task<IActionResult> OnGetApplicantProfileAsync(long applicationId)
@@ -122,7 +130,7 @@ public class ApplicantsModel : PageModel
         });
     }
 
-    public async Task<IActionResult> OnGetViewCvAsync(long applicationId, string? filter)
+    public async Task<IActionResult> OnGetViewCvAsync(long applicationId, string? filter, string? q)
     {
         var redirect = RequireEmployer();
         if (redirect != null)
@@ -131,13 +139,14 @@ public class ApplicantsModel : PageModel
         }
 
         Filter = NormalizeFilter(filter);
+        Search = string.IsNullOrWhiteSpace(q) ? null : q.Trim();
 
         var list = await _api.GetApiDataAsync<List<EmployerDashboardApplicationDto>>("/api/employers/me/applications");
         var app = list?.FirstOrDefault(a => a.Id == applicationId);
         if (app == null)
         {
             TempData["ApplicantErrorMessage"] = "Không tìm thấy đơn ứng tuyển.";
-            return RedirectToPage(new { filter = Filter });
+            return RedirectToPage(new { filter = Filter, q = Search });
         }
 
         if (app.IsUnread)
@@ -153,7 +162,7 @@ public class ApplicantsModel : PageModel
         }
 
         TempData["ApplicantErrorMessage"] = "Ứng viên chưa có liên kết CV.";
-        return RedirectToPage(new { filter = Filter });
+        return RedirectToPage(new { filter = Filter, q = Search });
     }
 
     private async Task LoadApplicantsAsync()
@@ -165,17 +174,50 @@ public class ApplicantsModel : PageModel
             return;
         }
 
-        UnreadCount = list.Count(a => a.IsUnread);
+        AllApplicants = list
+            .OrderByDescending(a => a.AppliedAt)
+            .ToList();
 
-        Applicants = Filter switch
-        {
-            "unread" => list.Where(a => a.IsUnread).ToList(),
-            "reviewed" => list.Where(a => string.Equals(a.Status, "reviewed", StringComparison.OrdinalIgnoreCase)).ToList(),
-            "accepted" => list.Where(a => string.Equals(a.Status, "accepted", StringComparison.OrdinalIgnoreCase)).ToList(),
-            "rejected" => list.Where(a => string.Equals(a.Status, "rejected", StringComparison.OrdinalIgnoreCase)).ToList(),
-            _ => list
-        };
+        UnreadCount = AllApplicants.Count(a => a.IsUnread);
+        ReviewedCount = AllApplicants.Count(a => IsStatus(a.Status, "reviewed"));
+        AcceptedCount = AllApplicants.Count(a => IsStatus(a.Status, "accepted"));
+        RejectedCount = AllApplicants.Count(a => IsStatus(a.Status, "rejected"));
+
+        FilteredApplicants = AllApplicants
+            .Where(a => MatchesFilter(a, Filter))
+            .Where(a => MatchesSearch(a, Search))
+            .ToList();
     }
+
+    private static bool MatchesFilter(EmployerDashboardApplicationDto app, string filter) => filter switch
+    {
+        "unread" => app.IsUnread,
+        "reviewed" => IsStatus(app.Status, "reviewed"),
+        "accepted" => IsStatus(app.Status, "accepted"),
+        "rejected" => IsStatus(app.Status, "rejected"),
+        _ => true
+    };
+
+    private static bool MatchesSearch(EmployerDashboardApplicationDto app, string? search)
+    {
+        if (string.IsNullOrWhiteSpace(search))
+        {
+            return true;
+        }
+
+        var term = search.Trim();
+        return (app.ApplicantName?.Contains(term, StringComparison.OrdinalIgnoreCase) ?? false)
+            || (app.JobTitle?.Contains(term, StringComparison.OrdinalIgnoreCase) ?? false)
+            || (app.CategoryName?.Contains(term, StringComparison.OrdinalIgnoreCase) ?? false)
+            || (app.JobLocation?.Contains(term, StringComparison.OrdinalIgnoreCase) ?? false)
+            || (app.JobSalary?.Contains(term, StringComparison.OrdinalIgnoreCase) ?? false)
+            || (app.ResumeTitle?.Contains(term, StringComparison.OrdinalIgnoreCase) ?? false)
+            || (app.ApplicantEmail?.Contains(term, StringComparison.OrdinalIgnoreCase) ?? false)
+            || (app.ApplicantPhone?.Contains(term, StringComparison.OrdinalIgnoreCase) ?? false);
+    }
+
+    private static bool IsStatus(string? value, string expected) =>
+        string.Equals(value?.Trim(), expected, StringComparison.OrdinalIgnoreCase);
 
     private IActionResult? RequireEmployer()
     {
@@ -228,12 +270,29 @@ public class ApplicantsModel : PageModel
     public static string DashIfEmpty(string? value) =>
         global::JobPortal.Web.Models.AccountPanelViewModel.DashIfEmpty(value);
 
-    public static string StatusBadgeClass(string status) => status.ToLowerInvariant() switch
+    public static string StatusCardModifier(string status) => status.Trim().ToLowerInvariant() switch
     {
-        "submitted" or "pending" => "bg-warning text-dark",
-        "reviewed" => "bg-info text-dark",
-        "accepted" => "bg-success",
-        "rejected" => "bg-danger",
-        _ => "bg-secondary"
+        "accepted" => "emp-app-card--accepted",
+        "rejected" => "emp-app-card--rejected",
+        "reviewed" => "emp-app-card--reviewed",
+        "submitted" or "pending" => "emp-app-card--new",
+        _ => ""
+    };
+
+    public static string StatusHint(string status, bool isUnread) => status.Trim().ToLowerInvariant() switch
+    {
+        "submitted" or "pending" when isUnread =>
+            "CV mới — xem hồ sơ và cập nhật trạng thái để ứng viên biết tiến độ.",
+        "reviewed" => "Đã xem CV — chấp nhận hoặc từ chối khi đã đánh giá xong.",
+        "accepted" => "Ứng viên đã được chọn — theo dõi tiến độ công việc tại mục Quản lý tiến độ.",
+        "rejected" => "Đơn đã đóng — có thể xem lại tin tuyển dụng hoặc liên hệ nếu cần.",
+        _ => ""
+    };
+
+    public static string FormatJobPostingStatus(string? status) => status?.Trim().ToLowerInvariant() switch
+    {
+        "open" => "Đang tuyển",
+        "closed" => "Đã đóng",
+        _ => status ?? "—"
     };
 }

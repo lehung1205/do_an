@@ -21,6 +21,7 @@ public class IndexModel : PageModel
 
     public List<AdminManagedEmployerDto> Employers { get; set; } = new();
     public List<AdminManagedJobSeekerDto> JobSeekers { get; set; } = new();
+    public AdminUserManagementSummaryDto? Summary { get; set; }
 
     public string? ErrorMessage { get; set; }
     public string? SuccessMessage { get; set; }
@@ -33,6 +34,21 @@ public class IndexModel : PageModel
     public int TotalPages { get; set; }
     public bool ShowPagination => TotalPages > 1;
     public bool IsEmployersTab => string.Equals(Tab, EmployersTab, StringComparison.OrdinalIgnoreCase);
+    public bool HasActiveFilter =>
+        !string.IsNullOrWhiteSpace(Search) ||
+        !string.IsNullOrEmpty(StatusFilter);
+
+    public int TabTotal => IsEmployersTab
+        ? Summary?.TotalEmployers ?? TotalCount
+        : Summary?.TotalJobSeekers ?? TotalCount;
+
+    public int TabActive => IsEmployersTab
+        ? Summary?.ActiveEmployers ?? 0
+        : Summary?.ActiveJobSeekers ?? 0;
+
+    public int TabInactive => IsEmployersTab
+        ? Summary?.InactiveEmployers ?? 0
+        : Summary?.InactiveJobSeekers ?? 0;
 
     public async Task<IActionResult> OnGetAsync(
         string? tab,
@@ -65,6 +81,8 @@ public class IndexModel : PageModel
         StatusFilter = NormalizeStatusFilter(status);
         SuccessMessage = TempData["AdminUserSuccessMessage"] as string;
         ActionErrorMessage = TempData["AdminUserErrorMessage"] as string;
+
+        Summary = await _api.GetApiDataAsync<AdminUserManagementSummaryDto>("/api/admin/users/summary");
 
         var query = BuildQuery(page, pageSize);
 
@@ -258,5 +276,20 @@ public class IndexModel : PageModel
         IsActiveStatus(status) ? "Hoạt động" : "Vô hiệu hóa";
 
     public static string StatusBadgeClass(string status) =>
-        IsActiveStatus(status) ? "bg-success" : "bg-secondary";
+        IsActiveStatus(status) ? "admin-users-badge--active" : "admin-users-badge--inactive";
+
+    public static string StatusCardModifier(string status) =>
+        IsActiveStatus(status) ? "admin-user-card--active" : "admin-user-card--inactive";
+
+    public static string FormatDate(DateTime value) =>
+        value.ToLocalTime().ToString("dd/MM/yyyy");
+
+    public static string FormatDateTime(DateTime? value) =>
+        value.HasValue ? value.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm") : "—";
+
+    public static string FormatRelativeUpdated(DateTime? updatedAt, DateTime createdAt)
+    {
+        var reference = updatedAt ?? createdAt;
+        return global::JobPortal.Web.Pages.IndexModel.FormatRelativeTime(reference);
+    }
 }

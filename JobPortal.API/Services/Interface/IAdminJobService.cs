@@ -5,6 +5,8 @@ namespace JobPortal.API.Services.Interface;
 
 public interface IAdminJobService
 {
+    Task<AdminJobModerationSummaryDto> GetModerationSummaryAsync(CancellationToken cancellationToken = default);
+
     Task<PagedResult<AdminPendingJobDto>> GetJobsPagedAsync(
         int page,
         int pageSize,

@@ -20,6 +20,16 @@ public class AdminUsersController : ControllerBase
         _userManagementService = userManagementService;
     }
 
+    [HttpGet("summary")]
+    public async Task<IActionResult> GetSummary(CancellationToken cancellationToken = default)
+    {
+        _ = GetCurrentUserId();
+        var summary = await _userManagementService.GetSummaryAsync(cancellationToken);
+        return Ok(ApiResponse<AdminUserManagementSummaryDto>.SuccessResponse(
+            summary,
+            "User management summary retrieved successfully."));
+    }
+
     [HttpGet("employers")]
     public async Task<IActionResult> GetEmployers(
         [FromQuery] int page = 1,

@@ -21,6 +21,33 @@ public class AdminJobService : IAdminJobService
         _jobExpiryService = jobExpiryService;
     }
 
+    public async Task<AdminJobModerationSummaryDto> GetModerationSummaryAsync(
+        CancellationToken cancellationToken = default)
+    {
+        await _jobExpiryService.CloseExpiredJobsAsync(cancellationToken);
+
+        var pending = await _context.Jobs.CountAsync(
+            j => j.PostingStatus == JobPostingCatalog.Pending,
+            cancellationToken);
+        var recruiting = await _context.Jobs.CountAsync(
+            j => j.PostingStatus == JobPostingCatalog.Recruiting,
+            cancellationToken);
+        var rejected = await _context.Jobs.CountAsync(
+            j => j.PostingStatus == JobPostingCatalog.Rejected,
+            cancellationToken);
+        var closed = await _context.Jobs.CountAsync(
+            j => j.PostingStatus == JobPostingCatalog.Closed,
+            cancellationToken);
+
+        return new AdminJobModerationSummaryDto
+        {
+            PendingCount = pending,
+            RecruitingCount = recruiting,
+            RejectedCount = rejected,
+            ClosedCount = closed
+        };
+    }
+
     public Task<PagedResult<AdminPendingJobDto>> GetJobsPagedAsync(
         int page,
         int pageSize,
@@ -134,19 +161,29 @@ public class AdminJobService : IAdminJobService
                 EmployerId = j.EmployerId,
                 EmployerName = j.Employer.Name,
                 EmployerEmail = j.Employer.Email,
+                EmployerPhone = j.Employer.Phone,
+                EmployerImage = j.Employer.Image,
                 CategoryId = j.CategoryId,
                 CategoryName = j.Category.Name,
                 Title = j.Title,
                 Description = j.Description,
+                DescriptionPreview = j.Description,
                 Salary = j.Salary,
                 Location = j.Location,
                 PostingStatus = j.PostingStatus,
                 WorkingHours = j.WorkingHours,
+                ApplicantCount = j.Applications.Count,
+                ImageCount = j.Images.Count,
                 CreatedAt = j.CreatedAt,
                 ExpiryDate = j.ExpiryDate,
                 ThumbnailUrl = j.Images.OrderBy(i => i.Id).Select(i => i.Url).FirstOrDefault()
             })
             .ToListAsync(cancellationToken);
+
+        foreach (var item in items)
+        {
+            item.DescriptionPreview = JobDescriptionPreview.Create(item.Description);
+        }
 
         return new PagedResult<AdminPendingJobDto>
         {

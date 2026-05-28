@@ -5,6 +5,8 @@ namespace JobPortal.API.Services.Interface;
 
 public interface IAdminUserManagementService
 {
+    Task<AdminUserManagementSummaryDto> GetSummaryAsync(CancellationToken cancellationToken = default);
+
     Task<PagedResult<AdminManagedEmployerDto>> GetEmployersPagedAsync(
         int page,
         int pageSize,

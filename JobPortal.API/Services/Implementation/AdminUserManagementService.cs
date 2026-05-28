@@ -21,6 +21,28 @@ public class AdminUserManagementService : IAdminUserManagementService
         _authRepository = authRepository;
     }
 
+    public async Task<AdminUserManagementSummaryDto> GetSummaryAsync(CancellationToken cancellationToken = default)
+    {
+        var totalEmployers = await _context.Employers.CountAsync(cancellationToken);
+        var activeEmployers = await _context.Employers.CountAsync(
+            e => e.Status == AccountStatusCatalog.Active,
+            cancellationToken);
+        var totalSeekers = await _context.JobSeekers.CountAsync(cancellationToken);
+        var activeSeekers = await _context.JobSeekers.CountAsync(
+            j => j.Status == AccountStatusCatalog.Active,
+            cancellationToken);
+
+        return new AdminUserManagementSummaryDto
+        {
+            TotalEmployers = totalEmployers,
+            ActiveEmployers = activeEmployers,
+            InactiveEmployers = totalEmployers - activeEmployers,
+            TotalJobSeekers = totalSeekers,
+            ActiveJobSeekers = activeSeekers,
+            InactiveJobSeekers = totalSeekers - activeSeekers
+        };
+    }
+
     public async Task<PagedResult<AdminManagedEmployerDto>> GetEmployersPagedAsync(
         int page,
         int pageSize,
@@ -63,9 +85,13 @@ public class AdminUserManagementService : IAdminUserManagementService
                 Phone = e.Phone,
                 Image = e.Image,
                 Status = e.Status,
+                EmailVerified = e.EmailVerifiedAt != null,
                 PostingLimit = e.PostingLimit,
                 JobCount = e.Jobs.Count,
-                CreatedAt = e.CreatedAt
+                OpenJobCount = e.Jobs.Count(j => j.PostingStatus == JobPostingCatalog.Recruiting),
+                ApplicantCount = e.Jobs.SelectMany(j => j.Applications).Count(),
+                CreatedAt = e.CreatedAt,
+                UpdatedAt = e.UpdatedAt
             })
             .ToListAsync(cancellationToken);
 
@@ -114,8 +140,12 @@ public class AdminUserManagementService : IAdminUserManagementService
                 Phone = j.Phone,
                 ProfileImage = j.ProfileImage ?? (j.User != null ? j.User.ProfileImage : null),
                 Status = j.Status,
+                EmailVerified = j.EmailVerifiedAt != null,
                 ApplicationCount = j.Applications.Count,
-                CreatedAt = j.CreatedAt
+                AcceptedApplicationCount = j.Applications.Count(a => a.Status == "accepted"),
+                ResumeCount = j.Resumes.Count,
+                CreatedAt = j.CreatedAt,
+                UpdatedAt = j.UpdatedAt
             })
             .ToListAsync(cancellationToken);
 
@@ -130,7 +160,7 @@ public class AdminUserManagementService : IAdminUserManagementService
     {
         var employer = await _context.Employers
             .Include(e => e.User)
-            .Include(e => e.Jobs)
+            .Include(e => e.Jobs).ThenInclude(j => j.Applications)
             .FirstOrDefaultAsync(e => e.Id == employerId, cancellationToken);
 
         if (employer == null)
@@ -160,6 +190,7 @@ public class AdminUserManagementService : IAdminUserManagementService
         var jobSeeker = await _context.JobSeekers
             .Include(j => j.User)
             .Include(j => j.Applications)
+            .Include(j => j.Resumes)
             .FirstOrDefaultAsync(j => j.Id == jobSeekerId, cancellationToken);
 
         if (jobSeeker == null)
@@ -246,9 +277,14 @@ public class AdminUserManagementService : IAdminUserManagementService
         Phone = employer.Phone,
         Image = employer.Image,
         Status = employer.Status,
+        EmailVerified = employer.EmailVerifiedAt != null,
         PostingLimit = employer.PostingLimit,
         JobCount = employer.Jobs?.Count ?? 0,
-        CreatedAt = employer.CreatedAt
+        OpenJobCount = employer.Jobs?.Count(j =>
+            string.Equals(j.PostingStatus, JobPostingCatalog.Recruiting, StringComparison.OrdinalIgnoreCase)) ?? 0,
+        ApplicantCount = employer.Jobs?.SelectMany(j => j.Applications).Count() ?? 0,
+        CreatedAt = employer.CreatedAt,
+        UpdatedAt = employer.UpdatedAt
     };
 
     private static AdminManagedJobSeekerDto MapJobSeeker(Models.JobSeeker jobSeeker) => new()
@@ -260,7 +296,12 @@ public class AdminUserManagementService : IAdminUserManagementService
         Phone = jobSeeker.Phone,
         ProfileImage = jobSeeker.ProfileImage ?? jobSeeker.User?.ProfileImage,
         Status = jobSeeker.Status,
+        EmailVerified = jobSeeker.EmailVerifiedAt != null,
         ApplicationCount = jobSeeker.Applications?.Count ?? 0,
-        CreatedAt = jobSeeker.CreatedAt
+        AcceptedApplicationCount = jobSeeker.Applications?.Count(a =>
+            string.Equals(a.Status, "accepted", StringComparison.OrdinalIgnoreCase)) ?? 0,
+        ResumeCount = jobSeeker.Resumes?.Count ?? 0,
+        CreatedAt = jobSeeker.CreatedAt,
+        UpdatedAt = jobSeeker.UpdatedAt
     };
 }

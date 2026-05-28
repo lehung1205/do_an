@@ -1,215 +1,342 @@
 @page
 @model JobPortal.Web.Pages.Admin.Jobs.IndexModel
+@using JobPortal.Web.Models
 @{
     ViewData["Title"] = "Duyệt tin tuyển dụng";
-    var isPendingTab = Model.StatusFilter == IndexModel.StatusPending;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/admin-jobs.css" asp-append-version="true" />
 }
 
 <div class="admin-portal">
     <div class="container admin-portal__container py-4">
-    <partial name="Shared/_AdminPageHeader" model='("Quản lý tin tuyển dụng", "Lọc tin chờ duyệt, đã duyệt hoặc bị từ chối · Tin chờ quá 24h có thể tự duyệt", "bi-shield-check")' />
 
-    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
-    {
-        <div class="alert alert-success">@Model.SuccessMessage</div>
-    }
-    @if (!string.IsNullOrEmpty(Model.ActionErrorMessage))
-    {
-        <div class="alert alert-warning">@Model.ActionErrorMessage</div>
-    }
-    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
-    {
-        <div class="alert alert-warning">@Model.ErrorMessage</div>
-    }
-
-    <ul class="nav nav-tabs admin-portal__tabs">
-        <li class="nav-item">
-            <a class="nav-link @(Model.StatusFilter == IndexModel.StatusPending ? "active" : "")"
-               asp-page="/Admin/Jobs/Index"
-               asp-route-status="@IndexModel.StatusPending"
-               asp-route-q="@Model.Search"
-               asp-route-pageNumber="1"
-               asp-route-pageSize="@Model.PageSize">Chờ duyệt</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link @(Model.StatusFilter == IndexModel.StatusApproved ? "active" : "")"
-               asp-page="/Admin/Jobs/Index"
-               asp-route-status="@IndexModel.StatusApproved"
-               asp-route-q="@Model.Search"
-               asp-route-pageNumber="1"
-               asp-route-pageSize="@Model.PageSize">Đã duyệt</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link @(Model.StatusFilter == IndexModel.StatusRejected ? "active" : "")"
-               asp-page="/Admin/Jobs/Index"
-               asp-route-status="@IndexModel.StatusRejected"
-               asp-route-q="@Model.Search"
-               asp-route-pageNumber="1"
-               asp-route-pageSize="@Model.PageSize">Từ chối</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link @(Model.StatusFilter == IndexModel.StatusAll ? "active" : "")"
-               asp-page="/Admin/Jobs/Index"
-               asp-route-status="@IndexModel.StatusAll"
-               asp-route-q="@Model.Search"
-               asp-route-pageNumber="1"
-               asp-route-pageSize="@Model.PageSize">Tất cả</a>
-        </li>
-    </ul>
-
-    <form method="get" class="card border-0 shadow-sm mb-4">
-        <div class="card-body">
-            <input type="hidden" name="status" value="@Model.StatusFilter" />
-            <div class="row g-3 align-items-end">
-                <div class="col-md-6 col-lg-6">
-                    <label class="form-label" for="q">Tìm kiếm</label>
-                    <input type="search" class="form-control" id="q" name="q" value="@Model.Search"
-                           placeholder="Tiêu đề, mô tả, địa điểm, tên công ty..." maxlength="200" />
-                </div>
-                <div class="col-6 col-md-2 col-lg-2">
-                    <button type="submit" class="btn admin-payments__btn admin-payments__btn--filter w-100">
-                        <i class="bi bi-funnel me-1"></i>Lọc
-                    </button>
-                </div>
-                <div class="col-6 col-md-2 col-lg-2">
-                    <a class="btn admin-payments__btn admin-payments__btn--excel w-100"
-                       asp-page="/Admin/Jobs/Index"
-                       asp-page-handler="ExportJobsExcel"
-                       asp-route-status="@Model.StatusFilter"
-                       asp-route-q="@Model.Search"
-                       title="Xuất danh sách theo bộ lọc hiện tại">
-                        <i class="bi bi-file-earmark-excel me-1"></i>Xuất Excel
-                    </a>
-                </div>
-                <div class="col-12 col-md-2 col-lg-2">
-                    <a asp-page="/Admin/Jobs/Index"
-                       asp-route-status="@Model.StatusFilter"
-                       class="btn admin-payments__btn admin-payments__btn--clear w-100"
-                       title="Xóa từ khóa">
-                        <i class="bi bi-x-lg me-1"></i>Xóa lọc
-                    </a>
-                </div>
+        <header class="admin-jobs-hero">
+            <div class="admin-jobs-hero__text">
+                <p class="admin-jobs-hero__eyebrow">
+                    <i class="bi bi-shield-check"></i> Kiểm duyệt
+                </p>
+                <h1 class="admin-jobs-hero__title">Duyệt tin tuyển dụng</h1>
+                <p class="admin-jobs-hero__subtitle">
+                    Phê duyệt hoặc từ chối tin đăng của nhà tuyển dụng. Tin chờ quá 24 giờ có thể được hệ thống tự duyệt.
+                    Từ chối sẽ hoàn lượt đăng tin cho NTD.
+                </p>
             </div>
-            <input type="hidden" name="pageNumber" value="1" />
-            <input type="hidden" name="pageSize" value="@Model.PageSize" />
-        </div>
-    </form>
+            @if (Model.Summary != null)
+            {
+                <div class="admin-jobs-hero__kpis" aria-label="Tổng quan tin">
+                    <div class="admin-jobs-hero__kpi">
+                        <span class="admin-jobs-hero__kpi-value admin-jobs-hero__kpi-value--warn">@Model.Summary.PendingCount</span>
+                        <span class="admin-jobs-hero__kpi-label">Chờ duyệt</span>
+                    </div>
+                    <div class="admin-jobs-hero__kpi">
+                        <span class="admin-jobs-hero__kpi-value admin-jobs-hero__kpi-value--success">@Model.Summary.RecruitingCount</span>
+                        <span class="admin-jobs-hero__kpi-label">Đang tuyển</span>
+                    </div>
+                    <div class="admin-jobs-hero__kpi">
+                        <span class="admin-jobs-hero__kpi-value">@Model.Summary.RejectedCount</span>
+                        <span class="admin-jobs-hero__kpi-label">Từ chối</span>
+                    </div>
+                </div>
+            }
+        </header>
 
-    @if (string.IsNullOrEmpty(Model.ErrorMessage))
-    {
-        @if (Model.TotalCount > 0)
+        @if (!string.IsNullOrEmpty(Model.SuccessMessage))
         {
-            <p class="admin-portal__toolbar">@Model.TotalCount @Model.ListSummaryLabel</p>
+            <div class="alert alert-success admin-jobs-alert shadow-sm">@Model.SuccessMessage</div>
+        }
+        @if (!string.IsNullOrEmpty(Model.ActionErrorMessage))
+        {
+            <div class="alert alert-warning admin-jobs-alert shadow-sm">@Model.ActionErrorMessage</div>
+        }
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="alert alert-warning admin-jobs-alert shadow-sm">@Model.ErrorMessage</div>
         }
 
-        @if (Model.Jobs.Count == 0)
+        @if (string.IsNullOrEmpty(Model.ErrorMessage) || Model.Jobs.Count > 0 || Model.HasActiveFilter)
         {
-            <div class="admin-portal__empty">
-                <i class="bi bi-inbox"></i>
-                <p class="mb-0">@Model.EmptyListMessage</p>
+            <nav class="admin-jobs-stats" aria-label="Lọc theo trạng thái tin">
+                <a asp-page="/Admin/Jobs/Index"
+                   asp-route-status="@IndexModel.StatusPending"
+                   asp-route-q="@Model.Search"
+                   asp-route-pageNumber="1"
+                   asp-route-pageSize="@Model.PageSize"
+                   class="admin-jobs-stat admin-jobs-stat--pending @(Model.StatusFilter == IndexModel.StatusPending ? "is-active" : "")">
+                    <span class="admin-jobs-stat__label">Chờ duyệt</span>
+                    <span class="admin-jobs-stat__value">@(Model.Summary?.PendingCount ?? 0)</span>
+                </a>
+                <a asp-page="/Admin/Jobs/Index"
+                   asp-route-status="@IndexModel.StatusApproved"
+                   asp-route-q="@Model.Search"
+                   asp-route-pageNumber="1"
+                   asp-route-pageSize="@Model.PageSize"
+                   class="admin-jobs-stat admin-jobs-stat--approved @(Model.StatusFilter == IndexModel.StatusApproved ? "is-active" : "")">
+                    <span class="admin-jobs-stat__label">Đã duyệt</span>
+                    <span class="admin-jobs-stat__value">@(Model.Summary?.RecruitingCount ?? 0)</span>
+                </a>
+                <a asp-page="/Admin/Jobs/Index"
+                   asp-route-status="@IndexModel.StatusRejected"
+                   asp-route-q="@Model.Search"
+                   asp-route-pageNumber="1"
+                   asp-route-pageSize="@Model.PageSize"
+                   class="admin-jobs-stat admin-jobs-stat--rejected @(Model.StatusFilter == IndexModel.StatusRejected ? "is-active" : "")">
+                    <span class="admin-jobs-stat__label">Từ chối</span>
+                    <span class="admin-jobs-stat__value">@(Model.Summary?.RejectedCount ?? 0)</span>
+                </a>
+                <a asp-page="/Admin/Jobs/Index"
+                   asp-route-status="@IndexModel.StatusAll"
+                   asp-route-q="@Model.Search"
+                   asp-route-pageNumber="1"
+                   asp-route-pageSize="@Model.PageSize"
+                   class="admin-jobs-stat @(Model.StatusFilter == IndexModel.StatusAll ? "is-active" : "")">
+                    <span class="admin-jobs-stat__label">Tất cả</span>
+                    <span class="admin-jobs-stat__value">@Model.TabTotalCount</span>
+                </a>
+            </nav>
+
+            <form method="get" class="admin-jobs-filter">
+                <input type="hidden" name="status" value="@Model.StatusFilter" />
+                <input type="hidden" name="pageNumber" value="1" />
+                <input type="hidden" name="pageSize" value="@Model.PageSize" />
+                <div class="admin-jobs-filter__grid">
+                    <div class="admin-jobs-filter__search">
+                        <label class="form-label" for="q">Tìm kiếm</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                            <input type="search" class="form-control border-start-0" id="q" name="q" value="@Model.Search"
+                                   placeholder="Tiêu đề, mô tả, địa điểm, công ty..." maxlength="200" />
+                        </div>
+                    </div>
+                    <div>
+                        <button type="submit" class="btn admin-payments__btn admin-payments__btn--filter w-100">
+                            <i class="bi bi-funnel me-1"></i>Lọc
+                        </button>
+                    </div>
+                    <div>
+                        <a class="btn admin-payments__btn admin-payments__btn--excel w-100"
+                           asp-page="/Admin/Jobs/Index"
+                           asp-page-handler="ExportJobsExcel"
+                           asp-route-status="@Model.StatusFilter"
+                           asp-route-q="@Model.Search"
+                           title="Xuất danh sách theo bộ lọc hiện tại">
+                            <i class="bi bi-file-earmark-excel me-1"></i>Excel
+                        </a>
+                    </div>
+                    <div>
+                        @if (Model.HasActiveFilter)
+                        {
+                            <a asp-page="/Admin/Jobs/Index"
+                               asp-route-status="@Model.StatusFilter"
+                               class="btn admin-payments__btn admin-payments__btn--clear w-100">
+                                <i class="bi bi-x-lg me-1"></i>Xóa lọc
+                            </a>
+                        }
+                        else
+                        {
+                            <span class="btn admin-payments__btn admin-payments__btn--clear w-100 disabled opacity-50" aria-disabled="true">
+                                <i class="bi bi-x-lg me-1"></i>Xóa lọc
+                            </span>
+                        }
+                    </div>
+                </div>
+            </form>
+        }
+
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage) && Model.Jobs.Count == 0)
+        {
+            <div class="admin-jobs-empty">
+                <div class="admin-jobs-empty__icon" aria-hidden="true"><i class="bi bi-exclamation-circle"></i></div>
+                <p class="text-muted mb-0">@Model.ErrorMessage</p>
+            </div>
+        }
+        else if (Model.Jobs.Count == 0)
+        {
+            <div class="admin-jobs-empty admin-jobs-empty--compact">
+                <div class="admin-jobs-empty__icon" aria-hidden="true"><i class="bi bi-inbox"></i></div>
+                <p class="mb-3 text-muted">@Model.EmptyListMessage</p>
+                @if (Model.HasActiveFilter)
+                {
+                    <a asp-page="/Admin/Jobs/Index" asp-route-status="@Model.StatusFilter"
+                       class="btn btn-sm admin-payments__btn admin-payments__btn--filter">Xóa bộ lọc</a>
+                }
             </div>
         }
         else
         {
-            <div class="row g-4">
+            <p class="admin-jobs-toolbar">
+                Hiển thị <strong>@Model.Jobs.Count</strong> / @Model.TotalCount @Model.ListSummaryLabel
+                @if (Model.HasActiveFilter)
+                {
+                    <span>· đang lọc</span>
+                }
+            </p>
+
+            <div class="admin-jobs-list">
                 @foreach (var job in Model.Jobs)
                 {
                     var statusKey = job.PostingStatus.Trim().ToLowerInvariant();
                     var showModerationActions = string.Equals(statusKey, IndexModel.StatusPending, StringComparison.Ordinal);
-                    <div class="col-12">
-                        <article class="admin-job-card">
-                            <div class="row g-0">
-                                <div class="col-md-3 col-lg-2">
-                                    @if (!string.IsNullOrWhiteSpace(job.ThumbnailUrl))
+                    var hint = IndexModel.StatusHint(job.PostingStatus, job.CreatedAt);
+                    var daysLeft = IndexModel.DaysUntilExpiry(job.ExpiryDate);
+                    var desc = string.IsNullOrWhiteSpace(job.DescriptionPreview) ? job.Description : job.DescriptionPreview;
+
+                    <article class="admin-job-card @IndexModel.StatusCardModifier(job.PostingStatus)">
+                        <div class="admin-job-card__media">
+                            @if (!string.IsNullOrWhiteSpace(job.ThumbnailUrl))
+                            {
+                                <img src="@job.ThumbnailUrl" alt="" class="admin-job-card__thumb" loading="lazy" />
+                            }
+                            else
+                            {
+                                <div class="admin-job-card__thumb-placeholder" aria-hidden="true">
+                                    <i class="bi bi-briefcase"></i>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="admin-job-card__body">
+                            <div class="admin-job-card__top">
+                                <h2 class="admin-job-card__title">
+                                    @if (showModerationActions)
                                     {
-                                        <img src="@job.ThumbnailUrl" alt="" class="admin-job-card__thumb w-100 h-100 object-fit-cover" loading="lazy" />
+                                        @job.Title
                                     }
                                     else
                                     {
-                                        <div class="admin-job-card__placeholder d-flex align-items-center justify-content-center h-100 min-h-120">
-                                            <i class="bi bi-briefcase fs-2 text-muted"></i>
-                                        </div>
+                                        <a asp-page="/Jobs/Detail" asp-route-id="@job.Id" target="_blank" rel="noopener noreferrer">@job.Title</a>
                                     }
-                                </div>
-                                <div class="col-md-9 col-lg-10">
-                                    <div class="card-body">
-                                        <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-2">
-                                            <h3 class="h5 mb-0">@job.Title</h3>
-                                            <span class="badge @IndexModel.StatusBadgeClass(job.PostingStatus)">
-                                                @IndexModel.FormatStatus(job.PostingStatus)
-                                            </span>
-                                        </div>
-                                        <p class="text-muted small mb-2">
-                                            <i class="bi bi-building me-1"></i>@job.EmployerName
-                                            @if (!string.IsNullOrWhiteSpace(job.EmployerEmail))
-                                            {
-                                                <span class="mx-1">·</span>
-                                                <i class="bi bi-envelope me-1"></i>@job.EmployerEmail
-                                            }
+                                </h2>
+                                <span class="admin-jobs-badge @IndexModel.StatusBadgeClass(job.PostingStatus)">
+                                    @IndexModel.FormatStatus(job.PostingStatus)
+                                </span>
+                            </div>
+
+                            <div class="admin-job-card__employer">
+                                <span class="admin-job-card__employer-avatar" aria-hidden="true">
+                                    @if (!string.IsNullOrWhiteSpace(job.EmployerImage))
+                                    {
+                                        <img src="@job.EmployerImage" alt="" loading="lazy" />
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-building"></i>
+                                    }
+                                </span>
+                                <div class="min-w-0">
+                                    <p class="admin-job-card__employer-name">@job.EmployerName</p>
+                                    <p class="admin-job-card__employer-meta mb-0">
+                                        @if (!string.IsNullOrWhiteSpace(job.EmployerEmail))
+                                        {
+                                            <i class="bi bi-envelope me-1"></i>@job.EmployerEmail
+                                        }
+                                        @if (!string.IsNullOrWhiteSpace(job.EmployerPhone))
+                                        {
                                             <span class="mx-1">·</span>
-                                            <i class="bi bi-tag me-1"></i>@job.CategoryName
-                                        </p>
-                                        <p class="small mb-2 text-truncate-3">@job.Description</p>
-                                        <ul class="list-unstyled small mb-3">
-                                            <li><i class="bi bi-geo-alt text-primary me-1"></i>@job.Location</li>
-                                            <li><i class="bi bi-cash-stack text-primary me-1"></i>@job.Salary</li>
-                                            @if (!string.IsNullOrWhiteSpace(job.WorkingHours))
-                                            {
-                                                <li><i class="bi bi-clock text-primary me-1"></i>@job.WorkingHours</li>
-                                            }
-                                            <li>
-                                                <i class="bi bi-calendar-plus text-primary me-1"></i>Đăng @job.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
-                                                <span class="mx-1">·</span>
-                                                <i class="bi bi-calendar-event text-primary me-1"></i>Hết hạn @job.ExpiryDate.ToLocalTime().ToString("dd/MM/yyyy")
-                                            </li>
-                                        </ul>
-                                        <div class="d-flex flex-wrap gap-2 align-items-center">
-                                            @if (showModerationActions)
-                                            {
-                                                <form method="post" asp-page-handler="Approve" class="d-inline"
-                                                      onsubmit="return confirm('Duyệt tin này? Tin sẽ hiển thị công khai.');">
-                                                    @Html.AntiForgeryToken()
-                                                    <input type="hidden" name="jobId" value="@job.Id" />
-                                                    <input type="hidden" name="status" value="@Model.StatusFilter" />
-                                                    <input type="hidden" name="q" value="@Model.Search" />
-                                                    <input type="hidden" name="pageNumber" value="@Model.CurrentPage" />
-                                                    <input type="hidden" name="pageSize" value="@Model.PageSize" />
-                                                    <button type="submit" class="btn btn-success btn-sm">
-                                                        <i class="bi bi-check-lg me-1"></i>Duyệt
-                                                    </button>
-                                                </form>
-                                                <form method="post" asp-page-handler="Reject" class="d-inline"
-                                                      onsubmit="return confirm('Từ chối tin này? Lượt đăng tin sẽ được hoàn lại cho nhà tuyển dụng.');">
-                                                    @Html.AntiForgeryToken()
-                                                    <input type="hidden" name="jobId" value="@job.Id" />
-                                                    <input type="hidden" name="status" value="@Model.StatusFilter" />
-                                                    <input type="hidden" name="q" value="@Model.Search" />
-                                                    <input type="hidden" name="pageNumber" value="@Model.CurrentPage" />
-                                                    <input type="hidden" name="pageSize" value="@Model.PageSize" />
-                                                    <button type="submit" class="btn btn-outline-danger btn-sm">
-                                                        <i class="bi bi-x-lg me-1"></i>Từ chối
-                                                    </button>
-                                                </form>
-                                            }
-                                            else
-                                            {
-                                                <a asp-page="/Jobs/Detail" asp-route-id="@job.Id" target="_blank" rel="noopener"
-                                                   class="btn btn-sm btn-outline-primary">
-                                                    <i class="bi bi-box-arrow-up-right me-1"></i>Xem tin
-                                                </a>
-                                            }
-                                        </div>
-                                    </div>
+                                            <i class="bi bi-telephone me-1"></i>@job.EmployerPhone
+                                        }
+                                        <span class="mx-1">·</span>
+                                        <i class="bi bi-hash"></i>NTD #@job.EmployerId
+                                    </p>
                                 </div>
                             </div>
-                        </article>
-                    </div>
+
+                            @if (!string.IsNullOrWhiteSpace(desc))
+                            {
+                                <p class="admin-job-card__desc">@desc</p>
+                            }
+
+                            @if (!string.IsNullOrEmpty(hint))
+                            {
+                                <p class="admin-job-card__hint @(showModerationActions && IndexModel.IsEligibleForAutoApprove(job.CreatedAt) ? "" : "admin-job-card__hint--info")">
+                                    <i class="bi bi-lightbulb"></i> @hint
+                                </p>
+                            }
+
+                            <ul class="admin-job-card__facts">
+                                <li><i class="bi bi-geo-alt"></i><span>@job.Location</span></li>
+                                <li><i class="bi bi-cash-stack"></i><span>@job.Salary</span></li>
+                                @if (!string.IsNullOrWhiteSpace(job.WorkingHours))
+                                {
+                                    <li><i class="bi bi-clock"></i><span>@job.WorkingHours</span></li>
+                                }
+                                <li>
+                                    <i class="bi bi-calendar-plus"></i>
+                                    <span>Đăng @IndexModel.FormatDateTime(job.CreatedAt) (@IndexModel.FormatRelativeCreated(job.CreatedAt))</span>
+                                </li>
+                                <li>
+                                    <i class="bi bi-calendar-event"></i>
+                                    <span>Hết hạn @IndexModel.FormatDate(job.ExpiryDate) · còn @daysLeft ngày</span>
+                                </li>
+                            </ul>
+
+                            <div class="admin-job-card__chips">
+                                <span class="admin-jobs-chip admin-jobs-chip--category">
+                                    <i class="bi bi-tag"></i> @job.CategoryName
+                                </span>
+                                <span class="admin-jobs-chip admin-jobs-chip--applicants">
+                                    <i class="bi bi-people"></i> @job.ApplicantCount ứng viên
+                                </span>
+                                @if (job.ImageCount > 0)
+                                {
+                                    <span class="admin-jobs-chip">
+                                        <i class="bi bi-images"></i> @job.ImageCount ảnh
+                                    </span>
+                                }
+                                @if (showModerationActions && IndexModel.IsEligibleForAutoApprove(job.CreatedAt))
+                                {
+                                    <span class="admin-jobs-chip admin-jobs-chip--auto">
+                                        <i class="bi bi-lightning"></i> Đủ điều kiện tự duyệt
+                                    </span>
+                                }
+                                <span class="admin-jobs-chip">#@job.Id</span>
+                            </div>
+                        </div>
+
+                        <footer class="admin-job-card__footer">
+                            @if (showModerationActions)
+                            {
+                                <form method="post" asp-page-handler="Approve" class="d-inline"
+                                      onsubmit="return confirm('Duyệt tin &quot;@job.Title&quot;? Tin sẽ hiển thị công khai.');">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="jobId" value="@job.Id" />
+                                    <input type="hidden" name="status" value="@Model.StatusFilter" />
+                                    <input type="hidden" name="q" value="@Model.Search" />
+                                    <input type="hidden" name="pageNumber" value="@Model.CurrentPage" />
+                                    <input type="hidden" name="pageSize" value="@Model.PageSize" />
+                                    <button type="submit" class="btn btn-sm admin-jobs-btn admin-jobs-btn--approve">
+                                        <i class="bi bi-check-lg me-1"></i>Duyệt tin
+                                    </button>
+                                </form>
+                                <form method="post" asp-page-handler="Reject" class="d-inline"
+                                      onsubmit="return confirm('Từ chối tin &quot;@job.Title&quot;? Lượt đăng tin sẽ được hoàn lại cho NTD.');">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="jobId" value="@job.Id" />
+                                    <input type="hidden" name="status" value="@Model.StatusFilter" />
+                                    <input type="hidden" name="q" value="@Model.Search" />
+                                    <input type="hidden" name="pageNumber" value="@Model.CurrentPage" />
+                                    <input type="hidden" name="pageSize" value="@Model.PageSize" />
+                                    <button type="submit" class="btn btn-sm admin-jobs-btn admin-jobs-btn--reject">
+                                        <i class="bi bi-x-lg me-1"></i>Từ chối
+                                    </button>
+                                </form>
+                            }
+                            else
+                            {
+                                <a asp-page="/Jobs/Detail" asp-route-id="@job.Id" target="_blank" rel="noopener noreferrer"
+                                   class="btn btn-sm admin-jobs-btn admin-jobs-btn--view">
+                                    <i class="bi bi-box-arrow-up-right me-1"></i>Xem tin công khai
+                                </a>
+                            }
+                        </footer>
+                    </article>
                 }
             </div>
 
             @if (Model.ShowPagination)
             {
-                <nav class="mt-4" aria-label="Phân trang duyệt tin">
+                <nav class="admin-jobs-pagination" aria-label="Phân trang duyệt tin">
                     <ul class="pagination justify-content-center flex-wrap mb-0">
                         <li class="page-item @(Model.CurrentPage <= 1 ? "disabled" : "")">
                             <a class="page-link"
@@ -249,6 +376,5 @@
                 </nav>
             }
         }
-    }
     </div>
 </div>

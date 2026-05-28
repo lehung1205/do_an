@@ -21,6 +21,16 @@ public class AdminJobsController : ControllerBase
         _adminJobService = adminJobService;
     }
 
+    [HttpGet("summary")]
+    public async Task<IActionResult> GetSummary(CancellationToken cancellationToken = default)
+    {
+        _ = GetCurrentUserId();
+        var summary = await _adminJobService.GetModerationSummaryAsync(cancellationToken);
+        return Ok(ApiResponse<AdminJobModerationSummaryDto>.SuccessResponse(
+            summary,
+            "Job moderation summary retrieved successfully."));
+    }
+
     [HttpGet]
     public async Task<IActionResult> GetJobs(
         [FromQuery] int page = 1,

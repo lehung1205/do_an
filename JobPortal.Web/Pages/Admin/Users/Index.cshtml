@@ -1,298 +1,436 @@
 @page
 @model JobPortal.Web.Pages.Admin.Users.IndexModel
+@using JobPortal.Web.Models
 @{
     ViewData["Title"] = "Quản lý tài khoản";
     var routeStatus = Model.StatusFilter ?? "all";
+    var statusRoute = string.IsNullOrEmpty(Model.StatusFilter) ? "all" : Model.StatusFilter;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/admin-users.css" asp-append-version="true" />
 }
 
 <div class="admin-portal">
     <div class="container admin-portal__container py-4">
-    <partial name="Shared/_AdminPageHeader" model='("Quản lý tài khoản", "Vô hiệu hóa hoặc kích hoạt tài khoản nhà tuyển dụng và ứng viên", "bi-people")' />
 
-    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
-    {
-        <div class="alert alert-success">@Model.SuccessMessage</div>
-    }
-    @if (!string.IsNullOrEmpty(Model.ActionErrorMessage))
-    {
-        <div class="alert alert-warning">@Model.ActionErrorMessage</div>
-    }
-    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
-    {
-        <div class="alert alert-warning">@Model.ErrorMessage</div>
-    }
+        <header class="admin-users-hero">
+            <div class="admin-users-hero__text">
+                <p class="admin-users-hero__eyebrow">
+                    <i class="bi bi-shield-lock"></i> Quản trị
+                </p>
+                <h1 class="admin-users-hero__title">Quản lý tài khoản</h1>
+                <p class="admin-users-hero__subtitle">
+                    Theo dõi nhà tuyển dụng và ứng viên — kích hoạt hoặc vô hiệu hóa khi cần. Vô hiệu hóa sẽ thu hồi phiên đăng nhập.
+                </p>
+            </div>
+            @if (Model.Summary != null)
+            {
+                <div class="admin-users-hero__kpis" aria-label="Tổng quan hệ thống">
+                    <div class="admin-users-hero__kpi">
+                        <span class="admin-users-hero__kpi-value">@Model.Summary.TotalEmployers</span>
+                        <span class="admin-users-hero__kpi-label">NTD</span>
+                    </div>
+                    <div class="admin-users-hero__kpi">
+                        <span class="admin-users-hero__kpi-value">@Model.Summary.TotalJobSeekers</span>
+                        <span class="admin-users-hero__kpi-label">Ứng viên</span>
+                    </div>
+                    <div class="admin-users-hero__kpi">
+                        <span class="admin-users-hero__kpi-value admin-users-hero__kpi-value--success">@(Model.Summary.ActiveEmployers + Model.Summary.ActiveJobSeekers)</span>
+                        <span class="admin-users-hero__kpi-label">Đang hoạt động</span>
+                    </div>
+                </div>
+            }
+        </header>
 
-    <ul class="nav nav-tabs admin-portal__tabs">
-        <li class="nav-item">
-            <a class="nav-link @(Model.IsEmployersTab ? "active" : "")"
+        @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+        {
+            <div class="alert alert-success admin-users-alert shadow-sm">@Model.SuccessMessage</div>
+        }
+        @if (!string.IsNullOrEmpty(Model.ActionErrorMessage))
+        {
+            <div class="alert alert-warning admin-users-alert shadow-sm">@Model.ActionErrorMessage</div>
+        }
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="alert alert-warning admin-users-alert shadow-sm">@Model.ErrorMessage</div>
+        }
+
+        <nav class="admin-users-tabs" aria-label="Loại tài khoản">
+            <a class="admin-users-tab @(Model.IsEmployersTab ? "is-active" : "")"
                asp-page="/Admin/Users/Index"
                asp-route-tab="@IndexModel.EmployersTab"
-               asp-route-status="@routeStatus"
+               asp-route-status="@statusRoute"
                asp-route-q="@Model.Search"
                asp-route-page="1"
                asp-route-pageSize="@Model.PageSize">
-                Nhà tuyển dụng
+                <span class="admin-users-tab__icon"><i class="bi bi-building"></i></span>
+                <span>
+                    <span class="admin-users-tab__label d-block">Nhà tuyển dụng</span>
+                    <span class="admin-users-tab__meta">@(Model.Summary?.TotalEmployers ?? 0) tài khoản</span>
+                </span>
             </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link @(!Model.IsEmployersTab ? "active" : "")"
+            <a class="admin-users-tab @(!Model.IsEmployersTab ? "is-active" : "")"
                asp-page="/Admin/Users/Index"
                asp-route-tab="@IndexModel.JobSeekersTab"
-               asp-route-status="@routeStatus"
+               asp-route-status="@statusRoute"
                asp-route-q="@Model.Search"
                asp-route-page="1"
                asp-route-pageSize="@Model.PageSize">
-                Ứng viên
+                <span class="admin-users-tab__icon"><i class="bi bi-person-badge"></i></span>
+                <span>
+                    <span class="admin-users-tab__label d-block">Ứng viên</span>
+                    <span class="admin-users-tab__meta">@(Model.Summary?.TotalJobSeekers ?? 0) tài khoản</span>
+                </span>
             </a>
-        </li>
-    </ul>
+        </nav>
 
-    <form method="get" class="card border-0 shadow-sm mb-4">
-        <div class="card-body">
-            <input type="hidden" name="tab" value="@Model.Tab" />
-            <div class="row g-3 align-items-end">
-                <div class="col-md-3">
-                    <label class="form-label" for="status">Trạng thái</label>
-                    <select class="form-select" id="status" name="status">
-                        @if (routeStatus == "all")
-                        {
-                            <option value="all" selected>Tất cả</option>
-                        }
-                        else
-                        {
-                            <option value="all">Tất cả</option>
-                        }
-                        @if (routeStatus == "ACTIVE")
-                        {
-                            <option value="ACTIVE" selected>Hoạt động</option>
-                        }
-                        else
-                        {
-                            <option value="ACTIVE">Hoạt động</option>
-                        }
-                        @if (routeStatus == "INACTIVE")
-                        {
-                            <option value="INACTIVE" selected>Vô hiệu hóa</option>
-                        }
-                        else
-                        {
-                            <option value="INACTIVE">Vô hiệu hóa</option>
-                        }
-                    </select>
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label" for="q">Tìm kiếm</label>
-                    <input type="search" class="form-control" id="q" name="q" value="@Model.Search"
-                           placeholder="Tên, email, số điện thoại..." maxlength="200" />
-                </div>
-                <div class="col-md-3 d-flex gap-2">
-                    <button type="submit" class="btn btn-primary flex-grow-1">
-                        <i class="bi bi-search me-1"></i> Lọc
-                    </button>
-                    <a asp-page="/Admin/Users/Index"
-                       asp-route-tab="@Model.Tab"
-                       class="btn btn-outline-secondary" title="Xóa bộ lọc">
-                        <i class="bi bi-x-lg"></i>
-                    </a>
-                </div>
-            </div>
-            <input type="hidden" name="page" value="1" />
-            <input type="hidden" name="pageSize" value="@Model.PageSize" />
-        </div>
-    </form>
+        @if (string.IsNullOrEmpty(Model.ErrorMessage) || Model.TotalCount > 0 || Model.HasActiveFilter)
+        {
+            <nav class="admin-users-stats" aria-label="Lọc trạng thái">
+                <a asp-page="/Admin/Users/Index"
+                   asp-route-tab="@Model.Tab"
+                   asp-route-status="all"
+                   asp-route-q="@Model.Search"
+                   asp-route-page="1"
+                   asp-route-pageSize="@Model.PageSize"
+                   class="admin-users-stat @(routeStatus == "all" ? "is-active" : "")">
+                    <span class="admin-users-stat__label">Tất cả</span>
+                    <span class="admin-users-stat__value">@Model.TabTotal</span>
+                </a>
+                <a asp-page="/Admin/Users/Index"
+                   asp-route-tab="@Model.Tab"
+                   asp-route-status="ACTIVE"
+                   asp-route-q="@Model.Search"
+                   asp-route-page="1"
+                   asp-route-pageSize="@Model.PageSize"
+                   class="admin-users-stat admin-users-stat--active @(routeStatus == "ACTIVE" ? "is-active" : "")">
+                    <span class="admin-users-stat__label">Hoạt động</span>
+                    <span class="admin-users-stat__value">@Model.TabActive</span>
+                </a>
+                <a asp-page="/Admin/Users/Index"
+                   asp-route-tab="@Model.Tab"
+                   asp-route-status="INACTIVE"
+                   asp-route-q="@Model.Search"
+                   asp-route-page="1"
+                   asp-route-pageSize="@Model.PageSize"
+                   class="admin-users-stat admin-users-stat--inactive @(routeStatus == "INACTIVE" ? "is-active" : "")">
+                    <span class="admin-users-stat__label">Vô hiệu</span>
+                    <span class="admin-users-stat__value">@Model.TabInactive</span>
+                </a>
+            </nav>
 
-    @if (string.IsNullOrEmpty(Model.ErrorMessage))
-    {
-        <div class="admin-portal__panel">
-            <div class="table-responsive">
-                @if (Model.IsEmployersTab)
-                {
-                    <table class="table table-hover align-middle mb-0">
-                        <thead>
-                            <tr>
-                                <th>Họ tên / Email</th>
-                                <th>Liên hệ</th>
-                                <th>Lượt đăng</th>
-                                <th>Tin đã đăng</th>
-                                <th>Trạng thái</th>
-                                <th class="text-end">Thao tác</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if (Model.Employers.Count == 0)
-                            {
-                                <tr>
-                                    <td colspan="6" class="text-center text-muted py-4">Không có dữ liệu phù hợp.</td>
-                                </tr>
-                            }
-                            else
-                            {
-                                @foreach (var e in Model.Employers)
-                                {
-                                    var isActive = IndexModel.IsActiveStatus(e.Status);
-                                    <tr>
-                                        <td>
-                                            <div class="d-flex align-items-center gap-3">
-                                                <span class="admin-user-avatar" aria-hidden="true">
-                                                    @if (!string.IsNullOrWhiteSpace(e.Image))
-                                                    {
-                                                        <img src="@e.Image" alt="" class="admin-user-avatar__img" loading="lazy" />
-                                                    }
-                                                    else
-                                                    {
-                                                        <span class="admin-user-avatar__placeholder">
-                                                            <i class="bi bi-building"></i>
-                                                        </span>
-                                                    }
-                                                </span>
-                                                <div class="min-w-0">
-                                                    <div class="fw-semibold text-truncate">@e.Name</div>
-                                                    <div class="small text-muted text-truncate">@e.Email</div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="small">@(e.Phone ?? "—")</td>
-                                        <td>@e.PostingLimit</td>
-                                        <td>@e.JobCount</td>
-                                        <td>
-                                            <span class="badge @IndexModel.StatusBadgeClass(e.Status)">
-                                                @IndexModel.FormatStatus(e.Status)
-                                            </span>
-                                        </td>
-                                        <td class="text-end">
-                                            @if (isActive)
-                                            {
-                                                <form method="post" asp-page-handler="DeactivateEmployer" class="d-inline"
-                                                      onsubmit="return confirm('Vô hiệu hóa tài khoản @e.Name? Người dùng sẽ không đăng nhập được.');">
-                                                    @Html.AntiForgeryToken()
-                                                    <input type="hidden" name="id" value="@e.Id" />
-                                                    <input type="hidden" name="q" value="@Model.Search" />
-                                                    <input type="hidden" name="status" value="@routeStatus" />
-                                                    <input type="hidden" name="page" value="@Model.CurrentPage" />
-                                                    <input type="hidden" name="pageSize" value="@Model.PageSize" />
-                                                    <button type="submit" class="btn btn-sm admin-user-action-btn admin-user-action-btn--deactivate">
-                                                        <i class="bi bi-slash-circle me-1"></i>Vô hiệu hóa
-                                                    </button>
-                                                </form>
-                                            }
-                                            else
-                                            {
-                                                <form method="post" asp-page-handler="ActivateEmployer" class="d-inline">
-                                                    @Html.AntiForgeryToken()
-                                                    <input type="hidden" name="id" value="@e.Id" />
-                                                    <input type="hidden" name="q" value="@Model.Search" />
-                                                    <input type="hidden" name="status" value="@routeStatus" />
-                                                    <input type="hidden" name="page" value="@Model.CurrentPage" />
-                                                    <input type="hidden" name="pageSize" value="@Model.PageSize" />
-                                                    <button type="submit" class="btn btn-sm admin-user-action-btn admin-user-action-btn--activate">
-                                                        <i class="bi bi-check-circle me-1"></i>Kích hoạt
-                                                    </button>
-                                                </form>
-                                            }
-                                        </td>
-                                    </tr>
-                                }
-                            }
-                        </tbody>
-                    </table>
-                }
-                else
-                {
-                    <table class="table table-hover align-middle mb-0">
-                        <thead>
-                            <tr>
-                                <th>Họ tên / Email</th>
-                                <th>Liên hệ</th>
-                                <th>Đơn ứng tuyển</th>
-                                <th>Ngày tạo</th>
-                                <th>Trạng thái</th>
-                                <th class="text-end">Thao tác</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if (Model.JobSeekers.Count == 0)
-                            {
-                                <tr>
-                                    <td colspan="6" class="text-center text-muted py-4">Không có dữ liệu phù hợp.</td>
-                                </tr>
-                            }
-                            else
-                            {
-                                @foreach (var s in Model.JobSeekers)
-                                {
-                                    var isActive = IndexModel.IsActiveStatus(s.Status);
-                                    <tr>
-                                        <td>
-                                            <div class="d-flex align-items-center gap-3">
-                                                <span class="admin-user-avatar" aria-hidden="true">
-                                                    @if (!string.IsNullOrWhiteSpace(s.ProfileImage))
-                                                    {
-                                                        <img src="@s.ProfileImage" alt="" class="admin-user-avatar__img" loading="lazy" />
-                                                    }
-                                                    else
-                                                    {
-                                                        <span class="admin-user-avatar__placeholder">
-                                                            @JobPortal.Web.Models.AccountPanelViewModel.GetInitials(s.Name)
-                                                        </span>
-                                                    }
-                                                </span>
-                                                <div class="min-w-0">
-                                                    <div class="fw-semibold text-truncate">@s.Name</div>
-                                                    <div class="small text-muted text-truncate">@s.Email</div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="small">@(s.Phone ?? "—")</td>
-                                        <td>@s.ApplicationCount</td>
-                                        <td class="small">@s.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy")</td>
-                                        <td>
-                                            <span class="badge @IndexModel.StatusBadgeClass(s.Status)">
-                                                @IndexModel.FormatStatus(s.Status)
-                                            </span>
-                                        </td>
-                                        <td class="text-end">
-                                            @if (isActive)
-                                            {
-                                                <form method="post" asp-page-handler="DeactivateSeeker" class="d-inline"
-                                                      onsubmit="return confirm('Vô hiệu hóa tài khoản @s.Name? Người dùng sẽ không đăng nhập được.');">
-                                                    @Html.AntiForgeryToken()
-                                                    <input type="hidden" name="id" value="@s.Id" />
-                                                    <input type="hidden" name="q" value="@Model.Search" />
-                                                    <input type="hidden" name="status" value="@routeStatus" />
-                                                    <input type="hidden" name="page" value="@Model.CurrentPage" />
-                                                    <input type="hidden" name="pageSize" value="@Model.PageSize" />
-                                                    <button type="submit" class="btn btn-sm admin-user-action-btn admin-user-action-btn--deactivate">
-                                                        <i class="bi bi-slash-circle me-1"></i>Vô hiệu hóa
-                                                    </button>
-                                                </form>
-                                            }
-                                            else
-                                            {
-                                                <form method="post" asp-page-handler="ActivateSeeker" class="d-inline">
-                                                    @Html.AntiForgeryToken()
-                                                    <input type="hidden" name="id" value="@s.Id" />
-                                                    <input type="hidden" name="q" value="@Model.Search" />
-                                                    <input type="hidden" name="status" value="@routeStatus" />
-                                                    <input type="hidden" name="page" value="@Model.CurrentPage" />
-                                                    <input type="hidden" name="pageSize" value="@Model.PageSize" />
-                                                    <button type="submit" class="btn btn-sm admin-user-action-btn admin-user-action-btn--activate">
-                                                        <i class="bi bi-check-circle me-1"></i>Kích hoạt
-                                                    </button>
-                                                </form>
-                                            }
-                                        </td>
-                                    </tr>
-                                }
-                            }
-                        </tbody>
-                    </table>
-                }
+            <form method="get" class="admin-users-filter">
+                <input type="hidden" name="tab" value="@Model.Tab" />
+                <input type="hidden" name="status" value="@statusRoute" />
+                <input type="hidden" name="page" value="1" />
+                <input type="hidden" name="pageSize" value="@Model.PageSize" />
+                <div class="admin-users-filter__grid">
+                    <div>
+                        <label class="form-label" for="q">Tìm kiếm</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                            <input type="search" class="form-control border-start-0" id="q" name="q" value="@Model.Search"
+                                   placeholder="Tên, email, số điện thoại..." maxlength="200" />
+                        </div>
+                    </div>
+                    <div class="admin-users-filter__actions">
+                        <button type="submit" class="btn admin-payments__btn admin-payments__btn--filter w-100">
+                            <i class="bi bi-funnel me-1"></i>Lọc
+                        </button>
+                        @if (Model.HasActiveFilter)
+                        {
+                            <a asp-page="/Admin/Users/Index"
+                               asp-route-tab="@Model.Tab"
+                               class="btn admin-payments__btn admin-payments__btn--clear w-100">
+                                <i class="bi bi-x-lg me-1"></i>Xóa lọc
+                            </a>
+                        }
+                    </div>
+                </div>
+            </form>
+        }
+
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage) && Model.Employers.Count == 0 && Model.JobSeekers.Count == 0)
+        {
+            <div class="admin-users-empty">
+                <i class="bi bi-exclamation-circle display-6 text-muted mb-2 d-block"></i>
+                <p class="text-muted mb-0">@Model.ErrorMessage</p>
             </div>
-        </div>
+        }
+        else if (Model.IsEmployersTab)
+        {
+            <p class="admin-users-toolbar">
+                Hiển thị <strong>@Model.Employers.Count</strong> / @Model.TotalCount nhà tuyển dụng
+                @if (Model.HasActiveFilter)
+                {
+                    <span>· đang lọc</span>
+                }
+            </p>
+
+            @if (Model.Employers.Count == 0)
+            {
+                <div class="admin-users-empty admin-users-empty--compact">
+                    <i class="bi bi-funnel display-6 text-muted mb-2 d-block"></i>
+                    <p class="mb-3 text-muted">Không có nhà tuyển dụng phù hợp bộ lọc.</p>
+                    <a asp-page="/Admin/Users/Index" asp-route-tab="@IndexModel.EmployersTab"
+                       class="btn btn-sm admin-payments__btn admin-payments__btn--filter">Xem tất cả</a>
+                </div>
+            }
+            else
+            {
+                <div class="admin-users-list">
+                    @foreach (var e in Model.Employers)
+                    {
+                        var isActive = IndexModel.IsActiveStatus(e.Status);
+                        var slotsUsed = Math.Min(e.JobCount, e.PostingLimit);
+                        <article class="admin-user-card @IndexModel.StatusCardModifier(e.Status)">
+                            <div class="admin-user-card__avatar-wrap">
+                                <span class="admin-user-card__avatar" aria-hidden="true">
+                                    @if (!string.IsNullOrWhiteSpace(e.Image))
+                                    {
+                                        <img src="@e.Image" alt="" class="admin-user-card__avatar-img" loading="lazy" />
+                                    }
+                                    else
+                                    {
+                                        <span class="admin-user-card__avatar-placeholder">
+                                            <i class="bi bi-building"></i>
+                                        </span>
+                                    }
+                                </span>
+                            </div>
+
+                            <div class="admin-user-card__body">
+                                <div class="admin-user-card__head">
+                                    <div class="min-w-0">
+                                        <h2 class="admin-user-card__name">@e.Name</h2>
+                                        <p class="admin-user-card__email"><i class="bi bi-envelope me-1"></i>@e.Email</p>
+                                    </div>
+                                    <div class="admin-user-card__badges">
+                                        <span class="admin-users-badge @IndexModel.StatusBadgeClass(e.Status)">
+                                            @IndexModel.FormatStatus(e.Status)
+                                        </span>
+                                        @if (e.EmailVerified)
+                                        {
+                                            <span class="admin-users-chip admin-users-chip--verified">
+                                                <i class="bi bi-patch-check"></i> Email xác thực
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="admin-users-chip admin-users-chip--warn">
+                                                <i class="bi bi-envelope-exclamation"></i> Chưa xác thực
+                                            </span>
+                                        }
+                                    </div>
+                                </div>
+
+                                <ul class="admin-user-card__metrics">
+                                    <li class="admin-user-card__metric">
+                                        <span class="admin-user-card__metric-value">@e.JobCount</span>
+                                        <span class="admin-user-card__metric-label">Tin đã đăng</span>
+                                    </li>
+                                    <li class="admin-user-card__metric">
+                                        <span class="admin-user-card__metric-value">@e.OpenJobCount</span>
+                                        <span class="admin-user-card__metric-label">Đang tuyển</span>
+                                    </li>
+                                    <li class="admin-user-card__metric">
+                                        <span class="admin-user-card__metric-value">@e.ApplicantCount</span>
+                                        <span class="admin-user-card__metric-label">Ứng viên nhận</span>
+                                    </li>
+                                    <li class="admin-user-card__metric">
+                                        <span class="admin-user-card__metric-value">@slotsUsed/@e.PostingLimit</span>
+                                        <span class="admin-user-card__metric-label">Hạn mức tin</span>
+                                    </li>
+                                </ul>
+
+                                <div class="admin-user-card__meta-row">
+                                    @if (!string.IsNullOrWhiteSpace(e.Phone))
+                                    {
+                                        <span><i class="bi bi-telephone"></i>@e.Phone</span>
+                                    }
+                                    <span><i class="bi bi-calendar-plus"></i>Tạo @IndexModel.FormatDate(e.CreatedAt)</span>
+                                    <span><i class="bi bi-clock-history"></i>Cập nhật @IndexModel.FormatRelativeUpdated(e.UpdatedAt, e.CreatedAt)</span>
+                                    <span><i class="bi bi-hash"></i>ID @e.Id · User #@e.UserId</span>
+                                </div>
+                            </div>
+
+                            <footer class="admin-user-card__footer">
+                                @if (isActive)
+                                {
+                                    <form method="post" asp-page-handler="DeactivateEmployer" class="d-inline"
+                                          onsubmit="return confirm('Vô hiệu hóa tài khoản @e.Name? Người dùng sẽ không đăng nhập được.');">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@e.Id" />
+                                        <input type="hidden" name="tab" value="@Model.Tab" />
+                                        <input type="hidden" name="q" value="@Model.Search" />
+                                        <input type="hidden" name="status" value="@statusRoute" />
+                                        <input type="hidden" name="page" value="@Model.CurrentPage" />
+                                        <input type="hidden" name="pageSize" value="@Model.PageSize" />
+                                        <button type="submit" class="btn btn-sm admin-user-action-btn admin-user-action-btn--deactivate">
+                                            <i class="bi bi-slash-circle me-1"></i>Vô hiệu hóa
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <form method="post" asp-page-handler="ActivateEmployer" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@e.Id" />
+                                        <input type="hidden" name="tab" value="@Model.Tab" />
+                                        <input type="hidden" name="q" value="@Model.Search" />
+                                        <input type="hidden" name="status" value="@statusRoute" />
+                                        <input type="hidden" name="page" value="@Model.CurrentPage" />
+                                        <input type="hidden" name="pageSize" value="@Model.PageSize" />
+                                        <button type="submit" class="btn btn-sm admin-user-action-btn admin-user-action-btn--activate">
+                                            <i class="bi bi-check-circle me-1"></i>Kích hoạt
+                                        </button>
+                                    </form>
+                                }
+                            </footer>
+                        </article>
+                    }
+                </div>
+            }
+        }
+        else
+        {
+            <p class="admin-users-toolbar">
+                Hiển thị <strong>@Model.JobSeekers.Count</strong> / @Model.TotalCount ứng viên
+                @if (Model.HasActiveFilter)
+                {
+                    <span>· đang lọc</span>
+                }
+            </p>
+
+            @if (Model.JobSeekers.Count == 0)
+            {
+                <div class="admin-users-empty admin-users-empty--compact">
+                    <i class="bi bi-funnel display-6 text-muted mb-2 d-block"></i>
+                    <p class="mb-3 text-muted">Không có ứng viên phù hợp bộ lọc.</p>
+                    <a asp-page="/Admin/Users/Index" asp-route-tab="@IndexModel.JobSeekersTab"
+                       class="btn btn-sm admin-payments__btn admin-payments__btn--filter">Xem tất cả</a>
+                </div>
+            }
+            else
+            {
+                <div class="admin-users-list">
+                    @foreach (var s in Model.JobSeekers)
+                    {
+                        var isActive = IndexModel.IsActiveStatus(s.Status);
+                        <article class="admin-user-card @IndexModel.StatusCardModifier(s.Status)">
+                            <div class="admin-user-card__avatar-wrap">
+                                <span class="admin-user-card__avatar" aria-hidden="true">
+                                    @if (!string.IsNullOrWhiteSpace(s.ProfileImage))
+                                    {
+                                        <img src="@s.ProfileImage" alt="" class="admin-user-card__avatar-img" loading="lazy" />
+                                    }
+                                    else
+                                    {
+                                        <span class="admin-user-card__avatar-placeholder">
+                                            @AccountPanelViewModel.GetInitials(s.Name)
+                                        </span>
+                                    }
+                                </span>
+                            </div>
+
+                            <div class="admin-user-card__body">
+                                <div class="admin-user-card__head">
+                                    <div class="min-w-0">
+                                        <h2 class="admin-user-card__name">@s.Name</h2>
+                                        <p class="admin-user-card__email"><i class="bi bi-envelope me-1"></i>@s.Email</p>
+                                    </div>
+                                    <div class="admin-user-card__badges">
+                                        <span class="admin-users-badge @IndexModel.StatusBadgeClass(s.Status)">
+                                            @IndexModel.FormatStatus(s.Status)
+                                        </span>
+                                        @if (s.EmailVerified)
+                                        {
+                                            <span class="admin-users-chip admin-users-chip--verified">
+                                                <i class="bi bi-patch-check"></i> Email xác thực
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="admin-users-chip admin-users-chip--warn">
+                                                <i class="bi bi-envelope-exclamation"></i> Chưa xác thực
+                                            </span>
+                                        }
+                                    </div>
+                                </div>
+
+                                <ul class="admin-user-card__metrics">
+                                    <li class="admin-user-card__metric">
+                                        <span class="admin-user-card__metric-value">@s.ApplicationCount</span>
+                                        <span class="admin-user-card__metric-label">Đơn ứng tuyển</span>
+                                    </li>
+                                    <li class="admin-user-card__metric">
+                                        <span class="admin-user-card__metric-value">@s.AcceptedApplicationCount</span>
+                                        <span class="admin-user-card__metric-label">Được chấp nhận</span>
+                                    </li>
+                                    <li class="admin-user-card__metric">
+                                        <span class="admin-user-card__metric-value">@s.ResumeCount</span>
+                                        <span class="admin-user-card__metric-label">CV đã tạo</span>
+                                    </li>
+                                    <li class="admin-user-card__metric">
+                                        <span class="admin-user-card__metric-value">@(s.ApplicationCount > 0 ? Math.Round(100.0 * s.AcceptedApplicationCount / s.ApplicationCount, 0) : 0)%</span>
+                                        <span class="admin-user-card__metric-label">Tỷ lệ trúng</span>
+                                    </li>
+                                </ul>
+
+                                <div class="admin-user-card__meta-row">
+                                    @if (!string.IsNullOrWhiteSpace(s.Phone))
+                                    {
+                                        <span><i class="bi bi-telephone"></i>@s.Phone</span>
+                                    }
+                                    <span><i class="bi bi-calendar-plus"></i>Tạo @IndexModel.FormatDate(s.CreatedAt)</span>
+                                    <span><i class="bi bi-clock-history"></i>Cập nhật @IndexModel.FormatRelativeUpdated(s.UpdatedAt, s.CreatedAt)</span>
+                                    <span><i class="bi bi-hash"></i>ID @s.Id · User #@s.UserId</span>
+                                </div>
+                            </div>
+
+                            <footer class="admin-user-card__footer">
+                                @if (isActive)
+                                {
+                                    <form method="post" asp-page-handler="DeactivateSeeker" class="d-inline"
+                                          onsubmit="return confirm('Vô hiệu hóa tài khoản @s.Name? Người dùng sẽ không đăng nhập được.');">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@s.Id" />
+                                        <input type="hidden" name="tab" value="@Model.Tab" />
+                                        <input type="hidden" name="q" value="@Model.Search" />
+                                        <input type="hidden" name="status" value="@statusRoute" />
+                                        <input type="hidden" name="page" value="@Model.CurrentPage" />
+                                        <input type="hidden" name="pageSize" value="@Model.PageSize" />
+                                        <button type="submit" class="btn btn-sm admin-user-action-btn admin-user-action-btn--deactivate">
+                                            <i class="bi bi-slash-circle me-1"></i>Vô hiệu hóa
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <form method="post" asp-page-handler="ActivateSeeker" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@s.Id" />
+                                        <input type="hidden" name="tab" value="@Model.Tab" />
+                                        <input type="hidden" name="q" value="@Model.Search" />
+                                        <input type="hidden" name="status" value="@statusRoute" />
+                                        <input type="hidden" name="page" value="@Model.CurrentPage" />
+                                        <input type="hidden" name="pageSize" value="@Model.PageSize" />
+                                        <button type="submit" class="btn btn-sm admin-user-action-btn admin-user-action-btn--activate">
+                                            <i class="bi bi-check-circle me-1"></i>Kích hoạt
+                                        </button>
+                                    </form>
+                                }
+                            </footer>
+                        </article>
+                    }
+                </div>
+            }
+        }
 
         @if (Model.ShowPagination)
         {
-            <nav class="mt-4" aria-label="Phân trang">
+            <nav class="admin-users-pagination" aria-label="Phân trang">
                 <ul class="pagination justify-content-center flex-wrap mb-0">
                     <li class="page-item @(Model.CurrentPage <= 1 ? "disabled" : "")">
                         <a class="page-link"
@@ -300,7 +438,7 @@
                            asp-route-tab="@Model.Tab"
                            asp-route-page="@(Model.CurrentPage - 1)"
                            asp-route-pageSize="@Model.PageSize"
-                           asp-route-status="@routeStatus"
+                           asp-route-status="@statusRoute"
                            asp-route-q="@Model.Search">
                             <i class="bi bi-chevron-left"></i>
                         </a>
@@ -313,7 +451,7 @@
                                asp-route-tab="@Model.Tab"
                                asp-route-page="@i"
                                asp-route-pageSize="@Model.PageSize"
-                               asp-route-status="@routeStatus"
+                               asp-route-status="@statusRoute"
                                asp-route-q="@Model.Search">@i</a>
                         </li>
                     }
@@ -323,7 +461,7 @@
                            asp-route-tab="@Model.Tab"
                            asp-route-page="@(Model.CurrentPage + 1)"
                            asp-route-pageSize="@Model.PageSize"
-                           asp-route-status="@routeStatus"
+                           asp-route-status="@statusRoute"
                            asp-route-q="@Model.Search">
                             <i class="bi bi-chevron-right"></i>
                         </a>
@@ -334,6 +472,5 @@
                 </p>
             </nav>
         }
-    }
     </div>
 </div>

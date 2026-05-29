@@ -9,7 +9,6 @@ namespace JobPortal.API.Services.Implementation;
 public class AdminDashboardService : IAdminDashboardService
 {
     private const int ChartMonths = 6;
-    private const int TopRatedLimit = 10;
     private const int ActiveUserDays = 30;
 
     private readonly AppDbContext _context;
@@ -19,8 +18,12 @@ public class AdminDashboardService : IAdminDashboardService
     public async Task<AdminDashboardDto> GetDashboardAsync(CancellationToken cancellationToken = default)
     {
         var summary = await BuildSummaryAsync(cancellationToken);
-        var topEmployers = await GetTopEmployersAsync(cancellationToken);
-        var topSeekers = await GetTopJobSeekersAsync(cancellationToken);
+        var topEmployers = (await TopRatedQuery.GetTopEmployersAsync(_context, cancellationToken: cancellationToken))
+            .Select(MapToAdminRatedUser)
+            .ToList();
+        var topSeekers = (await TopRatedQuery.GetTopJobSeekersAsync(_context, cancellationToken: cancellationToken))
+            .Select(MapToAdminRatedUser)
+            .ToList();
         var charts = await BuildChartsAsync(cancellationToken);
 
         return new AdminDashboardDto
@@ -31,6 +34,15 @@ public class AdminDashboardService : IAdminDashboardService
             Charts = charts
         };
     }
+
+    private static AdminRatedUserDto MapToAdminRatedUser(TopRatedUserDto item) => new()
+    {
+        Id = item.Id,
+        Name = item.Name,
+        Email = item.Email,
+        AverageRating = item.AverageRating,
+        ReviewCount = item.ReviewCount
+    };
 
     private async Task<AdminDashboardSummaryDto> BuildSummaryAsync(CancellationToken cancellationToken)
     {
@@ -81,94 +93,6 @@ public class AdminDashboardService : IAdminDashboardService
             TotalJobSeekers = totalSeekers,
             TotalApplications = totalApplications
         };
-    }
-
-    private async Task<IReadOnlyList<AdminRatedUserDto>> GetTopEmployersAsync(CancellationToken cancellationToken)
-    {
-        var ratings = await _context.Reviews
-            .AsNoTracking()
-            .Where(r => r.ReviewType == ReviewCatalog.SeekerToEmployer)
-            .GroupBy(r => r.EmployerId)
-            .Select(g => new
-            {
-                EmployerId = g.Key,
-                AverageRating = g.Average(r => r.Rating),
-                ReviewCount = g.Count()
-            })
-            .Where(x => x.ReviewCount > 0)
-            .OrderByDescending(x => x.AverageRating)
-            .ThenByDescending(x => x.ReviewCount)
-            .Take(TopRatedLimit)
-            .ToListAsync(cancellationToken);
-
-        if (ratings.Count == 0)
-        {
-            return Array.Empty<AdminRatedUserDto>();
-        }
-
-        var ids = ratings.Select(r => r.EmployerId).ToList();
-        var employers = await _context.Employers
-            .AsNoTracking()
-            .Where(e => ids.Contains(e.Id))
-            .Select(e => new { e.Id, e.Name, e.Email })
-            .ToDictionaryAsync(e => e.Id, cancellationToken);
-
-        return ratings.Select(r =>
-        {
-            employers.TryGetValue(r.EmployerId, out var emp);
-            return new AdminRatedUserDto
-            {
-                Id = r.EmployerId,
-                Name = emp?.Name ?? "—",
-                Email = emp?.Email,
-                AverageRating = Math.Round(r.AverageRating, 1),
-                ReviewCount = r.ReviewCount
-            };
-        }).ToList();
-    }
-
-    private async Task<IReadOnlyList<AdminRatedUserDto>> GetTopJobSeekersAsync(CancellationToken cancellationToken)
-    {
-        var ratings = await _context.Reviews
-            .AsNoTracking()
-            .Where(r => r.ReviewType == ReviewCatalog.EmployerToSeeker)
-            .GroupBy(r => r.JobSeekerId)
-            .Select(g => new
-            {
-                JobSeekerId = g.Key,
-                AverageRating = g.Average(r => r.Rating),
-                ReviewCount = g.Count()
-            })
-            .Where(x => x.ReviewCount > 0)
-            .OrderByDescending(x => x.AverageRating)
-            .ThenByDescending(x => x.ReviewCount)
-            .Take(TopRatedLimit)
-            .ToListAsync(cancellationToken);
-
-        if (ratings.Count == 0)
-        {
-            return Array.Empty<AdminRatedUserDto>();
-        }
-
-        var ids = ratings.Select(r => r.JobSeekerId).ToList();
-        var seekers = await _context.JobSeekers
-            .AsNoTracking()
-            .Where(s => ids.Contains(s.Id))
-            .Select(s => new { s.Id, s.Name, s.Email })
-            .ToDictionaryAsync(s => s.Id, cancellationToken);
-
-        return ratings.Select(r =>
-        {
-            seekers.TryGetValue(r.JobSeekerId, out var seeker);
-            return new AdminRatedUserDto
-            {
-                Id = r.JobSeekerId,
-                Name = seeker?.Name ?? "—",
-                Email = seeker?.Email,
-                AverageRating = Math.Round(r.AverageRating, 1),
-                ReviewCount = r.ReviewCount
-            };
-        }).ToList();
     }
 
     private async Task<AdminRecruitmentChartsDto> BuildChartsAsync(CancellationToken cancellationToken)

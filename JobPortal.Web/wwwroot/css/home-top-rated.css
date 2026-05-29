@@ -1,0 +1,199 @@
+/* Top 10 đánh giá — trang chủ seeker & employer */
+.home-top-rated {
+  --htr-accent: var(--jp-primary, #0000ee);
+  --htr-accent-soft: #eef2ff;
+  --htr-badge-bg: #0000ee;
+  --htr-badge-text: #fff;
+  --htr-icon-employer: #b45309;
+  --htr-icon-seeker: #047857;
+  --htr-badge-employer-bg: #fef3c7;
+  --htr-badge-employer-text: #92400e;
+  --htr-badge-seeker-bg: #dcfce7;
+  --htr-badge-seeker-text: #166534;
+}
+
+.home-top-rated--seeker {
+  padding: 3rem 0;
+  background: linear-gradient(180deg, #f8fafc 0%, #fff 100%);
+}
+
+.home-top-rated--employer {
+  margin-bottom: 1.5rem;
+}
+
+.home-top-rated--employer .home-top-rated__card {
+  border-color: #dce1e8;
+  box-shadow: var(--jp-card-shadow, 0 1px 2px rgba(15, 23, 42, 0.05));
+}
+
+.home-top-rated--employer {
+  --htr-accent: #047857;
+  --htr-accent-soft: #ecfdf5;
+  --htr-badge-bg: #047857;
+}
+
+.home-top-rated__hint {
+  flex-shrink: 0;
+}
+
+.home-top-rated__card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 6px 20px rgba(15, 23, 42, 0.05);
+  height: 100%;
+  overflow: hidden;
+}
+
+.home-top-rated__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding: 1rem 1.15rem;
+  border-bottom: 1px solid #f1f5f9;
+  background: linear-gradient(180deg, #fafbfc 0%, #fff 100%);
+}
+
+.home-top-rated__head h3 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #1e293b;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.home-top-rated__icon {
+  font-size: 1rem;
+}
+
+.home-top-rated__icon--employer {
+  color: var(--htr-icon-employer);
+}
+
+.home-top-rated__icon--seeker {
+  color: var(--htr-icon-seeker);
+}
+
+.home-top-rated__badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.home-top-rated__badge--employer {
+  background: var(--htr-badge-employer-bg);
+  color: var(--htr-badge-employer-text);
+}
+
+.home-top-rated__badge--seeker {
+  background: var(--htr-badge-seeker-bg);
+  color: var(--htr-badge-seeker-text);
+}
+
+.home-top-rated__body {
+  padding: 0.35rem 1.15rem 1rem;
+}
+
+.home-top-rated__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.home-top-rated__item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.home-top-rated__item:last-child {
+  border-bottom: none;
+}
+
+.home-top-rated__rank {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  background: var(--htr-accent-soft);
+  color: var(--htr-accent);
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.home-top-rated__rank--gold { background: #fef3c7; color: #b45309; }
+.home-top-rated__rank--silver { background: #f1f5f9; color: #475569; }
+.home-top-rated__rank--bronze { background: #ffedd5; color: #c2410c; }
+
+.home-top-rated__info {
+  min-width: 0;
+  flex: 1;
+}
+
+.home-top-rated__name {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.home-top-rated__meta {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.home-top-rated__rating {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.home-top-rated__stars {
+  color: #f59e0b;
+  font-size: 0.8rem;
+  letter-spacing: -0.05em;
+}
+
+.home-top-rated__score {
+  font-weight: 700;
+  font-size: 0.9375rem;
+  color: #0f172a;
+}
+
+.home-top-rated__empty {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: #64748b;
+  font-size: 0.875rem;
+}
+
+.home-top-rated__empty i {
+  font-size: 2rem;
+  opacity: 0.4;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+@media (max-width: 575.98px) {
+  .home-top-rated--seeker {
+    padding: 2rem 0;
+  }
+
+  .home-top-rated__head h3 {
+    font-size: 0.875rem;
+  }
+}

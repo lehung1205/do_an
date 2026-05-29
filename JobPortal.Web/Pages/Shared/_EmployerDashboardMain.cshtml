@@ -161,12 +161,12 @@
                             @app.JobTitle • @IndexModel.FormatRelativeTime(app.AppliedAt)
                         </p>
                         <div class="d-flex flex-wrap gap-2">
-                            <a asp-page="/Employer/Applicants" asp-route-filter="@(app.IsUnread ? "unread" : "all")" class="btn btn-sm btn-outline-primary">
+                            <a asp-page="/Employer/Applicants" asp-route-filter="@(app.IsUnread ? "unread" : "all")" class="btn btn-sm employer-jobs-btn employer-jobs-btn--info">
                                 Duyệt CV
                             </a>
                             @if (!string.IsNullOrWhiteSpace(app.ResumeUrl))
                             {
-                                <a href="@app.ResumeUrl" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-secondary">
+                                <a href="@app.ResumeUrl" target="_blank" rel="noopener noreferrer" class="btn btn-sm employer-jobs-btn employer-jobs-btn--muted">
                                     Mở file CV
                                 </a>
                             }
@@ -199,4 +199,7 @@
             </ul>
         </section>
     }
+
+    <partial name="Shared/_HomeTopRatedSection"
+             model="@(JobPortal.Web.Models.HomeTopRatedSectionModel.FromLists(Model.TopRated, "employer"))" />
 }

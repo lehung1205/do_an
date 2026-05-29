@@ -11,6 +11,7 @@ public interface IJobService
         string? search = null,
         string? location = null,
         long? categoryId = null,
+        long? excludeAppliedForUserId = null,
         CancellationToken cancellationToken = default);
     Task<JobDto> GetJobByIdAsync(long id, CancellationToken cancellationToken = default);
     Task<JobRelatedListsDto> GetRelatedJobsAsync(long id, CancellationToken cancellationToken = default);

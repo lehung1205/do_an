@@ -18,8 +18,8 @@ public class ApplicantsModel : PageModel
     public string? Search { get; set; }
     public bool HasActiveFilter => !string.Equals(Filter, "all", StringComparison.OrdinalIgnoreCase) || !string.IsNullOrWhiteSpace(Search);
 
+    public int PendingResponseCount { get; set; }
     public int UnreadCount { get; set; }
-    public int ReviewedCount { get; set; }
     public int AcceptedCount { get; set; }
     public int RejectedCount { get; set; }
 
@@ -179,7 +179,7 @@ public class ApplicantsModel : PageModel
             .ToList();
 
         UnreadCount = AllApplicants.Count(a => a.IsUnread);
-        ReviewedCount = AllApplicants.Count(a => IsStatus(a.Status, "reviewed"));
+        PendingResponseCount = AllApplicants.Count(IsPendingResponse);
         AcceptedCount = AllApplicants.Count(a => IsStatus(a.Status, "accepted"));
         RejectedCount = AllApplicants.Count(a => IsStatus(a.Status, "rejected"));
 
@@ -189,10 +189,12 @@ public class ApplicantsModel : PageModel
             .ToList();
     }
 
+    private static bool IsPendingResponse(EmployerDashboardApplicationDto app) =>
+        !IsStatus(app.Status, "accepted") && !IsStatus(app.Status, "rejected");
+
     private static bool MatchesFilter(EmployerDashboardApplicationDto app, string filter) => filter switch
     {
-        "unread" => app.IsUnread,
-        "reviewed" => IsStatus(app.Status, "reviewed"),
+        "pending_response" => IsPendingResponse(app),
         "accepted" => IsStatus(app.Status, "accepted"),
         "rejected" => IsStatus(app.Status, "rejected"),
         _ => true
@@ -236,7 +238,9 @@ public class ApplicantsModel : PageModel
 
     private static string NormalizeFilter(string? filter) => filter?.Trim().ToLowerInvariant() switch
     {
-        "unread" or "reviewed" or "accepted" or "rejected" => filter.Trim().ToLowerInvariant(),
+        "accepted" => "accepted",
+        "rejected" => "rejected",
+        "pending_response" or "no_response" or "unread" or "reviewed" or "submitted" or "pending" => "pending_response",
         _ => "all"
     };
 

@@ -54,38 +54,67 @@
                     <span class="seeker-apps-stat__value">@total</span>
                 </a>
                 <a asp-page="/Applications/Index"
-                   asp-route-status="submitted"
+                   asp-route-status="pending_response"
                    asp-route-q="@Model.Search"
-                   class="seeker-apps-stat seeker-apps-stat--submitted @(Model.StatusFilter == "submitted" ? "is-active" : "")">
-                    <span class="seeker-apps-stat__label">Đang chờ</span>
-                    <span class="seeker-apps-stat__value">@Model.SubmittedCount</span>
-                </a>
-                <a asp-page="/Applications/Index"
-                   asp-route-status="reviewed"
-                   asp-route-q="@Model.Search"
-                   class="seeker-apps-stat seeker-apps-stat--reviewed @(Model.StatusFilter == "reviewed" ? "is-active" : "")">
-                    <span class="seeker-apps-stat__label">Đã xem</span>
-                    <span class="seeker-apps-stat__value">@Model.ReviewedCount</span>
+                   class="seeker-apps-stat seeker-apps-stat--pending @(Model.StatusFilter == "pending_response" ? "is-active" : "")">
+                    <span class="seeker-apps-stat__label">Chưa phản hồi</span>
+                    <span class="seeker-apps-stat__value">@Model.PendingResponseCount</span>
                 </a>
                 <a asp-page="/Applications/Index"
                    asp-route-status="accepted"
                    asp-route-q="@Model.Search"
                    class="seeker-apps-stat seeker-apps-stat--accepted @(Model.StatusFilter == "accepted" ? "is-active" : "")">
-                    <span class="seeker-apps-stat__label">Chấp nhận</span>
+                    <span class="seeker-apps-stat__label">Đã chấp nhận</span>
                     <span class="seeker-apps-stat__value">@Model.AcceptedCount</span>
                 </a>
                 <a asp-page="/Applications/Index"
                    asp-route-status="rejected"
                    asp-route-q="@Model.Search"
                    class="seeker-apps-stat seeker-apps-stat--rejected @(Model.StatusFilter == "rejected" ? "is-active" : "")">
-                    <span class="seeker-apps-stat__label">Từ chối</span>
+                    <span class="seeker-apps-stat__label">Đã từ chối</span>
                     <span class="seeker-apps-stat__value">@Model.RejectedCount</span>
                 </a>
             </nav>
 
             <form method="get" class="seeker-apps-filter">
-                <input type="hidden" name="status" value="@Model.StatusFilter" />
                 <div class="seeker-apps-filter__grid">
+                    <div class="seeker-apps-filter__field">
+                        <label class="form-label" for="status">Trạng thái</label>
+                        <select class="form-select" id="status" name="status">
+                            @if (Model.StatusFilter == "all")
+                            {
+                                <option value="all" selected>Tất cả</option>
+                            }
+                            else
+                            {
+                                <option value="all">Tất cả</option>
+                            }
+                            @if (Model.StatusFilter == "pending_response")
+                            {
+                                <option value="pending_response" selected>Chưa phản hồi</option>
+                            }
+                            else
+                            {
+                                <option value="pending_response">Chưa phản hồi</option>
+                            }
+                            @if (Model.StatusFilter == "accepted")
+                            {
+                                <option value="accepted" selected>Đã chấp nhận</option>
+                            }
+                            else
+                            {
+                                <option value="accepted">Đã chấp nhận</option>
+                            }
+                            @if (Model.StatusFilter == "rejected")
+                            {
+                                <option value="rejected" selected>Đã từ chối</option>
+                            }
+                            else
+                            {
+                                <option value="rejected">Đã từ chối</option>
+                            }
+                        </select>
+                    </div>
                     <div class="seeker-apps-filter__field seeker-apps-filter__field--search">
                         <label class="form-label" for="q">Tìm kiếm</label>
                         <div class="input-group">

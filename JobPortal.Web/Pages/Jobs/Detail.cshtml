@@ -5,11 +5,13 @@
 }
 
 <div class="container job-detail-page mt-4 mb-5">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a asp-page="/Jobs/Index">Việc làm</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Chi tiết</li>
-        </ol>
+    <nav class="job-detail-nav" aria-label="Điều hướng">
+        <a asp-page="/Jobs/Index" class="job-detail-back">
+            <span class="job-detail-back__icon" aria-hidden="true">
+                <i class="bi bi-arrow-left"></i>
+            </span>
+            <span class="job-detail-back__label">Quay lại Việc làm</span>
+        </a>
     </nav>
 
     <div class="row">
@@ -139,13 +141,72 @@
                                 else if (Model.Resumes.Count == 0)
                                 {
                                     <p class="text-muted mb-3">Bạn cần tải lên ít nhất một hồ sơ (CV) trước khi ứng tuyển.</p>
-                                    <a asp-page="/Index"
-                                       asp-route-openAccount="true"
-                                       asp-route-accountTab="resume"
-                                       asp-route-returnUrl="@Model.ReturnUrl"
-                                       class="btn btn-primary btn-lg">
+
+                                    @if (!string.IsNullOrEmpty(Model.ResumeSuccessMessage))
+                                    {
+                                        <div class="alert alert-success">@Model.ResumeSuccessMessage</div>
+                                    }
+                                    @if (!string.IsNullOrEmpty(Model.ResumeErrorMessage))
+                                    {
+                                        <div class="alert alert-danger">@Model.ResumeErrorMessage</div>
+                                    }
+
+                                    <button type="button"
+                                            class="btn btn-primary btn-lg"
+                                            id="toggleAddResumeFormBtn"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#addResumeForm"
+                                            aria-expanded="@(Model.ShowAddResumeForm ? "true" : "false")"
+                                            aria-controls="addResumeForm">
                                         <i class="bi bi-file-earmark-plus me-1"></i> Thêm hồ sơ (CV)
-                                    </a>
+                                    </button>
+
+                                    <div class="collapse @(Model.ShowAddResumeForm ? "show" : "") mt-3" id="addResumeForm">
+                                        <div class="apply-resume-form card border-0 bg-light">
+                                            <div class="card-body p-4">
+                                                <h5 class="h6 fw-semibold mb-3">
+                                                    <i class="bi bi-file-earmark-arrow-up me-2"></i>Thêm hồ sơ CV
+                                                </h5>
+                                                <form method="post"
+                                                      enctype="multipart/form-data"
+                                                      asp-page-handler="AddResume"
+                                                      asp-route-id="@Model.Job.Id"
+                                                      class="apply-resume-form__inner">
+                                                    <div class="mb-3">
+                                                        <label class="form-label" for="ResumeInput_Title">Tiêu đề hồ sơ</label>
+                                                        <input type="text"
+                                                               class="form-control"
+                                                               id="ResumeInput_Title"
+                                                               asp-for="ResumeInput.Title"
+                                                               maxlength="255"
+                                                               required
+                                                               placeholder="VD: CV Frontend 2025" />
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label" for="resumeFile">File CV (PDF)</label>
+                                                        <input type="file"
+                                                               class="form-control"
+                                                               id="resumeFile"
+                                                               name="resumeFile"
+                                                               accept="application/pdf,.pdf"
+                                                               required />
+                                                        <div class="form-text">Chỉ PDF, tối đa 10 MB.</div>
+                                                    </div>
+                                                    <div class="d-flex flex-wrap gap-2">
+                                                        <button type="submit" class="btn btn-primary">
+                                                            <i class="bi bi-plus-lg me-1"></i> Lưu hồ sơ
+                                                        </button>
+                                                        <button type="button"
+                                                                class="btn btn-outline-secondary"
+                                                                data-bs-toggle="collapse"
+                                                                data-bs-target="#addResumeForm">
+                                                            Hủy
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
                                 }
                                 else
                                 {

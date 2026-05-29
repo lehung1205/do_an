@@ -70,38 +70,67 @@
                 <span class="emp-apps-stat__value">@total</span>
             </a>
             <a asp-page="/Employer/Applicants"
-               asp-route-filter="unread"
+               asp-route-filter="pending_response"
                asp-route-q="@Model.Search"
-               class="emp-apps-stat emp-apps-stat--unread @(Model.Filter == "unread" ? "is-active" : "")">
-                <span class="emp-apps-stat__label">Chưa xem</span>
-                <span class="emp-apps-stat__value">@Model.UnreadCount</span>
-            </a>
-            <a asp-page="/Employer/Applicants"
-               asp-route-filter="reviewed"
-               asp-route-q="@Model.Search"
-               class="emp-apps-stat emp-apps-stat--reviewed @(Model.Filter == "reviewed" ? "is-active" : "")">
-                <span class="emp-apps-stat__label">Đã xem</span>
-                <span class="emp-apps-stat__value">@Model.ReviewedCount</span>
+               class="emp-apps-stat emp-apps-stat--pending @(Model.Filter == "pending_response" ? "is-active" : "")">
+                <span class="emp-apps-stat__label">Chưa phản hồi</span>
+                <span class="emp-apps-stat__value">@Model.PendingResponseCount</span>
             </a>
             <a asp-page="/Employer/Applicants"
                asp-route-filter="accepted"
                asp-route-q="@Model.Search"
                class="emp-apps-stat emp-apps-stat--accepted @(Model.Filter == "accepted" ? "is-active" : "")">
-                <span class="emp-apps-stat__label">Chấp nhận</span>
+                <span class="emp-apps-stat__label">Đã chấp nhận</span>
                 <span class="emp-apps-stat__value">@Model.AcceptedCount</span>
             </a>
             <a asp-page="/Employer/Applicants"
                asp-route-filter="rejected"
                asp-route-q="@Model.Search"
                class="emp-apps-stat emp-apps-stat--rejected @(Model.Filter == "rejected" ? "is-active" : "")">
-                <span class="emp-apps-stat__label">Từ chối</span>
+                <span class="emp-apps-stat__label">Đã từ chối</span>
                 <span class="emp-apps-stat__value">@Model.RejectedCount</span>
             </a>
         </nav>
 
         <form method="get" class="emp-apps-filter">
-            <input type="hidden" name="filter" value="@Model.Filter" />
             <div class="emp-apps-filter__grid">
+                <div class="emp-apps-filter__field">
+                    <label class="form-label" for="filter">Trạng thái</label>
+                    <select class="form-select" id="filter" name="filter">
+                        @if (Model.Filter == "all")
+                        {
+                            <option value="all" selected>Tất cả</option>
+                        }
+                        else
+                        {
+                            <option value="all">Tất cả</option>
+                        }
+                        @if (Model.Filter == "pending_response")
+                        {
+                            <option value="pending_response" selected>Chưa phản hồi</option>
+                        }
+                        else
+                        {
+                            <option value="pending_response">Chưa phản hồi</option>
+                        }
+                        @if (Model.Filter == "accepted")
+                        {
+                            <option value="accepted" selected>Đã chấp nhận</option>
+                        }
+                        else
+                        {
+                            <option value="accepted">Đã chấp nhận</option>
+                        }
+                        @if (Model.Filter == "rejected")
+                        {
+                            <option value="rejected" selected>Đã từ chối</option>
+                        }
+                        else
+                        {
+                            <option value="rejected">Đã từ chối</option>
+                        }
+                    </select>
+                </div>
                 <div class="emp-apps-filter__field">
                     <label class="form-label" for="q">Tìm kiếm</label>
                     <div class="input-group">

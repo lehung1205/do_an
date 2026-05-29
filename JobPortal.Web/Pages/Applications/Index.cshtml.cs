@@ -16,8 +16,7 @@ public class IndexModel : PageModel
     public string StatusFilter { get; set; } = "all";
     public string? Search { get; set; }
     public bool HasActiveFilter => !string.Equals(StatusFilter, "all", StringComparison.OrdinalIgnoreCase) || !string.IsNullOrWhiteSpace(Search);
-    public int SubmittedCount { get; set; }
-    public int ReviewedCount { get; set; }
+    public int PendingResponseCount { get; set; }
     public int AcceptedCount { get; set; }
     public int RejectedCount { get; set; }
 
@@ -46,8 +45,10 @@ public class IndexModel : PageModel
             .OrderByDescending(x => x.AppliedAt)
             .ToList();
 
-        SubmittedCount = Applications.Count(x => IsStatus(x.Status, "submitted") || IsStatus(x.Status, "pending"));
-        ReviewedCount = Applications.Count(x => IsStatus(x.Status, "reviewed"));
+        PendingResponseCount = Applications.Count(x =>
+            IsStatus(x.Status, "submitted") ||
+            IsStatus(x.Status, "pending") ||
+            IsStatus(x.Status, "reviewed"));
         AcceptedCount = Applications.Count(x => IsStatus(x.Status, "accepted"));
         RejectedCount = Applications.Count(x => IsStatus(x.Status, "rejected"));
 
@@ -72,13 +73,21 @@ public class IndexModel : PageModel
         }
 
         var s = status.Trim().ToLowerInvariant();
-        return s is "all" or "submitted" or "reviewed" or "accepted" or "rejected" ? s : "all";
+        return s switch
+        {
+            "all" => "all",
+            "accepted" => "accepted",
+            "rejected" => "rejected",
+            "pending_response" or "no_response" or "submitted" or "reviewed" or "pending" => "pending_response",
+            _ => "all"
+        };
     }
 
     private static bool MatchesStatus(MyApplicationDto app, string status) => status switch
     {
-        "submitted" => IsStatus(app.Status, "submitted") || IsStatus(app.Status, "pending"),
-        "reviewed" => IsStatus(app.Status, "reviewed"),
+        "pending_response" => IsStatus(app.Status, "submitted")
+            || IsStatus(app.Status, "pending")
+            || IsStatus(app.Status, "reviewed"),
         "accepted" => IsStatus(app.Status, "accepted"),
         "rejected" => IsStatus(app.Status, "rejected"),
         _ => true

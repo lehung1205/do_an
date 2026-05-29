@@ -1,3 +1,5 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using JobPortal.API.DTOs;
 using JobPortal.API.DTOs.Common;
 using JobPortal.API.Services;
@@ -25,8 +27,27 @@ public class JobsController : ControllerBase
         [FromQuery] long? categoryId = null,
         CancellationToken cancellationToken = default)
     {
-        var pagedJobs = await _jobService.GetJobsPagedAsync(page, pageSize, q, location, categoryId, cancellationToken);
+        var excludeAppliedForUserId = TryGetCurrentJobSeekerUserId();
+        var pagedJobs = await _jobService.GetJobsPagedAsync(
+            page,
+            pageSize,
+            q,
+            location,
+            categoryId,
+            excludeAppliedForUserId,
+            cancellationToken);
         return Ok(ApiResponse<PagedResult<JobListItemDto>>.SuccessResponse(pagedJobs, "Jobs retrieved successfully."));
+    }
+
+    private long? TryGetCurrentJobSeekerUserId()
+    {
+        if (User.Identity?.IsAuthenticated != true || !User.IsInRole("JOB_SEEKER"))
+        {
+            return null;
+        }
+
+        var sub = User.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
+        return long.TryParse(sub, out var userId) ? userId : null;
     }
 
     [HttpGet("{id:long}")]

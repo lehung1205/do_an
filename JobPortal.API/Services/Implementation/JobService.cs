@@ -17,6 +17,7 @@ public class JobService : IJobService
     private const int MaxPageSize = 100;
     private readonly IJobRepository _repository;
     private readonly IEmployerRepository _employerRepository;
+    private readonly IJobSeekerRepository _jobSeekerRepository;
     private readonly IJobExpiryService _jobExpiryService;
     private readonly AppDbContext _context;
     private readonly IMapper _mapper;
@@ -24,12 +25,14 @@ public class JobService : IJobService
     public JobService(
         IJobRepository repository,
         IEmployerRepository employerRepository,
+        IJobSeekerRepository jobSeekerRepository,
         IJobExpiryService jobExpiryService,
         AppDbContext context,
         IMapper mapper)
     {
         _repository = repository;
         _employerRepository = employerRepository;
+        _jobSeekerRepository = jobSeekerRepository;
         _jobExpiryService = jobExpiryService;
         _context = context;
         _mapper = mapper;
@@ -41,11 +44,22 @@ public class JobService : IJobService
         string? search = null,
         string? location = null,
         long? categoryId = null,
+        long? excludeAppliedForUserId = null,
         CancellationToken cancellationToken = default)
     {
         ValidatePagination(page, pageSize);
 
         await _jobExpiryService.CloseExpiredJobsAsync(cancellationToken);
+
+        long? excludeAppliedForJobSeekerId = null;
+        if (excludeAppliedForUserId is > 0)
+        {
+            var jobSeeker = await _jobSeekerRepository.GetByUserIdAsync(excludeAppliedForUserId.Value, cancellationToken);
+            if (jobSeeker != null)
+            {
+                excludeAppliedForJobSeekerId = jobSeeker.Id;
+            }
+        }
 
         var (items, totalCount) = await _repository.GetPagedAsync(
             page,
@@ -54,6 +68,7 @@ public class JobService : IJobService
             search,
             location,
             categoryId,
+            excludeAppliedForJobSeekerId,
             cancellationToken);
         var dtos = _mapper.Map<List<JobListItemDto>>(items);
         await ApplyEmployerRatingsToListItemsAsync(dtos, items, cancellationToken);

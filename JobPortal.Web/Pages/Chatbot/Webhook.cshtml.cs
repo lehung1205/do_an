@@ -53,8 +53,22 @@ public class WebhookModel : PageModel
             return new JsonResult(new { success = false, error = urlError }) { StatusCode = 400 };
         }
 
+        var message = request.Message.Trim();
         var n8nRole = MapRoleForN8n(isLoggedIn ? sessionRole : null);
-        var payload = new { message = request.Message.Trim(), role = n8nRole };
+        var isAdmin = string.Equals(sessionRole?.Trim(), "ADMIN", StringComparison.OrdinalIgnoreCase);
+        var accessToken = isAdmin ? HttpContext.Session.GetString("JwtToken") : null;
+
+        var payload = isAdmin
+            ? N8nChatbotWebhookPayload.ForAdmin(message, n8nRole, accessToken)
+            : N8nChatbotWebhookPayload.ForUser(message, n8nRole);
+
+        _logger.LogInformation(
+            "n8n webhook payload: role={Role}, sessionRole={SessionRole}, message={Message}, hasAccessToken={HasAccessToken}, accessTokenLength={TokenLength}",
+            payload.Role,
+            sessionRole,
+            payload.Message,
+            !string.IsNullOrEmpty(payload.AccessToken),
+            payload.AccessToken?.Length ?? 0);
 
         try
         {
@@ -80,10 +94,19 @@ public class WebhookModel : PageModel
             var reply = N8nChatbotResponseParser.ExtractReply(body);
             if (string.IsNullOrWhiteSpace(reply))
             {
+                _logger.LogWarning(
+                    "n8n webhook returned 200 but reply could not be parsed. BodyLength={BodyLength}, BodyPreview={BodyPreview}",
+                    body.Length,
+                    body.Length > 500 ? body[..500] + "…" : body);
+
+                var parseError = string.IsNullOrWhiteSpace(body)
+                    ? "Workflow n8n trả về phản hồi rỗng. Node «Respond to Webhook» cần trả JSON có trường reply (ví dụ: { \"reply\": \"...\" })."
+                    : "Không đọc được phản hồi từ bot. Kiểm tra node trả về JSON (reply/message/output).";
+
                 return new JsonResult(new
                 {
                     success = false,
-                    error = "Không đọc được phản hồi từ bot. Kiểm tra node trả về JSON (reply/message/output).",
+                    error = parseError,
                     raw = body.Length > 500 ? body[..500] + "…" : body
                 })
                 { StatusCode = 502 };
@@ -127,7 +150,7 @@ public class WebhookModel : PageModel
         sessionRole?.Trim().ToUpperInvariant() switch
         {
             "JOB_SEEKER" => "employee",
-            "ADMIN" => "ADMIN",
+            "ADMIN" => "admin",
             _ => "guest"
         };
 

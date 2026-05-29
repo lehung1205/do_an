@@ -13,11 +13,11 @@
 }' />
 
 <div class="employer-dash__panel-stack">
-    <p class="mb-3">
-        <a asp-page="/Employer/WorkProgress/Index" class="small text-decoration-none">
-            <i class="bi bi-arrow-left me-1"></i> Quay lại danh sách tiến độ
-        </a>
-    </p>
+    <partial name="Shared/_PageBackLink" model='new JobPortal.Web.Models.PageBackLinkModel {
+        PagePath = "/Employer/WorkProgress/Index",
+        Label = "Quay lại danh sách tiến độ",
+        EmployerVariant = true
+    }' />
 
     @if (Model.Progress == null)
     {

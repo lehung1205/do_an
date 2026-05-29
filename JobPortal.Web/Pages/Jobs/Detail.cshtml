@@ -1,18 +1,26 @@
 @page "{id:long}"
 @model JobPortal.Web.Pages.Jobs.DetailModel
+@using JobPortal.Web.Models
 @{
     ViewData["Title"] = Model.Job.Title;
+    if (Model.IsEmployerViewer)
+    {
+        Layout = "/Pages/Employer/_EmployerPortalLayout.cshtml";
+        ViewData["EmployerNavActive"] = EmployerPortalNavKeys.Jobs;
+    }
 }
 
+@if (Model.IsEmployerViewer)
+{
+    <partial name="Shared/_JobDetailEmployer" />
+}
+else
+{
 <div class="container job-detail-page mt-4 mb-5">
-    <nav class="job-detail-nav" aria-label="Điều hướng">
-        <a asp-page="/Jobs/Index" class="job-detail-back">
-            <span class="job-detail-back__icon" aria-hidden="true">
-                <i class="bi bi-arrow-left"></i>
-            </span>
-            <span class="job-detail-back__label">Quay lại Việc làm</span>
-        </a>
-    </nav>
+    <partial name="Shared/_PageBackLink" model='new JobPortal.Web.Models.PageBackLinkModel {
+        PagePath = "/Jobs/Index",
+        Label = "Quay lại Việc làm"
+    }' />
 
     <div class="row">
         <div class="col-lg-8">
@@ -334,8 +342,9 @@
         </div>
     </div>
 </div>
+}
 
-@if (Model.EmployerProfile != null)
+@if (!Model.IsEmployerViewer && Model.EmployerProfile != null)
 {
     var emp = Model.EmployerProfile;
     <div class="modal fade" id="employerProfileModal" tabindex="-1" aria-labelledby="employerProfileModalLabel" aria-hidden="true">
@@ -461,6 +470,16 @@
     </script>
 }
 
-@section Styles {
-    <link rel="stylesheet" href="~/css/job-detail.css" asp-append-version="true" />
+@if (Model.IsEmployerViewer)
+{
+    @section EmployerStyles {
+        <link rel="stylesheet" href="~/css/employer-jobs.css" asp-append-version="true" />
+        <link rel="stylesheet" href="~/css/employer-job-detail.css" asp-append-version="true" />
+    }
+}
+else
+{
+    @section Styles {
+        <link rel="stylesheet" href="~/css/job-detail.css" asp-append-version="true" />
+    }
 }

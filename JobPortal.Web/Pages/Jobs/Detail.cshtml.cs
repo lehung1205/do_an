@@ -1,5 +1,6 @@
 using JobPortal.Web.Dtos;
 using JobPortal.Web.Helpers;
+using JobPortal.Web.Models;
 using JobPortal.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -62,6 +63,19 @@ public class DetailModel : PageModel
 
     public bool ShowAddResumeForm { get; set; }
 
+    public int EmployerApplicantCount { get; set; }
+
+    public int EmployerUnreadApplicantCount { get; set; }
+
+    public int EmployerPendingApplicantCount { get; set; }
+
+    public IReadOnlyList<EmployerDashboardApplicationDto> EmployerRecentApplicants { get; set; } =
+        Array.Empty<EmployerDashboardApplicationDto>();
+
+    public string? EmployerManageSuccessMessage { get; set; }
+
+    public string? EmployerManageErrorMessage { get; set; }
+
     public string ReturnUrl { get; set; } = "/Jobs";
 
     public async Task<IActionResult> OnGetAsync(long id)
@@ -117,7 +131,72 @@ public class DetailModel : PageModel
             }
         }
 
+        if (IsEmployerViewer && IsLoggedIn)
+        {
+            EmployerManageSuccessMessage = TempData["JobManageSuccessMessage"] as string;
+            EmployerManageErrorMessage = TempData["JobManageErrorMessage"] as string;
+
+            var applications = await _api.GetApiDataAsync<List<EmployerDashboardApplicationDto>>(
+                "/api/employers/me/applications");
+            if (applications != null)
+            {
+                var forJob = applications
+                    .Where(x => x.JobId == id)
+                    .OrderByDescending(x => x.AppliedAt)
+                    .ToList();
+                EmployerApplicantCount = forJob.Count;
+                EmployerUnreadApplicantCount = forJob.Count(x => x.IsUnread);
+                EmployerPendingApplicantCount = forJob.Count(x => IsPendingApplicationStatus(x.Status));
+                EmployerRecentApplicants = forJob.Take(5).ToList();
+            }
+        }
+
         return Page();
+    }
+
+    public async Task<IActionResult> OnPostCloseJobAsync(long id)
+    {
+        if (string.IsNullOrEmpty(HttpContext.Session.GetString("JwtToken")))
+        {
+            return RedirectToPage("/Auth/Login", new { returnUrl = Url.Page("/Jobs/Detail", new { id }) });
+        }
+
+        if (!string.Equals(HttpContext.Session.GetString("UserRole"), "EMPLOYER", StringComparison.Ordinal))
+        {
+            return RedirectToPage(new { id });
+        }
+
+        var response = await _api.PostApiResponseAsync<object, EmployerDashboardJobDto>(
+            $"/api/employers/me/jobs/{id}/close",
+            new { });
+
+        if (response is not { Success: true })
+        {
+            TempData["JobManageErrorMessage"] = response?.Message
+                ?? response?.Errors.FirstOrDefault()?.Message
+                ?? "Không thể đóng tin tuyển dụng.";
+        }
+        else
+        {
+            var title = response.Data?.Title;
+            TempData["JobManageSuccessMessage"] = string.IsNullOrWhiteSpace(title)
+                ? "Đã đóng tin tuyển dụng."
+                : $"Đã đóng tin \"{title}\".";
+        }
+
+        return RedirectToPage(new { id });
+    }
+
+    private static bool IsPendingApplicationStatus(string? status)
+    {
+        if (string.IsNullOrWhiteSpace(status))
+        {
+            return true;
+        }
+
+        var normalized = status.Trim();
+        return !string.Equals(normalized, "accepted", StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(normalized, "rejected", StringComparison.OrdinalIgnoreCase);
     }
 
     public async Task<IActionResult> OnPostApplyAsync(long id)
@@ -237,6 +316,12 @@ public class DetailModel : PageModel
 
     public static string FormatGender(byte? gender) =>
         global::JobPortal.Web.Models.AccountPanelViewModel.FormatGender(gender);
+
+    public static string FormatRelativeApplied(DateTime appliedAtUtc) =>
+        global::JobPortal.Web.Pages.IndexModel.FormatRelativeTime(appliedAtUtc);
+
+    public static string FormatSalary(string? salary) =>
+        global::JobPortal.Web.Pages.IndexModel.FormatSalary(salary);
 
     public static string StatusBadgeClass(string status) => status.Trim().ToLowerInvariant() switch
     {

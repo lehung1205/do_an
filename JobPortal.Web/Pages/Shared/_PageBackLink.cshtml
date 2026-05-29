@@ -1,0 +1,10 @@
+@model JobPortal.Web.Models.PageBackLinkModel
+
+<nav class="@Model.NavClass" aria-label="Điều hướng">
+    <a asp-page="@Model.PagePath" class="page-back@(Model.EmployerVariant ? " page-back--employer" : "")">
+        <span class="page-back__icon" aria-hidden="true">
+            <i class="bi bi-arrow-left"></i>
+        </span>
+        <span class="page-back__label">@Model.Label</span>
+    </a>
+</nav>

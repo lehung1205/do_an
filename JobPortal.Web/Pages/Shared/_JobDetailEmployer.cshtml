@@ -1,0 +1,257 @@
+@model JobPortal.Web.Pages.Jobs.DetailModel
+@using JobPortal.Web.Models
+@{
+    var job = Model.Job;
+    var isRecruiting = Model.IsRecruiting;
+    var isClosed = Model.IsClosed;
+    var isPending = string.Equals(job.PostingStatus, "pending", StringComparison.OrdinalIgnoreCase);
+    var isRejected = string.Equals(job.PostingStatus, "rejected", StringComparison.OrdinalIgnoreCase);
+    var statusBadgeClass = isRecruiting ? "employer-badge--open"
+        : isPending ? "employer-badge--pending"
+        : isRejected ? "employer-badge--rejected"
+        : isClosed ? "employer-badge--closed"
+        : "employer-badge--draft";
+    var thumbUrl = Model.JobImages.FirstOrDefault()?.Url;
+}
+
+<partial name="Shared/_EmployerPageHeader" model='new EmployerPageHeaderModel {
+    Title = job.Title,
+    Subtitle = "Quản lý nội dung tin và theo dõi ứng viên",
+    BreadcrumbLabel = "Chi tiết tin"
+}' />
+
+<div class="employer-job-detail">
+    <partial name="Shared/_PageBackLink" model='new JobPortal.Web.Models.PageBackLinkModel {
+        PagePath = "/Employer/Jobs",
+        Label = "Quay lại Tin tuyển dụng",
+        EmployerVariant = true,
+        NavClass = "page-back-nav mb-0"
+    }' />
+
+    @if (!string.IsNullOrEmpty(Model.EmployerManageSuccessMessage))
+    {
+        <div class="alert alert-success employer-job-detail__alert">@Model.EmployerManageSuccessMessage</div>
+    }
+    @if (!string.IsNullOrEmpty(Model.EmployerManageErrorMessage))
+    {
+        <div class="alert alert-warning employer-job-detail__alert">@Model.EmployerManageErrorMessage</div>
+    }
+
+    <section class="employer-job-detail__hero employer-panel">
+        <div class="employer-job-detail__hero-main">
+            @if (!string.IsNullOrWhiteSpace(thumbUrl))
+            {
+                <div class="employer-job-detail__thumb">
+                    <img src="@thumbUrl" alt="" loading="lazy" />
+                </div>
+            }
+            else
+            {
+                <div class="employer-job-detail__thumb employer-job-detail__thumb--placeholder" aria-hidden="true">
+                    <i class="bi bi-briefcase"></i>
+                </div>
+            }
+            <div class="employer-job-detail__hero-body">
+                <div class="employer-job-detail__hero-head">
+                    <h2 class="employer-job-detail__title">@job.Title</h2>
+                    <span class="badge @statusBadgeClass employer-job-detail__status">
+                        @JobPortal.Web.Pages.Jobs.DetailModel.FormatPostingStatus(job.PostingStatus)
+                    </span>
+                </div>
+                <ul class="employer-job-detail__meta list-unstyled mb-0">
+                    <li><i class="bi bi-geo-alt"></i> @job.Location</li>
+                    <li><i class="bi bi-cash-stack"></i> @JobPortal.Web.Pages.Jobs.DetailModel.FormatSalary(job.Salary)</li>
+                    @if (!string.IsNullOrWhiteSpace(job.WorkingHours))
+                    {
+                        <li><i class="bi bi-clock"></i> @job.WorkingHours</li>
+                    }
+                    <li><i class="bi bi-calendar-event"></i> Hết hạn @job.ExpiryDate.ToLocalTime().ToString("dd/MM/yyyy")</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="employer-job-detail__stats">
+            <div class="employer-job-detail__stat">
+                <span class="employer-job-detail__stat-value">@Model.EmployerApplicantCount</span>
+                <span class="employer-job-detail__stat-label">Tổng CV</span>
+            </div>
+            <div class="employer-job-detail__stat">
+                <span class="employer-job-detail__stat-value@(Model.EmployerUnreadApplicantCount > 0 ? " employer-job-detail__stat-value--warn" : "")">
+                    @Model.EmployerUnreadApplicantCount
+                </span>
+                <span class="employer-job-detail__stat-label">Chưa xem</span>
+            </div>
+            <div class="employer-job-detail__stat">
+                <span class="employer-job-detail__stat-value">@Model.EmployerPendingApplicantCount</span>
+                <span class="employer-job-detail__stat-label">Chờ phản hồi</span>
+            </div>
+        </div>
+
+        <div class="employer-job-detail__actions">
+            @if (isRecruiting || isClosed)
+            {
+                <a asp-page="/Employer/Applicants"
+                   asp-route-q="@job.Title"
+                   class="btn employer-jobs-btn employer-jobs-btn--primary">
+                    <i class="bi bi-people me-1"></i> Xem ứng viên
+                </a>
+            }
+            @if (isRecruiting)
+            {
+                <form method="post"
+                      asp-page="/Jobs/Detail"
+                      asp-page-handler="CloseJob"
+                      asp-route-id="@job.Id"
+                      class="d-inline"
+                      onsubmit="return confirm('Đóng tin này? Ứng viên sẽ không thể nộp CV mới.');">
+                    <button type="submit" class="btn employer-jobs-btn employer-jobs-btn--danger">
+                        <i class="bi bi-x-circle me-1"></i> Đóng tin
+                    </button>
+                </form>
+            }
+            else if (isPending)
+            {
+                <span class="btn employer-jobs-btn employer-jobs-btn--muted disabled" tabindex="-1" aria-disabled="true">
+                    <i class="bi bi-hourglass-split me-1"></i> Chờ admin duyệt
+                </span>
+            }
+            else if (isRejected)
+            {
+                <a asp-page="/Employer/PostJob" class="btn employer-jobs-btn employer-jobs-btn--primary">
+                    <i class="bi bi-plus-lg me-1"></i> Đăng tin mới
+                </a>
+            }
+        </div>
+    </section>
+
+    @if (isClosed)
+    {
+        <div class="alert alert-secondary employer-job-detail__alert">
+            Tin đã hết hạn hoặc được đóng. Ứng viên không thể nộp hồ sơ mới; bạn vẫn xem được nội dung và CV đã nhận.
+        </div>
+    }
+    else if (isPending)
+    {
+        <div class="alert alert-warning employer-job-detail__alert">
+            Tin đang chờ admin duyệt. Sau khi được duyệt, tin sẽ hiển thị công khai cho ứng viên.
+        </div>
+    }
+    else if (isRejected)
+    {
+        <div class="alert alert-danger employer-job-detail__alert">
+            Tin đã bị từ chối. Vui lòng đăng tin mới hoặc liên hệ quản trị nếu cần hỗ trợ.
+        </div>
+    }
+
+    <div class="row g-4 employer-job-detail__layout">
+        <div class="col-lg-8">
+            <section class="employer-panel employer-job-detail__panel">
+                <h3 class="employer-job-detail__section-title">
+                    <i class="bi bi-file-text me-2"></i>Mô tả công việc
+                </h3>
+                <div class="employer-job-detail__description">@job.Description</div>
+            </section>
+
+            @if (Model.JobImages.Count > 0)
+            {
+                <section class="employer-panel employer-job-detail__panel mt-4">
+                    <h3 class="employer-job-detail__section-title">
+                        <i class="bi bi-images me-2"></i>Hình ảnh tin
+                    </h3>
+                    <div class="row g-2 employer-job-detail__gallery">
+                        @foreach (var img in Model.JobImages)
+                        {
+                            <div class="col-6 col-md-4">
+                                <a href="@img.Url" target="_blank" rel="noopener noreferrer" class="employer-job-detail__gallery-item">
+                                    <img src="@img.Url" alt="@(img.Name ?? "Ảnh tin")" loading="lazy" />
+                                </a>
+                            </div>
+                        }
+                    </div>
+                </section>
+            }
+        </div>
+
+        <div class="col-lg-4">
+            <section class="employer-panel employer-job-detail__panel">
+                <h3 class="employer-job-detail__section-title">
+                    <i class="bi bi-info-circle me-2"></i>Thông tin tin đăng
+                </h3>
+                <dl class="employer-job-detail__info mb-0">
+                    <div>
+                        <dt>Trạng thái</dt>
+                        <dd>
+                            <span class="badge @statusBadgeClass">@JobPortal.Web.Pages.Jobs.DetailModel.FormatPostingStatus(job.PostingStatus)</span>
+                        </dd>
+                    </div>
+                    <div>
+                        <dt>Mức lương</dt>
+                        <dd>@JobPortal.Web.Pages.Jobs.DetailModel.FormatSalary(job.Salary)</dd>
+                    </div>
+                    <div>
+                        <dt>Địa điểm</dt>
+                        <dd>@job.Location</dd>
+                    </div>
+                    <div>
+                        <dt>Thời gian làm việc</dt>
+                        <dd>@(string.IsNullOrWhiteSpace(job.WorkingHours) ? "—" : job.WorkingHours)</dd>
+                    </div>
+                    <div>
+                        <dt>Ngày hết hạn</dt>
+                        <dd>@job.ExpiryDate.ToLocalTime().ToString("dd/MM/yyyy")</dd>
+                    </div>
+                </dl>
+            </section>
+
+            <section class="employer-panel employer-job-detail__panel mt-4">
+                <div class="employer-job-detail__section-head">
+                    <h3 class="employer-job-detail__section-title mb-0">
+                        <i class="bi bi-person-lines-fill me-2"></i>CV gần đây
+                    </h3>
+                    @if (Model.EmployerApplicantCount > 0)
+                    {
+                        <a asp-page="/Employer/Applicants"
+                           asp-route-q="@job.Title"
+                           class="employer-job-detail__section-link">
+                            Xem tất cả
+                        </a>
+                    }
+                </div>
+
+                @if (Model.EmployerRecentApplicants.Count == 0)
+                {
+                    <p class="text-muted small mb-0 employer-job-detail__empty">
+                        Chưa có ứng viên nào nộp CV cho tin này.
+                    </p>
+                }
+                else
+                {
+                    <ul class="employer-job-detail__applicants list-unstyled mb-0">
+                        @foreach (var app in Model.EmployerRecentApplicants)
+                        {
+                            <li class="employer-job-detail__applicant">
+                                <div class="employer-job-detail__applicant-main">
+                                    <span class="employer-job-detail__applicant-name">@app.ApplicantName</span>
+                                    <span class="employer-job-detail__applicant-meta">
+                                        @JobPortal.Web.Pages.Jobs.DetailModel.FormatRelativeApplied(app.AppliedAt)
+                                    </span>
+                                </div>
+                                <div class="employer-job-detail__applicant-side">
+                                    @if (app.IsUnread)
+                                    {
+                                        <span class="employer-job-detail__applicant-badge">Mới</span>
+                                    }
+                                    <a asp-page="/Employer/Applicants"
+                                       asp-route-q="@app.ApplicantName"
+                                       class="employer-job-detail__applicant-link">
+                                        Xem
+                                    </a>
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                }
+            </section>
+        </div>
+    </div>
+</div>

@@ -5,12 +5,10 @@
 }
 
 <div class="container py-4 seeker-work-progress-page">
-    <nav aria-label="breadcrumb" class="mb-3 seeker-work-progress-breadcrumb">
-        <ol class="breadcrumb small">
-            <li class="breadcrumb-item"><a asp-page="/Applications/WorkProgress/Index">Tiến độ làm việc</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Chi tiết</li>
-        </ol>
-    </nav>
+    <partial name="Shared/_PageBackLink" model='new JobPortal.Web.Models.PageBackLinkModel {
+        PagePath = "/Applications/WorkProgress/Index",
+        Label = "Quay lại danh sách tiến độ"
+    }' />
 
     @if (Model.Progress == null)
     {

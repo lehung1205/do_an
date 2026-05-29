@@ -146,6 +146,7 @@
   color: #1e293b;
 }
 
+.emp-apps-stat--pending.is-active { border-color: #94a3b8; box-shadow: 0 0 0 2px rgba(148, 163, 184, 0.25); }
 .emp-apps-stat--unread.is-active { border-color: #f59e0b; box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.22); }
 .emp-apps-stat--reviewed.is-active { border-color: #0ea5e9; box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.2); }
 .emp-apps-stat--accepted.is-active { border-color: #22c55e; box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2); }
@@ -162,12 +163,12 @@
 
 .emp-apps-filter__grid {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: minmax(10rem, 14rem) 1fr auto;
   gap: 0.75rem;
   align-items: end;
 }
 
-@media (max-width: 575px) {
+@media (max-width: 767px) {
   .emp-apps-filter__grid {
     grid-template-columns: 1fr;
   }

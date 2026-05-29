@@ -1,5 +1,6 @@
 using JobPortal.API.Data;
 using JobPortal.API.DTOs;
+using JobPortal.API.Helpers;
 using JobPortal.API.Services.Interface;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,6 +21,18 @@ public class StatsService : IStatsService
         {
             EmployerCount = employerCount,
             JobSeekerCount = jobSeekerCount
+        };
+    }
+
+    public async Task<TopRatedListsDto> GetTopRatedListsAsync(CancellationToken cancellationToken = default)
+    {
+        var topEmployers = await TopRatedQuery.GetTopEmployersAsync(_context, cancellationToken: cancellationToken);
+        var topSeekers = await TopRatedQuery.GetTopJobSeekersAsync(_context, cancellationToken: cancellationToken);
+
+        return new TopRatedListsDto
+        {
+            TopEmployers = topEmployers,
+            TopJobSeekers = topSeekers
         };
     }
 }

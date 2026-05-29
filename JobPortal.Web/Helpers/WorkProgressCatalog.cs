@@ -11,6 +11,16 @@ public static class WorkProgressCatalog
         ("cancelled", "Đã hủy")
     };
 
+    public static readonly IReadOnlyList<(string Value, string Label)> FilterOptions = new[]
+    {
+        ("none", "Chưa có tiến độ"),
+        ("confirmed", "Đã xác nhận nhận việc"),
+        ("in_progress", "Đang làm việc"),
+        ("pending_check", "Chờ nghiệm thu"),
+        ("completed", "Hoàn thành"),
+        ("cancelled", "Đã hủy")
+    };
+
     public static bool IsLockedStatus(string? status)
     {
         if (string.IsNullOrWhiteSpace(status))
@@ -46,6 +56,11 @@ public static class WorkProgressCatalog
         "terminated" => "Đã hủy",
         _ => status
     };
+
+    public static string FormatProgressFilterLabel(string? value) =>
+        string.IsNullOrEmpty(value)
+            ? string.Empty
+            : FilterOptions.FirstOrDefault(o => o.Value == value).Label ?? value;
 
     public static string BadgeClass(string status) => status.Trim().ToLowerInvariant() switch
     {

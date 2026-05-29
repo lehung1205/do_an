@@ -21,4 +21,12 @@ public class StatsController : ControllerBase
         var stats = await _statsService.GetHomeStatsAsync(cancellationToken);
         return Ok(ApiResponse<HomeStatsDto>.SuccessResponse(stats, "Home stats retrieved successfully."));
     }
+
+    [AllowAnonymous]
+    [HttpGet("top-rated")]
+    public async Task<IActionResult> GetTopRatedLists(CancellationToken cancellationToken)
+    {
+        var lists = await _statsService.GetTopRatedListsAsync(cancellationToken);
+        return Ok(ApiResponse<TopRatedListsDto>.SuccessResponse(lists, "Top rated lists retrieved successfully."));
+    }
 }

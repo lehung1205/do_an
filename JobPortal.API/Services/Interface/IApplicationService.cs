@@ -19,6 +19,7 @@ public interface IApplicationService
     Task<IReadOnlyList<SeekerWorkProgressListItemDto>> GetMyAcceptedWorkProgressListAsync(
         long userId,
         string? search = null,
+        string? progress = null,
         CancellationToken cancellationToken = default);
 
     Task<SeekerApplicationWorkProgressDto> GetMyApplicationWorkProgressAsync(

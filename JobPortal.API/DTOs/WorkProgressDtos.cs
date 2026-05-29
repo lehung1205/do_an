@@ -39,6 +39,8 @@ public class EmployerAcceptedApplicationDto
     public DateTime? LastProgressAt { get; set; }
     public int StepCount { get; set; }
     public bool IsProgressLocked { get; set; }
+    public bool IsWorkFinished { get; set; }
+    public bool HasSubmittedReview { get; set; }
 }
 
 public class ApplicationWorkProgressDto
@@ -76,6 +78,8 @@ public class SeekerWorkProgressListItemDto
     public DateTime? LastProgressAt { get; set; }
     public int StepCount { get; set; }
     public bool IsProgressLocked { get; set; }
+    public bool IsWorkFinished { get; set; }
+    public bool HasSubmittedReview { get; set; }
 }
 
 public class SeekerApplicationWorkProgressDto

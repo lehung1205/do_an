@@ -1,0 +1,17 @@
+@model (bool IsWorkFinished, bool HasSubmittedReview)
+
+@if (Model.IsWorkFinished)
+{
+    if (Model.HasSubmittedReview)
+    {
+        <span class="work-progress-review-note work-progress-review-note--done">
+            <i class="bi bi-star-fill me-1" aria-hidden="true"></i>Đã đánh giá
+        </span>
+    }
+    else
+    {
+        <span class="work-progress-review-note work-progress-review-note--pending">
+            <i class="bi bi-star me-1" aria-hidden="true"></i>Chưa đánh giá
+        </span>
+    }
+}

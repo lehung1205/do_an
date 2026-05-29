@@ -268,8 +268,12 @@ else
     </div>
 </section>
 
+<partial name="Shared/_HomeTopRatedSection"
+         model="@(JobPortal.Web.Models.HomeTopRatedSectionModel.FromLists(Model.TopRated, "seeker"))" />
+
 @section Styles {
     <link rel="stylesheet" href="~/css/home-hero.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/home-top-rated.css" asp-append-version="true" />
 }
 
 @section Scripts {
@@ -303,5 +307,13 @@ else
     {
         <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
         <script src="~/js/employer-dashboard.js" asp-append-version="true"></script>
+    }
+}
+
+@section EmployerStyles {
+    @if (Model.IsEmployerHome)
+    {
+        <link rel="stylesheet" href="~/css/employer-jobs.css" asp-append-version="true" />
+        <link rel="stylesheet" href="~/css/home-top-rated.css" asp-append-version="true" />
     }
 }

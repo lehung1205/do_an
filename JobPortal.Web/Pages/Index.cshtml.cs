@@ -24,8 +24,11 @@ public class IndexModel : PageModel
         !string.IsNullOrWhiteSpace(Q) || !string.IsNullOrWhiteSpace(Location);
     public bool IsEmployerHome { get; set; }
     public EmployerDashboardDto? EmployerDashboard { get; set; }
+    public TopRatedListsDto? TopRated { get; set; }
 
     public IndexModel(ApiService api) => _api = api;
+
+    public static string FormatRating(double rating) => rating.ToString("0.0");
 
     public async Task<IActionResult> OnGetApplicantChartAsync(int days = 7)
     {
@@ -54,7 +57,11 @@ public class IndexModel : PageModel
 
         if (isLoggedIn && string.Equals(role, "EMPLOYER", StringComparison.Ordinal))
         {
-            EmployerDashboard = await _api.GetApiDataAsync<EmployerDashboardDto>("/api/employers/me/dashboard");
+            var dashboardTask = _api.GetApiDataAsync<EmployerDashboardDto>("/api/employers/me/dashboard");
+            var employerTopRatedTask = _api.GetApiDataAsync<TopRatedListsDto>("/api/stats/top-rated");
+            await Task.WhenAll(dashboardTask, employerTopRatedTask);
+            EmployerDashboard = await dashboardTask;
+            TopRated = await employerTopRatedTask;
             IsEmployerHome = EmployerDashboard != null;
             if (IsEmployerHome)
             {
@@ -80,13 +87,15 @@ public class IndexModel : PageModel
             $"/api/jobs?{string.Join("&", featuredQuery)}");
         var totalJobsTask = _api.GetApiDataAsync<PagedResult<JobListItemDto>>("/api/jobs?page=1&pageSize=1");
         var statsTask = _api.GetApiDataAsync<HomeStatsDto>("/api/stats");
+        var topRatedTask = _api.GetApiDataAsync<TopRatedListsDto>("/api/stats/top-rated");
         var categoriesTask = _api.GetApiDataAsync<List<CategoryDto>>("/api/categories");
         var jobsForCategoriesTask = _api.GetApiDataAsync<PagedResult<JobListItemDto>>("/api/jobs?page=1&pageSize=120");
-        await Task.WhenAll(featuredTask, totalJobsTask, statsTask, categoriesTask, jobsForCategoriesTask);
+        await Task.WhenAll(featuredTask, totalJobsTask, statsTask, topRatedTask, categoriesTask, jobsForCategoriesTask);
 
         var featured = await featuredTask;
         var totalJobs = await totalJobsTask;
         var stats = await statsTask;
+        TopRated = await topRatedTask;
         FeaturedJobs = featured?.Items.ToList() ?? new();
         TotalJobCount = totalJobs?.TotalCount ?? featured?.TotalCount ?? 0;
         EmployerCount = stats?.EmployerCount ?? 0;

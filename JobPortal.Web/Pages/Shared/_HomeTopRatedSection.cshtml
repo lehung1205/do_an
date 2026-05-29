@@ -1,0 +1,134 @@
+@model JobPortal.Web.Models.HomeTopRatedSectionModel
+
+@{
+    var sectionClass = Model.IsEmployerVariant ? "home-top-rated--employer" : "home-top-rated--seeker";
+}
+<section class="home-top-rated @sectionClass">
+    <div class="@(Model.IsEmployerVariant ? "" : "container")">
+        @if (Model.LoadFailed)
+        {
+            <div class="alert alert-warning home-top-rated__alert mb-3">
+                Không tải được bảng xếp hạng. Vui lòng thử lại sau hoặc kiểm tra API đang chạy.
+            </div>
+        }
+
+        @if (!Model.IsEmployerVariant)
+            {
+                <div class="text-center mb-4 home-section-head">
+                    <span class="home-section-head__eyebrow">Uy tín &amp; đánh giá</span>
+                    <h2 class="section-title mb-2">Top 10 được đánh giá cao</h2>
+                    <p class="text-muted mb-0 mx-auto" style="max-width: 40rem;">
+                        Chọn nhà tuyển dụng và đồng nghiệp uy tín dựa trên phản hồi thực tế sau khi làm việc.
+                    </p>
+                </div>
+            }
+            else
+            {
+                <div class="employer-dash__section-head mb-3">
+                    <h2 class="employer-dash__section-title mb-0">Bảng xếp hạng uy tín</h2>
+                    <span class="home-top-rated__hint text-muted small">Theo điểm đánh giá từ cộng đồng</span>
+                </div>
+            }
+
+            <div class="row g-3 g-lg-4">
+                <div class="col-lg-6">
+                    <div class="home-top-rated__card">
+                        <div class="home-top-rated__head">
+                            <h3>
+                                <i class="bi bi-building home-top-rated__icon home-top-rated__icon--employer" aria-hidden="true"></i>
+                                Top 10 nhà tuyển dụng
+                            </h3>
+                            <span class="home-top-rated__badge home-top-rated__badge--employer">Điểm cao nhất</span>
+                        </div>
+                        <div class="home-top-rated__body">
+                            @if (Model.TopEmployers.Count == 0)
+                            {
+                                <div class="home-top-rated__empty">
+                                    <i class="bi bi-star" aria-hidden="true"></i>
+                                    <p class="mb-0">Chưa có đánh giá từ ứng viên.</p>
+                                </div>
+                            }
+                            else
+                            {
+                                <ul class="home-top-rated__list">
+                                    @{ var rank = 0; }
+                                    @foreach (var item in Model.TopEmployers)
+                                    {
+                                        rank++;
+                                        var rankClass = rank == 1 ? "home-top-rated__rank--gold"
+                                            : rank == 2 ? "home-top-rated__rank--silver"
+                                            : rank == 3 ? "home-top-rated__rank--bronze" : "";
+                                        <li class="home-top-rated__item">
+                                            <span class="home-top-rated__rank @rankClass">@rank</span>
+                                            <div class="home-top-rated__info">
+                                                <div class="home-top-rated__name">@item.Name</div>
+                                                <div class="home-top-rated__meta">@item.ReviewCount đánh giá</div>
+                                            </div>
+                                            <div class="home-top-rated__rating">
+                                                <div class="home-top-rated__stars" aria-hidden="true">
+                                                    @for (var i = 0; i < 5; i++)
+                                                    {
+                                                        <i class="bi @(i < (int)Math.Round(item.AverageRating) ? "bi-star-fill" : "bi-star")"></i>
+                                                    }
+                                                </div>
+                                                <div class="home-top-rated__score">@JobPortal.Web.Pages.IndexModel.FormatRating(item.AverageRating)</div>
+                                            </div>
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="home-top-rated__card">
+                        <div class="home-top-rated__head">
+                            <h3>
+                                <i class="bi bi-person-workspace home-top-rated__icon home-top-rated__icon--seeker" aria-hidden="true"></i>
+                                Top 10 người lao động
+                            </h3>
+                            <span class="home-top-rated__badge home-top-rated__badge--seeker">Điểm cao nhất</span>
+                        </div>
+                        <div class="home-top-rated__body">
+                            @if (Model.TopJobSeekers.Count == 0)
+                            {
+                                <div class="home-top-rated__empty">
+                                    <i class="bi bi-star" aria-hidden="true"></i>
+                                    <p class="mb-0">Chưa có đánh giá từ nhà tuyển dụng.</p>
+                                </div>
+                            }
+                            else
+                            {
+                                <ul class="home-top-rated__list">
+                                    @{ var rankS = 0; }
+                                    @foreach (var item in Model.TopJobSeekers)
+                                    {
+                                        rankS++;
+                                        var rankClass = rankS == 1 ? "home-top-rated__rank--gold"
+                                            : rankS == 2 ? "home-top-rated__rank--silver"
+                                            : rankS == 3 ? "home-top-rated__rank--bronze" : "";
+                                        <li class="home-top-rated__item">
+                                            <span class="home-top-rated__rank @rankClass">@rankS</span>
+                                            <div class="home-top-rated__info">
+                                                <div class="home-top-rated__name">@item.Name</div>
+                                                <div class="home-top-rated__meta">@item.ReviewCount đánh giá</div>
+                                            </div>
+                                            <div class="home-top-rated__rating">
+                                                <div class="home-top-rated__stars" aria-hidden="true">
+                                                    @for (var i = 0; i < 5; i++)
+                                                    {
+                                                        <i class="bi @(i < (int)Math.Round(item.AverageRating) ? "bi-star-fill" : "bi-star")"></i>
+                                                    }
+                                                </div>
+                                                <div class="home-top-rated__score">@JobPortal.Web.Pages.IndexModel.FormatRating(item.AverageRating)</div>
+                                            </div>
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </div>
+</section>

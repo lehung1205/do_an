@@ -48,6 +48,7 @@ public class JobRepository : IJobRepository
         string? search = null,
         string? location = null,
         long? categoryId = null,
+        long? excludeAppliedForJobSeekerId = null,
         CancellationToken cancellationToken = default)
     {
         var query = _context.Jobs.AsNoTracking();
@@ -77,6 +78,13 @@ public class JobRepository : IJobRepository
         if (categoryId is > 0)
         {
             query = query.Where(j => j.CategoryId == categoryId.Value);
+        }
+
+        if (excludeAppliedForJobSeekerId is > 0)
+        {
+            var jobSeekerId = excludeAppliedForJobSeekerId.Value;
+            query = query.Where(j => !_context.Applications
+                .Any(a => a.JobId == j.Id && a.JobSeekerId == jobSeekerId));
         }
 
         var totalCount = await query.CountAsync(cancellationToken);

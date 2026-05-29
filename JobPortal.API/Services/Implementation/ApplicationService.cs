@@ -179,8 +179,14 @@ public class ApplicationService : IApplicationService
     public async Task<IReadOnlyList<SeekerWorkProgressListItemDto>> GetMyAcceptedWorkProgressListAsync(
         long userId,
         string? search = null,
+        string? progress = null,
         CancellationToken cancellationToken = default)
     {
+        if (!WorkProgressCatalog.TryNormalizeProgressFilter(progress, out var normalizedProgress))
+        {
+            throw new BadRequestException("Tiến độ lọc không hợp lệ.");
+        }
+
         var jobSeekerId = await GetJobSeekerIdForUserAsync(userId, cancellationToken);
 
         var query = _context.Applications
@@ -195,6 +201,8 @@ public class ApplicationService : IApplicationService
                 a.Job.Employer.Name.Contains(term) ||
                 a.Job.Location.Contains(term));
         }
+
+        query = query.FilterByLatestProgressStatus(normalizedProgress);
 
         var applications = await query
             .OrderByDescending(a => a.AppliedAt)
@@ -214,9 +222,16 @@ public class ApplicationService : IApplicationService
             })
             .ToListAsync(cancellationToken);
 
+        var applicationIds = applications.Select(a => a.Id).ToList();
+        var reviewLookup = await ApplicationReviewLookup.LoadReviewTypesByApplicationIdsAsync(
+            _context.Reviews,
+            applicationIds,
+            cancellationToken);
+
         return applications.Select(a =>
         {
             var latest = a.Steps.FirstOrDefault();
+            var isWorkFinished = WorkProgressCatalog.IsReviewableTerminalStatus(latest?.Status);
             return new SeekerWorkProgressListItemDto
             {
                 ApplicationId = a.Id,
@@ -229,7 +244,12 @@ public class ApplicationService : IApplicationService
                 CurrentWorkTitle = latest?.Title,
                 LastProgressAt = latest?.CreatedAt,
                 StepCount = a.Steps.Count,
-                IsProgressLocked = latest != null && WorkProgressCatalog.IsLockedStatus(latest.Status)
+                IsProgressLocked = latest != null && WorkProgressCatalog.IsLockedStatus(latest.Status),
+                IsWorkFinished = isWorkFinished,
+                HasSubmittedReview = isWorkFinished && ApplicationReviewLookup.HasReviewType(
+                    reviewLookup,
+                    a.Id,
+                    ReviewCatalog.SeekerToEmployer)
             };
         }).ToList();
     }

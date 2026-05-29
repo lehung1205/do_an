@@ -73,10 +73,11 @@ public class ApplicationsController : ControllerBase
     [Authorize(Roles = "JOB_SEEKER")]
     public async Task<IActionResult> GetMyAcceptedWorkProgressList(
         [FromQuery] string? q,
+        [FromQuery] string? progress,
         CancellationToken cancellationToken)
     {
         var userId = GetCurrentUserId();
-        var items = await _applicationService.GetMyAcceptedWorkProgressListAsync(userId, q, cancellationToken);
+        var items = await _applicationService.GetMyAcceptedWorkProgressListAsync(userId, q, progress, cancellationToken);
         return Ok(ApiResponse<IReadOnlyList<SeekerWorkProgressListItemDto>>.SuccessResponse(
             items,
             "Accepted applications work progress list retrieved successfully."));

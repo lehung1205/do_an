@@ -22,6 +22,7 @@ public class IndexModel : PageModel
     public int TotalPages { get; set; }
     public long? JobId { get; set; }
     public string? Search { get; set; }
+    public string? ProgressFilter { get; set; }
     public string? ErrorMessage { get; set; }
     public bool HasAnyAccepted { get; set; }
     public bool ShowPagination => TotalPages > 1;
@@ -29,6 +30,7 @@ public class IndexModel : PageModel
     public async Task<IActionResult> OnGetAsync(
         long? jobId,
         string? q,
+        string? progress,
         int pageNumber = 1,
         int pageSize = DefaultPageSize)
     {
@@ -50,6 +52,7 @@ public class IndexModel : PageModel
 
         JobId = jobId is > 0 ? jobId : null;
         Search = string.IsNullOrWhiteSpace(q) ? null : q.Trim();
+        ProgressFilter = string.IsNullOrWhiteSpace(progress) ? null : progress.Trim().ToLowerInvariant();
 
         var jobOptionsTask = _api.GetApiDataAsync<List<WorkProgressJobOptionDto>>(
             "/api/employers/me/applications/accepted/job-options");
@@ -68,6 +71,11 @@ public class IndexModel : PageModel
         if (!string.IsNullOrEmpty(Search))
         {
             query.Add($"q={Uri.EscapeDataString(Search)}");
+        }
+
+        if (!string.IsNullOrEmpty(ProgressFilter))
+        {
+            query.Add($"progress={Uri.EscapeDataString(ProgressFilter)}");
         }
 
         var pagedTask = _api.GetApiDataAsync<PagedResult<EmployerAcceptedApplicationDto>>(

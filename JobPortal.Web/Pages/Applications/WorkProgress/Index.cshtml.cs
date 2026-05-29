@@ -13,10 +13,11 @@ public class IndexModel : PageModel
 
     public List<SeekerWorkProgressListItemDto> Items { get; set; } = new();
     public string? Search { get; set; }
+    public string? ProgressFilter { get; set; }
     public string? ErrorMessage { get; set; }
-    public bool HasActiveFilter => !string.IsNullOrEmpty(Search);
+    public bool HasActiveFilter => !string.IsNullOrEmpty(Search) || !string.IsNullOrEmpty(ProgressFilter);
 
-    public async Task<IActionResult> OnGetAsync(string? q)
+    public async Task<IActionResult> OnGetAsync(string? q, string? progress)
     {
         var redirect = RequireJobSeeker();
         if (redirect != null)
@@ -25,10 +26,22 @@ public class IndexModel : PageModel
         }
 
         Search = string.IsNullOrWhiteSpace(q) ? null : q.Trim();
+        ProgressFilter = string.IsNullOrWhiteSpace(progress) ? null : progress.Trim().ToLowerInvariant();
 
-        var endpoint = string.IsNullOrEmpty(Search)
+        var query = new List<string>();
+        if (!string.IsNullOrEmpty(Search))
+        {
+            query.Add($"q={Uri.EscapeDataString(Search)}");
+        }
+
+        if (!string.IsNullOrEmpty(ProgressFilter))
+        {
+            query.Add($"progress={Uri.EscapeDataString(ProgressFilter)}");
+        }
+
+        var endpoint = query.Count == 0
             ? "/api/applications/me/accepted/work-progress"
-            : $"/api/applications/me/accepted/work-progress?q={Uri.EscapeDataString(Search)}";
+            : $"/api/applications/me/accepted/work-progress?{string.Join("&", query)}";
 
         var items = await _api.GetApiDataAsync<List<SeekerWorkProgressListItemDto>>(endpoint);
         if (items == null)

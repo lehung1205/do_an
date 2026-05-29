@@ -138,6 +138,7 @@ public class EmployerDashboardController : ControllerBase
     public async Task<IActionResult> GetAcceptedApplications(
         [FromQuery] long? jobId,
         [FromQuery] string? q,
+        [FromQuery] string? progress,
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 9,
         CancellationToken cancellationToken = default)
@@ -147,6 +148,7 @@ public class EmployerDashboardController : ControllerBase
             userId,
             jobId,
             q,
+            progress,
             pageNumber,
             pageSize,
             cancellationToken);

@@ -25,7 +25,7 @@
     {
         <form method="get" class="employer-panel mb-4">
             <div class="row g-3 align-items-end">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label class="form-label" for="jobId">Công việc</label>
                     <select class="form-select" id="jobId" name="jobId">
                         <option value="">Tất cả công việc</option>
@@ -42,12 +42,29 @@
                         }
                     </select>
                 </div>
-                <div class="col-md-5">
+                <div class="col-md-3">
+                    <label class="form-label" for="progress">Tiến độ</label>
+                    <select class="form-select" id="progress" name="progress">
+                        <option value="">Tất cả tiến độ</option>
+                        @foreach (var opt in JobPortal.Web.Helpers.WorkProgressCatalog.FilterOptions)
+                        {
+                            if (Model.ProgressFilter == opt.Value)
+                            {
+                                <option value="@opt.Value" selected>@opt.Label</option>
+                            }
+                            else
+                            {
+                                <option value="@opt.Value">@opt.Label</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-4">
                     <label class="form-label" for="q">Tìm kiếm</label>
                     <input type="search" class="form-control" id="q" name="q" value="@Model.Search"
                            placeholder="Tên ứng viên hoặc tên công việc..." maxlength="200" />
                 </div>
-                <div class="col-md-3 d-flex gap-2">
+                <div class="col-md-2 d-flex gap-2">
                     <button type="submit" class="btn work-progress-btn work-progress-btn--primary flex-grow-1">
                         <i class="bi bi-search me-1"></i> Lọc
                     </button>
@@ -82,6 +99,9 @@
         <p class="text-muted small mb-3">
             Hiển thị @Model.Accepted.Count / @Model.TotalCount ứng viên
             @(Model.JobId.HasValue ? " · đã lọc theo công việc" : "")
+            @(!string.IsNullOrEmpty(Model.ProgressFilter)
+                ? $" · tiến độ \"{JobPortal.Web.Helpers.WorkProgressCatalog.FormatProgressFilterLabel(Model.ProgressFilter)}\""
+                : "")
             @(!string.IsNullOrEmpty(Model.Search) ? $" · từ khóa \"{Model.Search}\"" : "")
         </p>
 
@@ -125,6 +145,11 @@
                     <p class="text-muted small mb-3">
                         @item.StepCount bước tiến độ
                         @(item.LastProgressAt.HasValue ? $" · Cập nhật {IndexModel.FormatRelativeTime(item.LastProgressAt.Value)}" : "")
+                        @if (item.IsWorkFinished)
+                        {
+                            <span> · </span>
+                            <partial name="Shared/_WorkProgressReviewNote" model="(item.IsWorkFinished, item.HasSubmittedReview)" />
+                        }
                     </p>
                     <a asp-page="/Employer/WorkProgress/Detail" asp-route-applicationId="@item.ApplicationId"
                        class="btn btn-sm work-progress-btn work-progress-btn--primary">
@@ -145,6 +170,7 @@
                            asp-route-pageSize="@Model.PageSize"
                            asp-route-jobId="@Model.JobId"
                            asp-route-q="@Model.Search"
+                           asp-route-progress="@Model.ProgressFilter"
                            aria-label="Trang trước">
                             <i class="bi bi-chevron-left"></i>
                         </a>
@@ -157,7 +183,8 @@
                                asp-route-pageNumber="@i"
                                asp-route-pageSize="@Model.PageSize"
                                asp-route-jobId="@Model.JobId"
-                               asp-route-q="@Model.Search">@i</a>
+                               asp-route-q="@Model.Search"
+                               asp-route-progress="@Model.ProgressFilter">@i</a>
                         </li>
                     }
                     <li class="page-item @(Model.CurrentPage >= Model.TotalPages ? "disabled" : "")">
@@ -167,6 +194,7 @@
                            asp-route-pageSize="@Model.PageSize"
                            asp-route-jobId="@Model.JobId"
                            asp-route-q="@Model.Search"
+                           asp-route-progress="@Model.ProgressFilter"
                            aria-label="Trang sau">
                             <i class="bi bi-chevron-right"></i>
                         </a>

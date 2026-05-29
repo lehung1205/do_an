@@ -1276,6 +1276,25 @@ main {
   color: #1e40af;
 }
 
+.work-progress-review-note {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 0.1rem 0.55rem;
+}
+
+.work-progress-review-note--done {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.work-progress-review-note--pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
 .employer-badge--open {
   background: #dcfce7;
   color: #166534;

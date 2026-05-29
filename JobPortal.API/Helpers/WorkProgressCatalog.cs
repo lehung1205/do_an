@@ -67,4 +67,46 @@ public static class WorkProgressCatalog
         "terminated" => "bg-danger",
         _ => "bg-secondary"
     };
+
+    /// <summary>Chuẩn hóa giá trị lọc tiến độ từ query (null = không lọc).</summary>
+    public static bool TryNormalizeProgressFilter(string? value, out string? normalized)
+    {
+        normalized = null;
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return true;
+        }
+
+        var filter = value.Trim().ToLowerInvariant();
+        if (filter is "all")
+        {
+            return true;
+        }
+
+        if (filter is "none" or "no_progress")
+        {
+            normalized = "none";
+            return true;
+        }
+
+        if (!IsValidStatus(filter))
+        {
+            return false;
+        }
+
+        normalized = filter;
+        return true;
+    }
+
+    /// <summary>Các status DB khớp với một giá trị lọc (gồm dữ liệu cũ).</summary>
+    public static IReadOnlyList<string> GetMatchingStatuses(string normalizedFilter) =>
+        normalizedFilter.Trim().ToLowerInvariant() switch
+        {
+            "confirmed" => new[] { "confirmed", "onboarding" },
+            "in_progress" => new[] { "in_progress", "probation" },
+            "pending_check" => new[] { "pending_check", "official" },
+            "completed" => new[] { "completed" },
+            "cancelled" => new[] { "cancelled", "terminated" },
+            _ => Array.Empty<string>()
+        };
 }

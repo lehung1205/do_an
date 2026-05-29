@@ -51,7 +51,24 @@
         <form method="get" class="card border-0 shadow-sm mb-4 seeker-work-progress-filter">
             <div class="card-body">
                 <div class="row g-3 align-items-end">
-                    <div class="col-md-9">
+                    <div class="col-md-4">
+                        <label class="form-label" for="progress">Tiến độ</label>
+                        <select class="form-select" id="progress" name="progress">
+                            <option value="">Tất cả tiến độ</option>
+                            @foreach (var opt in JobPortal.Web.Helpers.WorkProgressCatalog.FilterOptions)
+                            {
+                                if (Model.ProgressFilter == opt.Value)
+                                {
+                                    <option value="@opt.Value" selected>@opt.Label</option>
+                                }
+                                else
+                                {
+                                    <option value="@opt.Value">@opt.Label</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-5">
                         <label class="form-label" for="q">Tìm kiếm</label>
                         <input type="search" class="form-control" id="q" name="q" value="@Model.Search"
                                placeholder="Tên công việc, công ty, địa điểm..." maxlength="200" />
@@ -118,6 +135,11 @@
                                 @if (item.IsProgressLocked)
                                 {
                                     <span class="seeker-work-progress-card__locked">· Đã kết thúc</span>
+                                }
+                                @if (item.IsWorkFinished)
+                                {
+                                    <span>· </span>
+                                    <partial name="Shared/_WorkProgressReviewNote" model="(item.IsWorkFinished, item.HasSubmittedReview)" />
                                 }
                             </div>
                             <a asp-page="/Applications/WorkProgress/Detail" asp-route-applicationId="@item.ApplicationId"

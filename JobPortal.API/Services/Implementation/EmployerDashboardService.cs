@@ -577,6 +577,7 @@ public class EmployerDashboardService : IEmployerDashboardService
         long userId,
         long? jobId = null,
         string? search = null,
+        string? progress = null,
         int page = 1,
         int pageSize = 9,
         CancellationToken cancellationToken = default)
@@ -591,6 +592,11 @@ public class EmployerDashboardService : IEmployerDashboardService
         if (pageSize < 1 || pageSize > 50)
         {
             pageSize = 9;
+        }
+
+        if (!WorkProgressCatalog.TryNormalizeProgressFilter(progress, out var normalizedProgress))
+        {
+            throw new BadRequestException("Tiến độ lọc không hợp lệ.");
         }
 
         var employerId = await GetEmployerIdForUserAsync(userId, cancellationToken);
@@ -611,6 +617,8 @@ public class EmployerDashboardService : IEmployerDashboardService
                 a.JobSeeker.Name.Contains(term) ||
                 a.Job.Title.Contains(term));
         }
+
+        query = query.FilterByLatestProgressStatus(normalizedProgress);
 
         var totalCount = await query.CountAsync(cancellationToken);
 
@@ -634,9 +642,16 @@ public class EmployerDashboardService : IEmployerDashboardService
             })
             .ToListAsync(cancellationToken);
 
+        var applicationIds = applications.Select(a => a.Id).ToList();
+        var reviewLookup = await ApplicationReviewLookup.LoadReviewTypesByApplicationIdsAsync(
+            _context.Reviews,
+            applicationIds,
+            cancellationToken);
+
         var items = applications.Select(a =>
         {
             var latest = a.Steps.FirstOrDefault();
+            var isWorkFinished = WorkProgressCatalog.IsReviewableTerminalStatus(latest?.Status);
             return new EmployerAcceptedApplicationDto
             {
                 ApplicationId = a.Id,
@@ -649,7 +664,12 @@ public class EmployerDashboardService : IEmployerDashboardService
                 CurrentWorkTitle = latest?.Title,
                 LastProgressAt = latest?.CreatedAt,
                 StepCount = a.Steps.Count,
-                IsProgressLocked = latest != null && WorkProgressCatalog.IsLockedStatus(latest.Status)
+                IsProgressLocked = latest != null && WorkProgressCatalog.IsLockedStatus(latest.Status),
+                IsWorkFinished = isWorkFinished,
+                HasSubmittedReview = isWorkFinished && ApplicationReviewLookup.HasReviewType(
+                    reviewLookup,
+                    a.Id,
+                    ReviewCatalog.EmployerToSeeker)
             };
         }).ToList();
 

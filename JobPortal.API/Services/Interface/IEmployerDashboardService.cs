@@ -48,6 +48,7 @@ public interface IEmployerDashboardService
         long userId,
         long? jobId = null,
         string? search = null,
+        string? progress = null,
         int page = 1,
         int pageSize = 9,
         CancellationToken cancellationToken = default);

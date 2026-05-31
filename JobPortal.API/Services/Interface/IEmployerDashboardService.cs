@@ -23,7 +23,7 @@ public interface IEmployerDashboardService
 
     Task<PagedResult<EmployerDashboardJobDto>> GetJobsForUserAsync(
         long userId,
-        string? status = null,
+        string? view = null,
         string? search = null,
         int page = 1,
         int pageSize = 9,

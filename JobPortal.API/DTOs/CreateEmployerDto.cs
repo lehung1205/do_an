@@ -10,7 +10,7 @@ public class CreateEmployerDto
     public byte? Gender { get; set; }
     public string? Description { get; set; }
     public string? Image { get; set; }
-    public int PostingLimit { get; set; } = 10;
+    public int PostingLimit { get; set; } = 1;
     public string? IdCard { get; set; }
     public string Status { get; set; } = "ACTIVE";
 }

@@ -9,6 +9,10 @@ namespace JobPortal.Web.Pages.Employer;
 public class JobsModel : PageModel
 {
     public const int DefaultPageSize = 9;
+    public const string ViewAll = "all";
+    public const string ViewRecruiting = "recruiting";
+    public const string ViewUnreadCv = "unread-cv";
+    public const string ViewHasCv = "has-cv";
 
     private readonly ApiService _api;
 
@@ -19,17 +23,18 @@ public class JobsModel : PageModel
     public string? ErrorMessage { get; set; }
     public string? ActionErrorMessage { get; set; }
     public string? SuccessMessage { get; set; }
-    public string? StatusFilter { get; set; }
+    public string ViewFilter { get; set; } = ViewAll;
     public string? Search { get; set; }
     public int CurrentPage { get; set; } = 1;
     public int PageSize { get; set; } = DefaultPageSize;
     public int TotalCount { get; set; }
     public int TotalPages { get; set; }
-    public bool HasActiveFilter => !string.IsNullOrEmpty(StatusFilter) || !string.IsNullOrEmpty(Search);
+    public bool HasActiveFilter => !string.Equals(ViewFilter, ViewAll, StringComparison.OrdinalIgnoreCase)
+        || !string.IsNullOrEmpty(Search);
     public bool ShowPagination => TotalPages > 1;
 
     public async Task<IActionResult> OnGetAsync(
-        string? status,
+        string? view,
         string? q,
         int pageNumber = 1,
         int pageSize = DefaultPageSize)
@@ -50,7 +55,7 @@ public class JobsModel : PageModel
             pageSize = DefaultPageSize;
         }
 
-        StatusFilter = NormalizeStatusFilter(status);
+        ViewFilter = NormalizeViewFilter(view);
         Search = string.IsNullOrWhiteSpace(q) ? null : q.Trim();
         SuccessMessage = TempData["JobManageSuccessMessage"] as string;
         ActionErrorMessage = TempData["JobManageErrorMessage"] as string;
@@ -60,13 +65,9 @@ public class JobsModel : PageModel
         var query = new List<string>
         {
             $"pageNumber={pageNumber}",
-            $"pageSize={pageSize}"
+            $"pageSize={pageSize}",
+            $"view={Uri.EscapeDataString(ViewFilter)}"
         };
-
-        if (!string.IsNullOrEmpty(StatusFilter))
-        {
-            query.Add($"status={Uri.EscapeDataString(StatusFilter)}");
-        }
 
         if (!string.IsNullOrEmpty(Search))
         {
@@ -106,7 +107,7 @@ public class JobsModel : PageModel
 
     public async Task<IActionResult> OnPostCloseJobAsync(
         long jobId,
-        string? status,
+        string? view,
         string? q,
         int pageNumber = 1,
         int pageSize = DefaultPageSize)
@@ -145,28 +146,35 @@ public class JobsModel : PageModel
                 : $"Đã đóng tin \"{title}\".";
         }
 
-        var statusFilter = NormalizeStatusFilter(status);
         return RedirectToPage(new
         {
-            status = string.IsNullOrEmpty(statusFilter) ? "all" : statusFilter,
+            view = NormalizeViewFilter(view),
             q = string.IsNullOrWhiteSpace(q) ? null : q.Trim(),
             pageNumber,
             pageSize
         });
     }
 
-    private static string? NormalizeStatusFilter(string? status)
+    public static string NormalizeViewFilter(string? view)
     {
-        if (string.IsNullOrWhiteSpace(status) || string.Equals(status, "all", StringComparison.OrdinalIgnoreCase))
+        if (string.IsNullOrWhiteSpace(view) || string.Equals(view, ViewAll, StringComparison.OrdinalIgnoreCase))
         {
-            return null;
+            return ViewAll;
         }
 
-        var normalized = status.Trim().ToLowerInvariant();
-        return normalized is "pending" or "recruiting" or "rejected" or "closed"
+        var normalized = view.Trim().ToLowerInvariant();
+        return normalized is ViewRecruiting or ViewUnreadCv or ViewHasCv
             ? normalized
-            : null;
+            : ViewAll;
     }
+
+    public static string FormatViewFilter(string view) => view.Trim().ToLowerInvariant() switch
+    {
+        ViewRecruiting => "Đang tuyển",
+        ViewUnreadCv => "Có CV chưa đọc",
+        ViewHasCv => "Có ứng viên",
+        _ => "Tất cả tin"
+    };
 
     private IActionResult? RequireEmployer()
     {

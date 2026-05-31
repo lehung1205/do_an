@@ -598,7 +598,7 @@ public sealed class AuthService : IAuthService
                 PasswordHash = authUser.PasswordHash,
                 Status = "ACTIVE",
                 Role = pending.Role,
-                PostingLimit = 3,
+                PostingLimit = 1,
                 UserId = authUser.Id,
                 EmailVerifiedAt = verifiedAt,
                 CreatedAt = now,

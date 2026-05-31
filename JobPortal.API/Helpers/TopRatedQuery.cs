@@ -13,40 +13,50 @@ public static class TopRatedQuery
         int limit = DefaultLimit,
         CancellationToken cancellationToken = default)
     {
-        var ratings = await context.Reviews
+        var globalMean = await GetGlobalMeanAsync(
+            context,
+            ReviewCatalog.SeekerToEmployer,
+            cancellationToken);
+
+        var aggregated = await context.Reviews
             .AsNoTracking()
             .Where(r => r.ReviewType == ReviewCatalog.SeekerToEmployer)
             .GroupBy(r => r.EmployerId)
             .Select(g => new
             {
-                EmployerId = g.Key,
+                Id = g.Key,
                 AverageRating = g.Average(r => r.Rating),
                 ReviewCount = g.Count()
             })
             .Where(x => x.ReviewCount > 0)
-            .OrderByDescending(x => x.AverageRating)
-            .ThenByDescending(x => x.ReviewCount)
-            .Take(limit)
             .ToListAsync(cancellationToken);
 
-        if (ratings.Count == 0)
+        var ranked = TopRatedRanking.RankByWeightedScore(
+                aggregated.Select(x => new TopRatedRanking.AggregatedRating(
+                    x.Id,
+                    x.AverageRating,
+                    x.ReviewCount)),
+                globalMean,
+                limit)
+            .ToList();
+        if (ranked.Count == 0)
         {
             return Array.Empty<TopRatedUserDto>();
         }
 
-        var ids = ratings.Select(r => r.EmployerId).ToList();
+        var ids = ranked.Select(r => r.Id).ToList();
         var employers = await context.Employers
             .AsNoTracking()
             .Where(e => ids.Contains(e.Id))
             .Select(e => new { e.Id, e.Name, e.Email })
             .ToDictionaryAsync(e => e.Id, cancellationToken);
 
-        return ratings.Select(r =>
+        return ranked.Select(r =>
         {
-            employers.TryGetValue(r.EmployerId, out var emp);
+            employers.TryGetValue(r.Id, out var emp);
             return new TopRatedUserDto
             {
-                Id = r.EmployerId,
+                Id = r.Id,
                 Name = emp?.Name ?? "—",
                 Email = emp?.Email,
                 AverageRating = Math.Round(r.AverageRating, 1),
@@ -60,45 +70,68 @@ public static class TopRatedQuery
         int limit = DefaultLimit,
         CancellationToken cancellationToken = default)
     {
-        var ratings = await context.Reviews
+        var globalMean = await GetGlobalMeanAsync(
+            context,
+            ReviewCatalog.EmployerToSeeker,
+            cancellationToken);
+
+        var aggregated = await context.Reviews
             .AsNoTracking()
             .Where(r => r.ReviewType == ReviewCatalog.EmployerToSeeker)
             .GroupBy(r => r.JobSeekerId)
             .Select(g => new
             {
-                JobSeekerId = g.Key,
+                Id = g.Key,
                 AverageRating = g.Average(r => r.Rating),
                 ReviewCount = g.Count()
             })
             .Where(x => x.ReviewCount > 0)
-            .OrderByDescending(x => x.AverageRating)
-            .ThenByDescending(x => x.ReviewCount)
-            .Take(limit)
             .ToListAsync(cancellationToken);
 
-        if (ratings.Count == 0)
+        var ranked = TopRatedRanking.RankByWeightedScore(
+                aggregated.Select(x => new TopRatedRanking.AggregatedRating(
+                    x.Id,
+                    x.AverageRating,
+                    x.ReviewCount)),
+                globalMean,
+                limit)
+            .ToList();
+        if (ranked.Count == 0)
         {
             return Array.Empty<TopRatedUserDto>();
         }
 
-        var ids = ratings.Select(r => r.JobSeekerId).ToList();
+        var ids = ranked.Select(r => r.Id).ToList();
         var seekers = await context.JobSeekers
             .AsNoTracking()
             .Where(s => ids.Contains(s.Id))
             .Select(s => new { s.Id, s.Name, s.Email })
             .ToDictionaryAsync(s => s.Id, cancellationToken);
 
-        return ratings.Select(r =>
+        return ranked.Select(r =>
         {
-            seekers.TryGetValue(r.JobSeekerId, out var seeker);
+            seekers.TryGetValue(r.Id, out var seeker);
             return new TopRatedUserDto
             {
-                Id = r.JobSeekerId,
+                Id = r.Id,
                 Name = seeker?.Name ?? "—",
                 Email = seeker?.Email,
                 AverageRating = Math.Round(r.AverageRating, 1),
                 ReviewCount = r.ReviewCount
             };
         }).ToList();
+    }
+
+    private static async Task<double> GetGlobalMeanAsync(
+        AppDbContext context,
+        string reviewType,
+        CancellationToken cancellationToken)
+    {
+        var mean = await context.Reviews
+            .AsNoTracking()
+            .Where(r => r.ReviewType == reviewType)
+            .AverageAsync(r => (double?)r.Rating, cancellationToken);
+
+        return mean ?? TopRatedRanking.FallbackGlobalMean;
     }
 }

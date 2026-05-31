@@ -239,7 +239,7 @@ public class EmployerDashboardService : IEmployerDashboardService
 
     public async Task<PagedResult<EmployerDashboardJobDto>> GetJobsForUserAsync(
         long userId,
-        string? status = null,
+        string? view = null,
         string? search = null,
         int page = 1,
         int pageSize = 9,
@@ -270,11 +270,7 @@ public class EmployerDashboardService : IEmployerDashboardService
             .AsNoTracking()
             .Where(j => j.EmployerId == employer.Id);
 
-        var statusFilter = NormalizePostingStatusFilter(status);
-        if (statusFilter != null)
-        {
-            query = query.Where(j => j.PostingStatus == statusFilter);
-        }
+        query = ApplyJobsViewFilter(query, view);
 
         if (!string.IsNullOrWhiteSpace(search))
         {
@@ -376,17 +372,30 @@ public class EmployerDashboardService : IEmployerDashboardService
         ThumbnailUrl = job.Images.OrderBy(i => i.Id).Select(i => i.Url).FirstOrDefault()
     };
 
-    private static string? NormalizePostingStatusFilter(string? status)
+    private static IQueryable<Job> ApplyJobsViewFilter(IQueryable<Job> query, string? view)
     {
-        if (string.IsNullOrWhiteSpace(status) || string.Equals(status, "all", StringComparison.OrdinalIgnoreCase))
+        var normalized = NormalizeJobsViewFilter(view);
+        return normalized switch
         {
-            return null;
+            "recruiting" => query.Where(j => j.PostingStatus == JobPostingCatalog.Recruiting),
+            "unread-cv" => query.Where(j =>
+                j.Applications.Any(a => a.Status == "submitted" || a.Status == "pending")),
+            "has-cv" => query.Where(j => j.Applications.Any()),
+            _ => query
+        };
+    }
+
+    private static string NormalizeJobsViewFilter(string? view)
+    {
+        if (string.IsNullOrWhiteSpace(view) || string.Equals(view, "all", StringComparison.OrdinalIgnoreCase))
+        {
+            return "all";
         }
 
-        var normalized = status.Trim().ToLowerInvariant();
-        return normalized is "pending" or "recruiting" or "rejected" or "closed"
+        var normalized = view.Trim().ToLowerInvariant();
+        return normalized is "recruiting" or "unread-cv" or "has-cv"
             ? normalized
-            : null;
+            : "all";
     }
 
     public async Task<IReadOnlyList<EmployerDashboardApplicationDto>> GetApplicationsForUserAsync(

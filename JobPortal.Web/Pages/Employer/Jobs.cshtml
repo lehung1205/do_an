@@ -1,6 +1,7 @@
 @page
 @model JobPortal.Web.Pages.Employer.JobsModel
 @using JobPortal.Web.Models
+@using static JobPortal.Web.Pages.Employer.JobsModel
 @{
     ViewData["Title"] = "Tin tuyển dụng";
     ViewData["EmployerNavActive"] = EmployerPortalNavKeys.Jobs;
@@ -28,105 +29,81 @@
     }
     @if (string.IsNullOrEmpty(Model.ErrorMessage))
     {
-        <section class="employer-jobs-overview">
-            <div class="employer-jobs-overview__card">
+        <nav class="employer-jobs-overview" aria-label="Lọc tin tuyển dụng">
+            <a asp-page="/Employer/Jobs"
+               asp-route-view="@ViewAll"
+               asp-route-q="@Model.Search"
+               asp-route-pageNumber="1"
+               asp-route-pageSize="@Model.PageSize"
+               class="employer-jobs-overview__card @(Model.ViewFilter == ViewAll ? "is-active" : "")">
                 <span class="employer-jobs-overview__icon employer-jobs-overview__icon--primary"><i class="bi bi-briefcase"></i></span>
                 <div>
                     <p class="employer-jobs-overview__label">Tổng tin</p>
                     <p class="employer-jobs-overview__value">@((Model.Stats?.TotalJobs ?? Model.TotalCount).ToString())</p>
                 </div>
-            </div>
-            <div class="employer-jobs-overview__card">
+            </a>
+            <a asp-page="/Employer/Jobs"
+               asp-route-view="@ViewRecruiting"
+               asp-route-q="@Model.Search"
+               asp-route-pageNumber="1"
+               asp-route-pageSize="@Model.PageSize"
+               class="employer-jobs-overview__card @(Model.ViewFilter == ViewRecruiting ? "is-active" : "")">
                 <span class="employer-jobs-overview__icon employer-jobs-overview__icon--success"><i class="bi bi-broadcast-pin"></i></span>
                 <div>
                     <p class="employer-jobs-overview__label">Đang tuyển</p>
                     <p class="employer-jobs-overview__value">@((Model.Stats?.OpenJobs ?? 0).ToString())</p>
                 </div>
-            </div>
-            <div class="employer-jobs-overview__card">
+            </a>
+            <a asp-page="/Employer/Jobs"
+               asp-route-view="@ViewUnreadCv"
+               asp-route-q="@Model.Search"
+               asp-route-pageNumber="1"
+               asp-route-pageSize="@Model.PageSize"
+               class="employer-jobs-overview__card @(Model.ViewFilter == ViewUnreadCv ? "is-active" : "")">
                 <span class="employer-jobs-overview__icon employer-jobs-overview__icon--warning"><i class="bi bi-person-lines-fill"></i></span>
                 <div>
                     <p class="employer-jobs-overview__label">CV chưa đọc</p>
                     <p class="employer-jobs-overview__value">@((Model.Stats?.UnreadApplications ?? 0).ToString())</p>
                 </div>
-            </div>
-            <div class="employer-jobs-overview__card">
+            </a>
+            <a asp-page="/Employer/Jobs"
+               asp-route-view="@ViewHasCv"
+               asp-route-q="@Model.Search"
+               asp-route-pageNumber="1"
+               asp-route-pageSize="@Model.PageSize"
+               class="employer-jobs-overview__card @(Model.ViewFilter == ViewHasCv ? "is-active" : "")">
                 <span class="employer-jobs-overview__icon employer-jobs-overview__icon--info"><i class="bi bi-people"></i></span>
                 <div>
                     <p class="employer-jobs-overview__label">Tổng CV</p>
                     <p class="employer-jobs-overview__value">@((Model.Stats?.TotalCvCount ?? 0).ToString())</p>
                 </div>
-            </div>
-        </section>
+            </a>
+        </nav>
 
         <form method="get" class="employer-panel employer-jobs-filter mb-0">
             <div class="employer-jobs-filter__head">
-                <h3><i class="bi bi-funnel me-2"></i>Bộ lọc tin tuyển dụng</h3>
+                <h3><i class="bi bi-search me-2"></i>Tìm kiếm tin tuyển dụng</h3>
                 @if (Model.HasActiveFilter)
                 {
                     <span class="employer-jobs-filter__hint">Đang áp dụng bộ lọc</span>
                 }
             </div>
             <div class="row g-3 align-items-end">
-                <div class="col-md-3">
-                    <label class="form-label" for="status">Trạng thái</label>
-                    <select class="form-select" id="status" name="status">
-                        @if (Model.StatusFilter == null)
-                        {
-                            <option value="all" selected>Tất cả</option>
-                        }
-                        else
-                        {
-                            <option value="all">Tất cả</option>
-                        }
-                        @if (Model.StatusFilter == "pending")
-                        {
-                            <option value="pending" selected>Chờ duyệt</option>
-                        }
-                        else
-                        {
-                            <option value="pending">Chờ duyệt</option>
-                        }
-                        @if (Model.StatusFilter == "recruiting")
-                        {
-                            <option value="recruiting" selected>Đang tuyển</option>
-                        }
-                        else
-                        {
-                            <option value="recruiting">Đang tuyển</option>
-                        }
-                        @if (Model.StatusFilter == "rejected")
-                        {
-                            <option value="rejected" selected>Từ chối</option>
-                        }
-                        else
-                        {
-                            <option value="rejected">Từ chối</option>
-                        }
-                        @if (Model.StatusFilter == "closed")
-                        {
-                            <option value="closed" selected>Đã đóng</option>
-                        }
-                        else
-                        {
-                            <option value="closed">Đã đóng</option>
-                        }
-                    </select>
-                </div>
-                <div class="col-md-6">
+                <div class="col-md-9">
                     <label class="form-label" for="q">Tìm kiếm</label>
                     <input type="search" class="form-control" id="q" name="q" value="@Model.Search"
                            placeholder="Tiêu đề, mô tả, địa điểm, lương..." maxlength="200" />
                 </div>
                 <div class="col-md-3 d-flex gap-2">
                     <button type="submit" class="btn employer-jobs-btn employer-jobs-btn--primary flex-grow-1">
-                        <i class="bi bi-search me-1"></i> Lọc
+                        <i class="bi bi-search me-1"></i> Tìm
                     </button>
                     <a asp-page="/Employer/Jobs" class="btn employer-jobs-btn employer-jobs-btn--muted" title="Xóa bộ lọc">
                         <i class="bi bi-x-lg"></i>
                     </a>
                 </div>
             </div>
+            <input type="hidden" name="view" value="@Model.ViewFilter" />
             <input type="hidden" name="pageNumber" value="1" />
             <input type="hidden" name="pageSize" value="@Model.PageSize" />
         </form>
@@ -155,9 +132,9 @@
                 <h3>Danh sách tin tuyển dụng</h3>
                 <p>
                     Hiển thị <strong>@Model.Jobs.Count</strong> / <strong>@Model.TotalCount</strong> tin
-                    @if (!string.IsNullOrEmpty(Model.StatusFilter))
+                    @if (!string.Equals(Model.ViewFilter, ViewAll, StringComparison.OrdinalIgnoreCase))
                     {
-                        <span> · trạng thái <strong>@JobsModel.FormatJobStatus(Model.StatusFilter)</strong></span>
+                        <span> · <strong>@FormatViewFilter(Model.ViewFilter)</strong></span>
                     }
                     @if (!string.IsNullOrWhiteSpace(Model.Search))
                     {
@@ -169,7 +146,7 @@
                 @foreach (var job in Model.Jobs)
                 {
                     <div class="col d-flex">
-                        <partial name="Shared/_JobGridCard" model="JobPortal.Web.Models.JobGridCardModel.FromEmployerManageJob(job, Model.StatusFilter, Model.Search, Model.CurrentPage, Model.PageSize)" />
+                        <partial name="Shared/_JobGridCard" model="JobPortal.Web.Models.JobGridCardModel.FromEmployerManageJob(job, Model.ViewFilter, Model.Search, Model.CurrentPage, Model.PageSize)" />
                     </div>
                 }
             </div>
@@ -183,7 +160,7 @@
                                asp-page="/Employer/Jobs"
                                asp-route-pageNumber="@(Model.CurrentPage - 1)"
                                asp-route-pageSize="@Model.PageSize"
-                               asp-route-status="@Model.StatusFilter"
+                               asp-route-view="@Model.ViewFilter"
                                asp-route-q="@Model.Search"
                                aria-label="Trang trước">
                                 <i class="bi bi-chevron-left"></i>
@@ -196,7 +173,7 @@
                                    asp-page="/Employer/Jobs"
                                    asp-route-pageNumber="@i"
                                    asp-route-pageSize="@Model.PageSize"
-                                   asp-route-status="@Model.StatusFilter"
+                                   asp-route-view="@Model.ViewFilter"
                                    asp-route-q="@Model.Search">@i</a>
                             </li>
                         }
@@ -205,7 +182,7 @@
                                asp-page="/Employer/Jobs"
                                asp-route-pageNumber="@(Model.CurrentPage + 1)"
                                asp-route-pageSize="@Model.PageSize"
-                               asp-route-status="@Model.StatusFilter"
+                               asp-route-view="@Model.ViewFilter"
                                asp-route-q="@Model.Search"
                                aria-label="Trang sau">
                                 <i class="bi bi-chevron-right"></i>

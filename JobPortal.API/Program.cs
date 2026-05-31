@@ -259,68 +259,6 @@ using (var scope = app.Services.CreateScope())
         await context.SaveChangesAsync();
     }
 
-    if (!context.Jobs.Any())
-    {
-        var category = new JobPortal.API.Models.Category { Name = "Information Technology" };
-        context.Categories.Add(category);
-        context.SaveChanges();
-
-        var employerUser = new User
-        {
-            Name = "Sample Company",
-            Email = "contact@sample.vn",
-            Role = "EMPLOYER",
-            PasswordHash = passwordHasher.HashPassword(null!, "Sample123!"),
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow,
-            IsActive = true
-        };
-        context.Users.Add(employerUser);
-        context.SaveChanges();
-
-        var employer = new JobPortal.API.Models.Employer
-        {
-            Name = "Sample Company",
-            Email = "contact@sample.vn",
-            PasswordHash = employerUser.PasswordHash,
-            Status = "ACTIVE",
-            Role = "EMPLOYER",
-            PostingLimit = 10,
-            UserId = employerUser.Id,
-            CreatedAt = employerUser.CreatedAt,
-            UpdatedAt = employerUser.UpdatedAt
-        };
-        context.Employers.Add(employer);
-        context.SaveChanges();
-
-        var now = DateTime.UtcNow;
-        context.Jobs.AddRange(
-            new JobPortal.API.Models.Job
-            {
-                EmployerId = employer.Id,
-                CategoryId = category.Id,
-                Title = "Backend Developer",
-                Description = "Develop APIs, work with .NET and MySQL.",
-                Salary = "25 triệu VNĐ/tháng",
-                Location = "Ho Chi Minh City",
-                PostingStatus = "recruiting",
-                WorkingHours = "8h-17h",
-                ExpiryDate = now.AddMonths(2)
-            },
-            new JobPortal.API.Models.Job
-            {
-                EmployerId = employer.Id,
-                CategoryId = category.Id,
-                Title = "Data Engineer",
-                Description = "Analyze data, build ML models.",
-                Salary = "30 triệu VNĐ/tháng",
-                Location = "Hanoi",
-                PostingStatus = "recruiting",
-                WorkingHours = "14h-16h",
-                ExpiryDate = now.AddMonths(2)
-            });
-        context.SaveChanges();
-    }
 }
 
 app.MapControllers();

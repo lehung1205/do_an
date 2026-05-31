@@ -10,6 +10,9 @@ namespace JobPortal.Web.Pages.Chatbot;
 [IgnoreAntiforgeryToken]
 public class WebhookModel : PageModel
 {
+    internal const string UnsupportedTopicFallbackReply =
+        "Xin lỗi, chúng tôi chưa hỗ trợ thông tin này. Bạn vui lòng thử hỏi về tìm việc làm, đăng ký tài khoản hoặc các nội dung khác trên JobPortal.";
+
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly N8nChatbotOptions _options;
     private readonly ILogger<WebhookModel> _logger;
@@ -99,17 +102,7 @@ public class WebhookModel : PageModel
                     body.Length,
                     body.Length > 500 ? body[..500] + "…" : body);
 
-                var parseError = string.IsNullOrWhiteSpace(body)
-                    ? "Workflow n8n trả về phản hồi rỗng. Node «Respond to Webhook» cần trả JSON có trường reply (ví dụ: { \"reply\": \"...\" })."
-                    : "Không đọc được phản hồi từ bot. Kiểm tra node trả về JSON (reply/message/output).";
-
-                return new JsonResult(new
-                {
-                    success = false,
-                    error = parseError,
-                    raw = body.Length > 500 ? body[..500] + "…" : body
-                })
-                { StatusCode = 502 };
+                reply = UnsupportedTopicFallbackReply;
             }
 
             return new JsonResult(new { success = true, reply });

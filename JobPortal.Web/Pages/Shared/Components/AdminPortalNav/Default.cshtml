@@ -1,0 +1,36 @@
+@model JobPortal.Web.ViewComponents.AdminPortalNavViewModel
+
+<aside class="admin-dash__sidebar" aria-label="Menu quản trị">
+    <div class="admin-dash__nav-group">
+        <div class="admin-dash__nav-group-title">Quản trị hệ thống</div>
+        <a asp-page="/Admin/Dashboard/Index" class="admin-dash__nav-link @(Model.IsDashboard ? "is-active" : "")">
+            <span><i class="bi bi-grid-1x2-fill"></i> Bảng điều khiển</span>
+        </a>
+        <a asp-page="/Admin/Jobs/Index" class="admin-dash__nav-link @(Model.IsJobs ? "is-active" : "")">
+            <span><i class="bi bi-shield-check"></i> Duyệt tin tuyển dụng</span>
+            @if (Model.PendingJobsCount > 0)
+            {
+                <span class="admin-dash__badge admin-dash__badge--highlight"
+                      title="@Model.PendingJobsCount tin chờ duyệt">@Model.PendingJobsCount</span>
+            }
+        </a>
+        <a asp-page="/Admin/Users/Index" class="admin-dash__nav-link @(Model.IsUsers ? "is-active" : "")">
+            <span><i class="bi bi-people"></i> Quản lý tài khoản</span>
+        </a>
+        <a asp-page="/Admin/Packages/Index" class="admin-dash__nav-link @(Model.IsPackages ? "is-active" : "")">
+            <span><i class="bi bi-bag-check"></i> Gói đăng tin</span>
+        </a>
+        <a asp-page="/Admin/Payments/Index" class="admin-dash__nav-link @(Model.IsPayments ? "is-active" : "")">
+            <span><i class="bi bi-cash-stack"></i> Doanh thu & giao dịch</span>
+        </a>
+    </div>
+
+    <div class="admin-dash__nav-group">
+        <a asp-page="/Privacy" class="admin-dash__nav-link">
+            <span><i class="bi bi-shield-check"></i> Chính sách</span>
+        </a>
+        <a asp-page="/Auth/Logout" class="admin-dash__nav-link admin-dash__nav-link--danger">
+            <span><i class="bi bi-box-arrow-right"></i> Đăng xuất</span>
+        </a>
+    </div>
+</aside>

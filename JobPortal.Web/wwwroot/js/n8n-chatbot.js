@@ -14,6 +14,9 @@
   const errorEl = document.getElementById("n8nChatbotError");
   const clearBtn = document.getElementById("n8nChatbotClear");
 
+  const FALLBACK_REPLY =
+    "Xin lỗi, chúng tôi chưa hỗ trợ thông tin này. Bạn vui lòng thử hỏi về tìm việc làm, đăng ký tài khoản hoặc các nội dung khác trên JobPortal.";
+
   let isOpen = false;
   let isLoading = false;
   let typingEl = null;
@@ -139,7 +142,7 @@
         return;
       }
 
-      appendMessage(data.reply || "Đã nhận phản hồi.", "bot");
+      appendMessage(data.reply || FALLBACK_REPLY, "bot");
     } catch (err) {
       removeTyping();
       const msg =

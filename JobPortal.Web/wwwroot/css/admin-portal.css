@@ -171,6 +171,23 @@ body.admin-portal-mode main {
   color: #b91c1c;
 }
 
+.admin-dash__badge {
+  min-width: 22px;
+  padding: 2px 7px;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 10px;
+  background: #e5e7eb;
+  color: #313131;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.admin-dash__badge--highlight {
+  background: #fef3c7;
+  color: #b45309;
+}
+
 .admin-dash__main {
   min-width: 0;
 }

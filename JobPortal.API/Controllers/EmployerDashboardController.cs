@@ -62,7 +62,7 @@ public class EmployerDashboardController : ControllerBase
 
     [HttpGet("jobs")]
     public async Task<IActionResult> GetJobs(
-        [FromQuery] string? status,
+        [FromQuery] string? view,
         [FromQuery] string? q,
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 9,
@@ -71,7 +71,7 @@ public class EmployerDashboardController : ControllerBase
         var userId = GetCurrentUserId();
         var result = await _dashboardService.GetJobsForUserAsync(
             userId,
-            status,
+            view,
             q,
             pageNumber,
             pageSize,

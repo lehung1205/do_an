@@ -20,7 +20,7 @@ public class JobGridCardModel
     public bool ShowEmployerActions { get; init; }
     /// <summary>Hiển thị badge trạng thái theo màu NTD (trang chủ employer, không cần nút thao tác).</summary>
     public bool ShowEmployerPostingStatus { get; init; }
-    public string? ListStatusFilter { get; init; }
+    public string? ListViewFilter { get; init; }
     public string? ListSearch { get; init; }
     public int ListPageNumber { get; init; } = 1;
     public int ListPageSize { get; init; } = 9;
@@ -59,7 +59,7 @@ public class JobGridCardModel
 
     public static JobGridCardModel FromEmployerManageJob(
         EmployerDashboardJobDto job,
-        string? statusFilter,
+        string? viewFilter,
         string? search,
         int pageNumber,
         int pageSize) => new()
@@ -77,7 +77,7 @@ public class JobGridCardModel
         ApplicantCount = job.ApplicantCount,
         WorkingHours = job.WorkingHours,
         ShowEmployerActions = true,
-        ListStatusFilter = statusFilter,
+        ListViewFilter = viewFilter,
         ListSearch = search,
         ListPageNumber = pageNumber,
         ListPageSize = pageSize

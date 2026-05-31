@@ -1,4 +1,5 @@
 @model JobPortal.Web.Models.JobGridCardModel
+@using JobPortal.Web.Pages.Employer
 @{
     var isRecruiting = string.Equals(Model.PostingStatus, "recruiting", StringComparison.OrdinalIgnoreCase);
     var isClosed = string.Equals(Model.PostingStatus, "closed", StringComparison.OrdinalIgnoreCase);
@@ -98,7 +99,7 @@
                               asp-page="/Employer/Jobs"
                               asp-page-handler="CloseJob"
                               asp-route-jobId="@Model.Id"
-                              asp-route-status="@(Model.ListStatusFilter ?? "all")"
+                              asp-route-view="@(Model.ListViewFilter ?? JobsModel.ViewAll)"
                               asp-route-q="@Model.ListSearch"
                               asp-route-pageNumber="@Model.ListPageNumber"
                               asp-route-pageSize="@Model.ListPageSize"

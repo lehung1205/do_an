@@ -227,38 +227,6 @@ using (var scope = app.Services.CreateScope())
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     context.Database.Migrate();
     var passwordHasher = new PasswordHasher<User>();
-
-    if (!context.Users.Any())
-    {
-        var admin = new User
-        {
-            Name = "Administrator",
-            Email = "admin@jobportal.local",
-            Role = "ADMIN",
-            PasswordHash = passwordHasher.HashPassword(null!, "Admin123!"),
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow,
-            IsActive = true
-        };
-
-        context.Users.Add(admin);
-        await context.SaveChangesAsync();
-
-        context.Admins.Add(new Admin
-        {
-            Name = admin.Name,
-            Email = admin.Email,
-            PasswordHash = admin.PasswordHash,
-            Status = "ACTIVE",
-            Role = admin.Role,
-            UserId = admin.Id,
-            CreatedAt = admin.CreatedAt,
-            UpdatedAt = admin.UpdatedAt
-        });
-
-        await context.SaveChangesAsync();
-    }
-
 }
 
 app.MapControllers();

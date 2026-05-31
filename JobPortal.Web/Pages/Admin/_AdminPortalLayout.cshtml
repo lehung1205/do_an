@@ -59,7 +59,7 @@
 <div class="admin-dash">
     <div class="container-fluid px-3 px-lg-4">
         <div class="admin-dash__shell">
-            <partial name="~/Pages/Shared/_AdminPortalNav.cshtml" model="currentPage" />
+            @await Component.InvokeAsync("AdminPortalNav", new { currentPage })
             <div class="admin-dash__main">
                 @RenderBody()
             </div>

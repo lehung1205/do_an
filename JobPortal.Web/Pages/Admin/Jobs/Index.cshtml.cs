@@ -32,6 +32,9 @@ public class IndexModel : PageModel
     public bool ShowPagination => TotalPages > 1;
     public bool HasActiveFilter => !string.IsNullOrWhiteSpace(Search);
 
+    public int AllTabCount =>
+        (Summary?.PendingCount ?? 0) + (Summary?.RecruitingCount ?? 0) + (Summary?.RejectedCount ?? 0);
+
     public int TabTotalCount => StatusFilter switch
     {
         StatusPending => Summary?.PendingCount ?? TotalCount,

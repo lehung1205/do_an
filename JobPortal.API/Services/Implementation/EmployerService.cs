@@ -82,8 +82,8 @@ public class EmployerService : IEmployerService
             Name = entity.Name,
             Description = entity.Description,
             Image = entity.Image,
-            Phone = entity.Phone,
-            Email = entity.Email,
+            Phone = entity.GetPhone(),
+            Email = entity.GetEmail(),
             Gender = entity.Gender,
             Reviews = new EmployerReceivedReviewsSummaryDto
             {
@@ -116,8 +116,8 @@ public class EmployerService : IEmployerService
                     Name = entity.Name,
                     Description = entity.Description,
                     Image = entity.Image,
-                    Phone = entity.Phone,
-                    Email = entity.Email,
+                    Phone = entity.GetPhone(),
+                    Email = entity.GetEmail(),
                     Gender = entity.Gender,
                     AverageRating = rating?.Average,
                     ReviewCount = rating?.Count ?? 0
@@ -179,7 +179,6 @@ public class EmployerService : IEmployerService
 
         var user = new User
         {
-            Name = dto.Name.Trim(),
             Email = normalizedEmail,
             PhoneNumber = dto.Phone?.Trim(),
             PasswordHash = passwordHash,
@@ -191,10 +190,7 @@ public class EmployerService : IEmployerService
 
         var employer = new Employer
         {
-            Name = user.Name,
-            Email = user.Email,
-            Phone = user.PhoneNumber,
-            PasswordHash = passwordHash,
+            Name = dto.Name.Trim(),
             DateOfBirth = dto.DateOfBirth,
             Gender = dto.Gender,
             Description = dto.Description?.Trim(),
@@ -202,7 +198,6 @@ public class EmployerService : IEmployerService
             PostingLimit = dto.PostingLimit > 0 ? dto.PostingLimit : 10,
             IdCard = dto.IdCard?.Trim(),
             Status = status,
-            Role = "EMPLOYER",
             CreatedAt = now,
             UpdatedAt = now
         };
@@ -222,8 +217,12 @@ public class EmployerService : IEmployerService
         var user = employer.User ?? throw new NotFoundException($"User linked to employer {id} was not found.");
 
         if (!string.IsNullOrWhiteSpace(dto.Name)) employer.Name = dto.Name.Trim();
-        if (!string.IsNullOrWhiteSpace(dto.Email)) employer.Email = dto.Email.Trim().ToLowerInvariant();
-        if (dto.Phone != null) employer.Phone = string.IsNullOrWhiteSpace(dto.Phone) ? null : dto.Phone.Trim();
+        if (!string.IsNullOrWhiteSpace(dto.Email)) user.Email = dto.Email.Trim().ToLowerInvariant();
+        if (dto.Phone != null)
+        {
+            user.PhoneNumber = string.IsNullOrWhiteSpace(dto.Phone) ? null : dto.Phone.Trim();
+        }
+
         if (dto.EmailVerifiedAt.HasValue) employer.EmailVerifiedAt = dto.EmailVerifiedAt;
         if (dto.DateOfBirth.HasValue) employer.DateOfBirth = dto.DateOfBirth;
         if (dto.Gender.HasValue) employer.Gender = dto.Gender;
@@ -232,14 +231,9 @@ public class EmployerService : IEmployerService
         if (dto.PostingLimit.HasValue) employer.PostingLimit = dto.PostingLimit.Value;
         if (dto.IdCard != null) employer.IdCard = string.IsNullOrWhiteSpace(dto.IdCard) ? null : dto.IdCard.Trim();
         if (!string.IsNullOrWhiteSpace(dto.Status)) employer.Status = dto.Status.Trim().ToUpperInvariant();
-        if (!string.IsNullOrWhiteSpace(dto.Role)) employer.Role = dto.Role.Trim().ToUpperInvariant();
+        if (!string.IsNullOrWhiteSpace(dto.Role)) user.Role = dto.Role.Trim().ToUpperInvariant();
 
         employer.UpdatedAt = DateTime.UtcNow;
-
-        user.Name = employer.Name;
-        user.Email = employer.Email;
-        user.PhoneNumber = employer.Phone;
-        user.Role = employer.Role;
         user.IsActive = employer.Status == "ACTIVE";
         user.UpdatedAt = employer.UpdatedAt;
 

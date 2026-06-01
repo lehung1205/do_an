@@ -48,7 +48,7 @@ public static class TopRatedQuery
         var employers = await context.Employers
             .AsNoTracking()
             .Where(e => ids.Contains(e.Id))
-            .Select(e => new { e.Id, e.Name, e.Email })
+            .Select(e => new { e.Id, e.Name, Email = e.User.Email })
             .ToDictionaryAsync(e => e.Id, cancellationToken);
 
         return ranked.Select(r =>
@@ -105,7 +105,7 @@ public static class TopRatedQuery
         var seekers = await context.JobSeekers
             .AsNoTracking()
             .Where(s => ids.Contains(s.Id))
-            .Select(s => new { s.Id, s.Name, s.Email })
+            .Select(s => new { s.Id, s.Name, Email = s.User.Email })
             .ToDictionaryAsync(s => s.Id, cancellationToken);
 
         return ranked.Select(r =>

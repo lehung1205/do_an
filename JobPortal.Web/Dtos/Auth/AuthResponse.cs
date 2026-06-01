@@ -35,6 +35,5 @@ public class ProfileResponse
     public string? IdCardIssuePlace { get; set; }
     public string? BankName { get; set; }
     public string? BankAccountNumber { get; set; }
-    public string? ProfilePhone { get; set; }
     public int? PostingLimit { get; set; }
 }

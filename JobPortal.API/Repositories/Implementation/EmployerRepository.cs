@@ -18,13 +18,16 @@ public class EmployerRepository : IEmployerRepository
     {
         return await _context.Employers
             .AsNoTracking()
+            .Include(e => e.User)
             .OrderByDescending(e => e.Id)
             .ToListAsync(cancellationToken);
     }
 
     public async Task<Employer?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
     {
-        return await _context.Employers.FindAsync([id], cancellationToken);
+        return await _context.Employers
+            .Include(e => e.User)
+            .FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
     }
 
     public async Task<Employer?> GetByIdWithUserAsync(long id, CancellationToken cancellationToken = default)

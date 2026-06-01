@@ -120,8 +120,17 @@ public class MappingProfile : Profile
             .ForMember(d => d.Employer, o => o.Ignore())
             .ForMember(d => d.JobSeeker, o => o.Ignore());
 
-        CreateMap<Admin, AdminDto>();
-        CreateMap<Employer, EmployerDto>();
-        CreateMap<JobSeeker, JobSeekerDto>();
+        CreateMap<Admin, AdminDto>()
+            .ForMember(d => d.Email, o => o.MapFrom(s => s.User.Email))
+            .ForMember(d => d.Phone, o => o.MapFrom(s => s.User.PhoneNumber))
+            .ForMember(d => d.Role, o => o.MapFrom(s => s.User.Role));
+        CreateMap<Employer, EmployerDto>()
+            .ForMember(d => d.Email, o => o.MapFrom(s => s.User.Email))
+            .ForMember(d => d.Phone, o => o.MapFrom(s => s.User.PhoneNumber))
+            .ForMember(d => d.Role, o => o.MapFrom(s => s.User.Role));
+        CreateMap<JobSeeker, JobSeekerDto>()
+            .ForMember(d => d.Email, o => o.MapFrom(s => s.User.Email))
+            .ForMember(d => d.Phone, o => o.MapFrom(s => s.User.PhoneNumber))
+            .ForMember(d => d.Role, o => o.MapFrom(s => s.User.Role));
     }
 }

@@ -15,16 +15,8 @@ public class Employer
     [MaxLength(255)]
     public string Name { get; set; } = null!;
 
-    [Column("email")]
-    [MaxLength(255)]
-    public string Email { get; set; } = null!;
-
     [Column("email_verified_at")]
     public DateTime? EmailVerifiedAt { get; set; }
-
-    [Column("password_hash")]
-    [MaxLength(500)]
-    public string PasswordHash { get; set; } = null!;
 
     [Column("date_of_birth")]
     public DateOnly? DateOfBirth { get; set; }
@@ -46,22 +38,14 @@ public class Employer
     [MaxLength(20)]
     public string? IdCard { get; set; }
 
-    [Column("phone")]
-    [MaxLength(20)]
-    public string? Phone { get; set; }
-
     [Column("status")]
     [MaxLength(32)]
     public string Status { get; set; } = null!;
 
-    [Column("role")]
-    [MaxLength(32)]
-    public string Role { get; set; } = "EMPLOYER";
-
     [Column("user_id")]
     public long UserId { get; set; }
 
-    public User? User { get; set; }
+    public User User { get; set; } = null!;
 
     [Column("created_at")]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

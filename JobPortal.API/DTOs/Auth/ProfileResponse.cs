@@ -41,8 +41,5 @@ public class ProfileResponse
     public string? BankName { get; set; }
     public string? BankAccountNumber { get; set; }
 
-    /// <summary>Phone on role profile row (may match <see cref="PhoneNumber"/>).</summary>
-    public string? ProfilePhone { get; set; }
-
     public int? PostingLimit { get; set; }
 }

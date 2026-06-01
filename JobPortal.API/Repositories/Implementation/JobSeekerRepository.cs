@@ -19,6 +19,7 @@ public class JobSeekerRepository : IJobSeekerRepository
     {
         return await _context.JobSeekers
             .AsNoTracking()
+            .Include(j => j.User)
             .OrderByDescending(j => j.Id)
             .ToListAsync(cancellationToken);
     }
@@ -32,7 +33,9 @@ public class JobSeekerRepository : IJobSeekerRepository
 
     public async Task<JobSeeker?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
     {
-        return await _context.JobSeekers.FindAsync([id], cancellationToken);
+        return await _context.JobSeekers
+            .Include(j => j.User)
+            .FirstOrDefaultAsync(j => j.Id == id, cancellationToken);
     }
 
     public async Task<JobSeeker?> GetByIdWithUserAsync(long id, CancellationToken cancellationToken = default)

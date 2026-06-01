@@ -14,11 +14,16 @@ public class AdminJobService : IAdminJobService
     private const int MaxPageSize = 50;
     private readonly AppDbContext _context;
     private readonly IJobExpiryService _jobExpiryService;
+    private readonly INotificationService _notificationService;
 
-    public AdminJobService(AppDbContext context, IJobExpiryService jobExpiryService)
+    public AdminJobService(
+        AppDbContext context,
+        IJobExpiryService jobExpiryService,
+        INotificationService notificationService)
     {
         _context = context;
         _jobExpiryService = jobExpiryService;
+        _notificationService = notificationService;
     }
 
     public async Task<AdminJobModerationSummaryDto> GetModerationSummaryAsync(
@@ -78,6 +83,12 @@ public class AdminJobService : IAdminJobService
         job.PostingStatus = JobPostingCatalog.Recruiting;
         await _context.SaveChangesAsync(cancellationToken);
 
+        await _notificationService.NotifyJobApprovedAsync(
+            job.Employer.UserId,
+            job.Id,
+            job.Title,
+            cancellationToken);
+
         return MapJobDto(job);
     }
 
@@ -113,6 +124,13 @@ public class AdminJobService : IAdminJobService
         }
 
         await _context.SaveChangesAsync(cancellationToken);
+
+        await _notificationService.NotifyJobRejectedAsync(
+            job.Employer.UserId,
+            job.Id,
+            job.Title,
+            request?.Reason,
+            cancellationToken);
 
         return MapJobDto(job);
     }

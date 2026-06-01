@@ -28,6 +28,13 @@
         <a asp-page="/Employer/WorkProgress/Index" class="employer-dash__nav-link @(Model.IsActive(EmployerPortalNavKeys.WorkProgress) ? "is-active" : "")">
             <span><i class="bi bi-kanban"></i> Tiến độ công việc</span>
         </a>
+        <a asp-page="/Notifications/Index" class="employer-dash__nav-link @(Model.IsActive(EmployerPortalNavKeys.Notifications) ? "is-active" : "")">
+            <span><i class="bi bi-bell"></i> Thông báo</span>
+            @if (Model.Nav.UnreadNotifications > 0)
+            {
+                <span class="employer-dash__badge employer-dash__badge--highlight">@Model.Nav.UnreadNotifications</span>
+            }
+        </a>
         <a asp-page="/Messages/Index" class="employer-dash__nav-link @(Model.IsActive(EmployerPortalNavKeys.Messages) ? "is-active" : "")">
             <span><i class="bi bi-chat-dots"></i> Tin nhắn</span>
             @if (Model.Nav.UnreadMessages > 0)

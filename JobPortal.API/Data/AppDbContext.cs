@@ -24,6 +24,7 @@ public class AppDbContext : DbContext
     public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
     public DbSet<ChatMessage> ChatMessages { get; set; } = null!;
     public DbSet<PendingRegistration> PendingRegistrations { get; set; } = null!;
+    public DbSet<UserNotification> UserNotifications { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -198,5 +199,14 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<PendingRegistration>()
             .HasIndex(p => p.Email);
+
+        modelBuilder.Entity<UserNotification>()
+            .HasOne(n => n.User)
+            .WithMany()
+            .HasForeignKey(n => n.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<UserNotification>()
+            .HasIndex(n => new { n.UserId, n.IsRead, n.CreatedAt });
     }
 }

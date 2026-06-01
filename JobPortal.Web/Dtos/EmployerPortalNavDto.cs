@@ -7,4 +7,5 @@ public class EmployerPortalNavDto
     public int TotalJobs { get; set; }
     public int UnreadApplications { get; set; }
     public int UnreadMessages { get; set; }
+    public int UnreadNotifications { get; set; }
 }

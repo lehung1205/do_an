@@ -54,6 +54,8 @@
                 var isEmployerStats = isEmployer && (
                     string.Equals(currentPage, "/Index", StringComparison.OrdinalIgnoreCase)
                     || string.IsNullOrEmpty(currentPage));
+                var isSeekerNotificationsPage = string.Equals(currentPage, "/Notifications/Index", StringComparison.OrdinalIgnoreCase);
+                var isSeekerMessagesPage = string.Equals(currentPage, "/Messages/Index", StringComparison.OrdinalIgnoreCase);
             }
             <div class="container">
                 <a class="navbar-brand site-brand" asp-page="@(isAdmin ? "/Admin/Dashboard/Index" : "/Index")">
@@ -99,12 +101,6 @@
                                 <li class="nav-item">
                                     <a class="nav-link" asp-page="/Applications/WorkProgress/Index">Tiến độ làm việc</a>
                                 </li>
-                                <li class="nav-item">
-                                    <a class="nav-link d-inline-flex align-items-center" asp-page="/Messages/Index">
-                                        Tin nhắn
-                                        @await Component.InvokeAsync("ChatNavBadge")
-                                    </a>
-                                </li>
                             }
                         }
                         <li class="nav-item">
@@ -116,6 +112,25 @@
                     <ul class="navbar-nav align-items-lg-center gap-2 nav-auth">
                         @if (isLoggedIn && !isEmployerPortalChrome)
                         {
+                            @if (isJobSeeker)
+                            {
+                                <li class="nav-item nav-quick-actions">
+                                    <a asp-page="/Notifications/Index"
+                                       class="site-nav-icon-btn @(isSeekerNotificationsPage ? "is-active" : "")"
+                                       title="Thông báo"
+                                       aria-label="Thông báo">
+                                        <i class="bi bi-bell"></i>
+                                        @await Component.InvokeAsync("NotificationNavBadge")
+                                    </a>
+                                    <a asp-page="/Messages/Index"
+                                       class="site-nav-icon-btn @(isSeekerMessagesPage ? "is-active" : "")"
+                                       title="Tin nhắn"
+                                       aria-label="Tin nhắn">
+                                        <i class="bi bi-chat-dots"></i>
+                                        @await Component.InvokeAsync("ChatNavBadge")
+                                    </a>
+                                </li>
+                            }
                             <li class="nav-item dropdown nav-account">
                                 <button class="btn nav-avatar dropdown-toggle" type="button"
                                         data-bs-toggle="dropdown" aria-expanded="false"

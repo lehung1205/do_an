@@ -76,6 +76,7 @@ builder.Services.AddScoped<IResumeService, ResumeService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IApplicationReviewService, ApplicationReviewService>();
 builder.Services.AddScoped<IChatService, ChatService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddSingleton<IChatPresenceService, ChatPresenceService>();
 builder.Services.AddScoped<IStatsService, StatsService>();
 builder.Services.AddScoped<ITokenService, TokenService>();

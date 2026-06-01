@@ -89,6 +89,48 @@ main {
   font-weight: 600;
 }
 
+.nav-quick-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.site-nav-icon-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  color: #334155;
+  text-decoration: none;
+  font-size: 1.2rem;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.site-nav-icon-btn:hover,
+.site-nav-icon-btn.is-active {
+  background: #eff6ff;
+  color: var(--jp-primary, #0000ee);
+}
+
+.site-nav-icon-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+  border-radius: 8px;
+  background: #dc3545;
+  color: #fff;
+}
+
 .nav-auth {
   margin-top: 0.5rem;
   padding-top: 0.5rem;

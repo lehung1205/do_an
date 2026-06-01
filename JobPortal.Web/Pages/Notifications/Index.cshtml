@@ -1,0 +1,91 @@
+@page
+@model JobPortal.Web.Pages.Notifications.IndexModel
+@using JobPortal.Web.Models
+@{
+    ViewData["Title"] = "Thông báo";
+    if (Model.IsEmployer)
+    {
+        Layout = "/Pages/Employer/_EmployerPortalLayout.cshtml";
+        ViewData["EmployerNavActive"] = EmployerPortalNavKeys.Notifications;
+    }
+}
+
+<div class="@(Model.IsEmployer ? "employer-dash__section" : "container py-4") notifications-page">
+    <header class="notifications-page__header">
+        <div>
+            <h1 class="h4 mb-1"><i class="bi bi-bell me-2 text-primary"></i>Thông báo</h1>
+            <p class="text-muted small mb-0">
+                @if (Model.UnreadCount > 0)
+                {
+                    <span>Bạn có <strong>@Model.UnreadCount</strong> thông báo chưa đọc.</span>
+                }
+                else
+                {
+                    <span>Tất cả thông báo đã được đọc.</span>
+                }
+            </p>
+        </div>
+        @if (Model.UnreadCount > 0)
+        {
+            <form method="post" asp-page-handler="MarkAllRead">
+                <button type="submit" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-check2-all me-1"></i>Đánh dấu đã đọc tất cả
+                </button>
+            </form>
+        }
+    </header>
+
+    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+    {
+        <div class="alert alert-success border-0 shadow-sm">@Model.SuccessMessage</div>
+    }
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-warning border-0 shadow-sm">@Model.ErrorMessage</div>
+    }
+
+    @if (Model.Notifications.Count == 0)
+    {
+        <div class="notifications-page__empty">
+            <i class="bi bi-bell-slash display-6 text-muted"></i>
+            <p class="text-muted mt-3 mb-0">Chưa có thông báo nào.</p>
+        </div>
+    }
+    else
+    {
+        <ul class="notifications-page__list">
+            @foreach (var item in Model.Notifications)
+            {
+                var actionUrl = Model.GetActionUrl(item);
+                <li class="notifications-page__item @(item.IsRead ? "" : "is-unread")">
+                    <div class="notifications-page__icon" aria-hidden="true">
+                        <i class="bi @IndexModel.IconClass(item.Type)"></i>
+                    </div>
+                    <div class="notifications-page__body">
+                        <div class="notifications-page__top">
+                            <h2 class="notifications-page__title h6 mb-1">@item.Title</h2>
+                            <time class="notifications-page__time">@IndexModel.FormatRelativeTime(item.CreatedAt)</time>
+                        </div>
+                        <p class="notifications-page__message mb-2">@item.Message</p>
+                        <div class="notifications-page__actions">
+                            @if (!string.IsNullOrEmpty(actionUrl))
+                            {
+                                <a href="@actionUrl" class="btn btn-sm btn-primary">Xem chi tiết</a>
+                            }
+                            @if (!item.IsRead)
+                            {
+                                <form method="post" asp-page-handler="MarkRead" asp-route-id="@item.Id" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary">Đánh dấu đã đọc</button>
+                                </form>
+                            }
+                        </div>
+                    </div>
+                </li>
+            }
+        </ul>
+    }
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/notifications.css" asp-append-version="true" />
+}

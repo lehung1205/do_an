@@ -14,15 +14,18 @@ public class EmployerDashboardService : IEmployerDashboardService
     private readonly AppDbContext _context;
     private readonly IJobExpiryService _jobExpiryService;
     private readonly IChatService _chatService;
+    private readonly INotificationService _notificationService;
 
     public EmployerDashboardService(
         AppDbContext context,
         IJobExpiryService jobExpiryService,
-        IChatService chatService)
+        IChatService chatService,
+        INotificationService notificationService)
     {
         _context = context;
         _jobExpiryService = jobExpiryService;
         _chatService = chatService;
+        _notificationService = notificationService;
     }
 
     public async Task<EmployerDashboardDto> GetDashboardForUserAsync(long userId, CancellationToken cancellationToken = default)
@@ -171,13 +174,16 @@ public class EmployerDashboardService : IEmployerDashboardService
             "EMPLOYER",
             cancellationToken);
 
+        var unreadNotifications = await _notificationService.GetUnreadCountAsync(userId, cancellationToken);
+
         return new EmployerPortalNavDto
         {
             CompanyName = employer.Name,
             PostingLimit = employer.PostingLimit,
             TotalJobs = totalJobs,
             UnreadApplications = unreadCv,
-            UnreadMessages = unreadMessages
+            UnreadMessages = unreadMessages,
+            UnreadNotifications = unreadNotifications
         };
     }
 
@@ -516,6 +522,7 @@ public class EmployerDashboardService : IEmployerDashboardService
 
         var application = await _context.Applications
             .Include(a => a.JobSeeker)
+            .Include(a => a.Job).ThenInclude(j => j.Employer)
             .Include(a => a.Job).ThenInclude(j => j.Category)
             .Include(a => a.Job).ThenInclude(j => j.Images)
             .Include(a => a.Resume)
@@ -554,6 +561,21 @@ public class EmployerDashboardService : IEmployerDashboardService
         if (status == "accepted")
         {
             await SeedInitialWorkProgressAsync(application.Id, cancellationToken);
+            await _notificationService.NotifyApplicationAcceptedAsync(
+                application.JobSeeker.UserId,
+                application.Id,
+                application.Job.Title,
+                application.Job.Employer.Name,
+                cancellationToken);
+        }
+        else if (status == "rejected")
+        {
+            await _notificationService.NotifyApplicationRejectedAsync(
+                application.JobSeeker.UserId,
+                application.Id,
+                application.Job.Title,
+                application.Job.Employer.Name,
+                cancellationToken);
         }
 
         return MapApplicationDto(MapApplicationRow(application), seekerRatings);

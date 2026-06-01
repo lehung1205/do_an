@@ -33,8 +33,15 @@
             </div>
 
             <div class="employer-portal-topbar__actions">
-                <a asp-page="/Messages/Index" class="employer-portal-topbar__icon-btn" title="Tin nhắn" aria-label="Tin nhắn">
+                <a asp-page="/Notifications/Index" class="employer-portal-topbar__icon-btn" title="Thông báo" aria-label="Thông báo">
                     <i class="bi bi-bell"></i>
+                    @if (Model.Nav.UnreadNotifications > 0)
+                    {
+                        <span class="employer-portal-topbar__icon-badge">@Model.Nav.UnreadNotifications</span>
+                    }
+                </a>
+                <a asp-page="/Messages/Index" class="employer-portal-topbar__icon-btn" title="Tin nhắn" aria-label="Tin nhắn">
+                    <i class="bi bi-chat-dots"></i>
                     @if (Model.Nav.UnreadMessages > 0)
                     {
                         <span class="employer-portal-topbar__icon-badge">@Model.Nav.UnreadMessages</span>

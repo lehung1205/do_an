@@ -70,9 +70,4 @@ public class TokenService : ITokenService
         var hash = sha256.ComputeHash(Encoding.UTF8.GetBytes(token));
         return Convert.ToBase64String(hash);
     }
-
-    public bool VerifyToken(string token, string hash)
-    {
-        return HashToken(token) == hash;
-    }
 }

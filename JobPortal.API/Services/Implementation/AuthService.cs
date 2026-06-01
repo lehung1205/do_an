@@ -420,21 +420,6 @@ public sealed class AuthService : IAuthService
         return _authRepository.UserExistsAsync(email, phoneNumber, cancellationToken);
     }
 
-    private Task<User?> FindUserByIdentifierAsync(string identifier, CancellationToken cancellationToken)
-    {
-        return _authRepository.FindUserByIdentifierAsync(identifier, cancellationToken);
-    }
-
-    private Task<User?> FindUserByEmailAsync(string email, CancellationToken cancellationToken)
-    {
-        return _authRepository.FindUserByEmailAsync(email, cancellationToken);
-    }
-
-    private Task<User?> FindUserByIdAsync(long id, CancellationToken cancellationToken)
-    {
-        return _authRepository.FindUserByIdAsync(id, cancellationToken);
-    }
-
     private async Task RevokeTokenInternalAsync(string token, long userId, string ipAddress, CancellationToken cancellationToken)
     {
         var hashedToken = _tokenService.HashToken(token);

@@ -82,7 +82,7 @@ public class EmployerService : IEmployerService
             Name = entity.Name,
             Description = entity.Description,
             Image = entity.Image,
-            Phone = entity.Phone,
+            Phone = entity.GetPhone(),
             Email = entity.GetEmail(),
             Gender = entity.Gender,
             Reviews = new EmployerReceivedReviewsSummaryDto
@@ -116,7 +116,7 @@ public class EmployerService : IEmployerService
                     Name = entity.Name,
                     Description = entity.Description,
                     Image = entity.Image,
-                    Phone = entity.Phone,
+                    Phone = entity.GetPhone(),
                     Email = entity.GetEmail(),
                     Gender = entity.Gender,
                     AverageRating = rating?.Average,
@@ -191,7 +191,6 @@ public class EmployerService : IEmployerService
         var employer = new Employer
         {
             Name = dto.Name.Trim(),
-            Phone = dto.Phone?.Trim(),
             DateOfBirth = dto.DateOfBirth,
             Gender = dto.Gender,
             Description = dto.Description?.Trim(),
@@ -221,8 +220,7 @@ public class EmployerService : IEmployerService
         if (!string.IsNullOrWhiteSpace(dto.Email)) user.Email = dto.Email.Trim().ToLowerInvariant();
         if (dto.Phone != null)
         {
-            employer.Phone = string.IsNullOrWhiteSpace(dto.Phone) ? null : dto.Phone.Trim();
-            user.PhoneNumber = employer.Phone;
+            user.PhoneNumber = string.IsNullOrWhiteSpace(dto.Phone) ? null : dto.Phone.Trim();
         }
 
         if (dto.EmailVerifiedAt.HasValue) employer.EmailVerifiedAt = dto.EmailVerifiedAt;

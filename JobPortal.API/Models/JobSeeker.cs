@@ -18,10 +18,6 @@ public class JobSeeker
     [Column("email_verified_at")]
     public DateTime? EmailVerifiedAt { get; set; }
 
-    [Column("phone")]
-    [MaxLength(20)]
-    public string? Phone { get; set; }
-
     [Column("date_of_birth")]
     public DateOnly? DateOfBirth { get; set; }
 

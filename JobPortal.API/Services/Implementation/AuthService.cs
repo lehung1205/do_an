@@ -361,7 +361,6 @@ public sealed class AuthService : IAuthService
         {
             var j = user.JobSeekerProfile;
             j.Name = name;
-            j.Phone = phone;
             j.DateOfBirth = request.DateOfBirth;
             j.Gender = request.Gender;
             j.Description = TrimOrNull(request.Description);
@@ -378,7 +377,6 @@ public sealed class AuthService : IAuthService
         {
             var e = user.EmployerProfile;
             e.Name = name;
-            e.Phone = phone;
             e.DateOfBirth = request.DateOfBirth;
             e.Gender = request.Gender;
             e.Description = TrimOrNull(request.Description);
@@ -389,7 +387,6 @@ public sealed class AuthService : IAuthService
         {
             var a = user.AdminProfile;
             a.Name = name;
-            a.Phone = phone;
             a.BankName = TrimOrNull(request.BankName);
             a.AccountNumber = TrimOrNull(request.BankAccountNumber);
             a.UpdatedAt = now;
@@ -505,7 +502,6 @@ public sealed class AuthService : IAuthService
             profile.IdCardIssuePlace = j.IdCardIssuePlace;
             profile.BankName = j.BankName;
             profile.BankAccountNumber = j.AccountNumber;
-            profile.ProfilePhone = j.Phone;
             profile.PostingLimit = null;
         }
         else if (user.EmployerProfile != null)
@@ -517,7 +513,6 @@ public sealed class AuthService : IAuthService
             profile.Gender = e.Gender;
             profile.Description = e.Description;
             profile.IdCard = e.IdCard;
-            profile.ProfilePhone = e.Phone;
             profile.PostingLimit = e.PostingLimit;
         }
         else if (user.AdminProfile != null)
@@ -526,7 +521,6 @@ public sealed class AuthService : IAuthService
             profile.AccountStatus = a.Status;
             profile.BankName = a.BankName;
             profile.BankAccountNumber = a.AccountNumber;
-            profile.ProfilePhone = a.Phone;
         }
 
         return profile;
@@ -590,7 +584,6 @@ public sealed class AuthService : IAuthService
             await _authRepository.AddEmployerAsync(new Employer
             {
                 Name = pending.Name,
-                Phone = pending.PhoneNumber,
                 Status = "ACTIVE",
                 PostingLimit = 1,
                 UserId = authUser.Id,
@@ -604,7 +597,6 @@ public sealed class AuthService : IAuthService
             await _authRepository.AddJobSeekerAsync(new JobSeeker
             {
                 Name = pending.Name,
-                Phone = pending.PhoneNumber,
                 Status = "ACTIVE",
                 UserId = authUser.Id,
                 EmailVerifiedAt = verifiedAt,

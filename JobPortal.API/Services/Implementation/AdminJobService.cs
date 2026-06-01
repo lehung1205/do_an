@@ -179,7 +179,7 @@ public class AdminJobService : IAdminJobService
                 EmployerId = j.EmployerId,
                 EmployerName = j.Employer.Name,
                 EmployerEmail = j.Employer.User.Email,
-                EmployerPhone = j.Employer.Phone,
+                EmployerPhone = j.Employer.User.PhoneNumber,
                 EmployerImage = j.Employer.Image,
                 CategoryId = j.CategoryId,
                 CategoryName = j.Category.Name,

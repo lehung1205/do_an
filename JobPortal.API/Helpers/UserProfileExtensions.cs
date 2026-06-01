@@ -24,4 +24,13 @@ public static class UserProfileExtensions
 
     public static string GetEmail(this Admin admin) =>
         admin.User?.Email ?? string.Empty;
+
+    public static string? GetPhone(this JobSeeker jobSeeker) =>
+        jobSeeker.User?.PhoneNumber;
+
+    public static string? GetPhone(this Employer employer) =>
+        employer.User?.PhoneNumber;
+
+    public static string? GetPhone(this Admin admin) =>
+        admin.User?.PhoneNumber;
 }

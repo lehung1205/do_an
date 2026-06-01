@@ -23,10 +23,6 @@ public class Admin
     [MaxLength(255)]
     public string? BankName { get; set; }
 
-    [Column("phone")]
-    [MaxLength(20)]
-    public string? Phone { get; set; }
-
     [Column("status")]
     [MaxLength(32)]
     public string Status { get; set; } = "ACTIVE";

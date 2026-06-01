@@ -122,12 +122,15 @@ public class MappingProfile : Profile
 
         CreateMap<Admin, AdminDto>()
             .ForMember(d => d.Email, o => o.MapFrom(s => s.User.Email))
+            .ForMember(d => d.Phone, o => o.MapFrom(s => s.User.PhoneNumber))
             .ForMember(d => d.Role, o => o.MapFrom(s => s.User.Role));
         CreateMap<Employer, EmployerDto>()
             .ForMember(d => d.Email, o => o.MapFrom(s => s.User.Email))
+            .ForMember(d => d.Phone, o => o.MapFrom(s => s.User.PhoneNumber))
             .ForMember(d => d.Role, o => o.MapFrom(s => s.User.Role));
         CreateMap<JobSeeker, JobSeekerDto>()
             .ForMember(d => d.Email, o => o.MapFrom(s => s.User.Email))
+            .ForMember(d => d.Phone, o => o.MapFrom(s => s.User.PhoneNumber))
             .ForMember(d => d.Role, o => o.MapFrom(s => s.User.Role));
     }
 }

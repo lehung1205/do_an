@@ -67,7 +67,7 @@ public class AdminUserManagementService : IAdminUserManagementService
             query = query.Where(e =>
                 e.Name.Contains(term) ||
                 e.User.Email.Contains(term) ||
-                (e.Phone != null && e.Phone.Contains(term)));
+                (e.User.PhoneNumber != null && e.User.PhoneNumber.Contains(term)));
         }
 
         var totalCount = await query.CountAsync(cancellationToken);
@@ -82,7 +82,7 @@ public class AdminUserManagementService : IAdminUserManagementService
                 UserId = e.UserId,
                 Name = e.Name,
                 Email = e.User.Email,
-                Phone = e.Phone,
+                Phone = e.User.PhoneNumber,
                 Image = e.Image,
                 Status = e.Status,
                 EmailVerified = e.EmailVerifiedAt != null,
@@ -122,7 +122,7 @@ public class AdminUserManagementService : IAdminUserManagementService
             query = query.Where(j =>
                 j.Name.Contains(term) ||
                 j.User.Email.Contains(term) ||
-                (j.Phone != null && j.Phone.Contains(term)));
+                (j.User.PhoneNumber != null && j.User.PhoneNumber.Contains(term)));
         }
 
         var totalCount = await query.CountAsync(cancellationToken);
@@ -137,7 +137,7 @@ public class AdminUserManagementService : IAdminUserManagementService
                 UserId = j.UserId,
                 Name = j.Name,
                 Email = j.User.Email,
-                Phone = j.Phone,
+                Phone = j.User.PhoneNumber,
                 ProfileImage = j.ProfileImage,
                 Status = j.Status,
                 EmailVerified = j.EmailVerifiedAt != null,
@@ -274,7 +274,7 @@ public class AdminUserManagementService : IAdminUserManagementService
         UserId = employer.UserId,
         Name = employer.Name,
         Email = employer.GetEmail(),
-        Phone = employer.Phone,
+        Phone = employer.GetPhone(),
         Image = employer.Image,
         Status = employer.Status,
         EmailVerified = employer.EmailVerifiedAt != null,
@@ -293,7 +293,7 @@ public class AdminUserManagementService : IAdminUserManagementService
         UserId = jobSeeker.UserId,
         Name = jobSeeker.Name,
         Email = jobSeeker.GetEmail(),
-        Phone = jobSeeker.Phone,
+        Phone = jobSeeker.GetPhone(),
         ProfileImage = jobSeeker.ProfileImage,
         Status = jobSeeker.Status,
         EmailVerified = jobSeeker.EmailVerifiedAt != null,

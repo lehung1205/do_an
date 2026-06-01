@@ -135,16 +135,7 @@
                         <dt class="col-5 text-muted">Ngân hàng</dt>
                         <dd class="col-7 mb-2">@AccountPanelViewModel.DashIfEmpty(Model.Profile.BankName)</dd>
                         <dt class="col-5 text-muted">Số tài khoản</dt>
-                        <dd class="col-7 mb-2">@AccountPanelViewModel.DashIfEmpty(Model.Profile.BankAccountNumber)</dd>
-                        <dt class="col-5 text-muted">Số điện thoại</dt>
-                        <dd class="col-7 mb-2">@AccountPanelViewModel.DashIfEmpty(Model.Profile.ProfilePhone)</dd>
-                    }
-                    @if (!string.IsNullOrWhiteSpace(Model.Profile.ProfilePhone)
-                        && !Model.IsAdmin
-                        && !string.Equals(Model.Profile.PhoneNumber, Model.Profile.ProfilePhone, StringComparison.Ordinal))
-                    {
-                        <dt class="col-5 text-muted">SĐT trên hồ sơ</dt>
-                        <dd class="col-7 mb-0">@Model.Profile.ProfilePhone</dd>
+                        <dd class="col-7 mb-0">@AccountPanelViewModel.DashIfEmpty(Model.Profile.BankAccountNumber)</dd>
                     }
                 </dl>
                 <button type="button" class="btn btn-primary btn-sm mt-3" data-account-switch-tab="edit">

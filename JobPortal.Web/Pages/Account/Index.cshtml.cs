@@ -374,7 +374,7 @@ public class IndexModel : PageModel
     public static EditInputModel CreateEditInputFromProfile(ProfileResponse profile) => new()
     {
         Name = profile.Name,
-        PhoneNumber = profile.PhoneNumber ?? profile.ProfilePhone,
+        PhoneNumber = profile.PhoneNumber,
         DateOfBirth = profile.DateOfBirth,
         Gender = profile.Gender,
         Description = profile.Description,

@@ -66,7 +66,6 @@ public class JobSeekerService : IJobSeekerService
         var jobSeeker = new JobSeeker
         {
             Name = dto.Name.Trim(),
-            Phone = dto.Phone?.Trim(),
             DateOfBirth = dto.DateOfBirth,
             Gender = dto.Gender,
             Description = dto.Description?.Trim(),
@@ -101,8 +100,7 @@ public class JobSeekerService : IJobSeekerService
         if (!string.IsNullOrWhiteSpace(dto.Email)) user.Email = dto.Email.Trim().ToLowerInvariant();
         if (dto.Phone != null)
         {
-            jobSeeker.Phone = string.IsNullOrWhiteSpace(dto.Phone) ? null : dto.Phone.Trim();
-            user.PhoneNumber = jobSeeker.Phone;
+            user.PhoneNumber = string.IsNullOrWhiteSpace(dto.Phone) ? null : dto.Phone.Trim();
         }
 
         if (dto.EmailVerifiedAt.HasValue) jobSeeker.EmailVerifiedAt = dto.EmailVerifiedAt;

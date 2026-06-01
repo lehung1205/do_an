@@ -66,7 +66,6 @@ public class AdminService : IAdminService
         var admin = new Admin
         {
             Name = dto.Name.Trim(),
-            Phone = dto.Phone?.Trim(),
             AccountNumber = dto.AccountNumber?.Trim(),
             BankName = dto.BankName?.Trim(),
             Status = status,
@@ -100,8 +99,7 @@ public class AdminService : IAdminService
 
         if (dto.Phone != null)
         {
-            admin.Phone = string.IsNullOrWhiteSpace(dto.Phone) ? null : dto.Phone.Trim();
-            user.PhoneNumber = admin.Phone;
+            user.PhoneNumber = string.IsNullOrWhiteSpace(dto.Phone) ? null : dto.Phone.Trim();
         }
 
         if (dto.AccountNumber != null)

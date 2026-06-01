@@ -38,10 +38,6 @@ public class Employer
     [MaxLength(20)]
     public string? IdCard { get; set; }
 
-    [Column("phone")]
-    [MaxLength(20)]
-    public string? Phone { get; set; }
-
     [Column("status")]
     [MaxLength(32)]
     public string Status { get; set; } = null!;

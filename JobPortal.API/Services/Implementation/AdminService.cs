@@ -54,7 +54,6 @@ public class AdminService : IAdminService
 
         var user = new User
         {
-            Name = dto.Name.Trim(),
             Email = normalizedEmail,
             PhoneNumber = dto.Phone?.Trim(),
             PasswordHash = passwordHash,
@@ -66,14 +65,11 @@ public class AdminService : IAdminService
 
         var admin = new Admin
         {
-            Name = user.Name,
-            Email = user.Email,
-            Phone = user.PhoneNumber,
-            PasswordHash = passwordHash,
+            Name = dto.Name.Trim(),
+            Phone = dto.Phone?.Trim(),
             AccountNumber = dto.AccountNumber?.Trim(),
             BankName = dto.BankName?.Trim(),
             Status = status,
-            Role = "ADMIN",
             CreatedAt = now,
             UpdatedAt = now
         };
@@ -99,12 +95,13 @@ public class AdminService : IAdminService
 
         if (!string.IsNullOrWhiteSpace(dto.Email))
         {
-            admin.Email = dto.Email.Trim().ToLowerInvariant();
+            user.Email = dto.Email.Trim().ToLowerInvariant();
         }
 
         if (dto.Phone != null)
         {
             admin.Phone = string.IsNullOrWhiteSpace(dto.Phone) ? null : dto.Phone.Trim();
+            user.PhoneNumber = admin.Phone;
         }
 
         if (dto.AccountNumber != null)
@@ -124,15 +121,10 @@ public class AdminService : IAdminService
 
         if (!string.IsNullOrWhiteSpace(dto.Role))
         {
-            admin.Role = dto.Role.Trim().ToUpperInvariant();
+            user.Role = dto.Role.Trim().ToUpperInvariant();
         }
 
         admin.UpdatedAt = DateTime.UtcNow;
-
-        user.Name = admin.Name;
-        user.Email = admin.Email;
-        user.PhoneNumber = admin.Phone;
-        user.Role = admin.Role;
         user.IsActive = admin.Status == "ACTIVE";
         user.UpdatedAt = admin.UpdatedAt;
 

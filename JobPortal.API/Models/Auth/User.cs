@@ -13,11 +13,6 @@ public class User
 
     [Required]
     [MaxLength(255)]
-    [Column("name")]
-    public string Name { get; set; } = string.Empty;
-
-    [Required]
-    [MaxLength(255)]
     [Column("email")]
     public string Email { get; set; } = string.Empty;
 
@@ -25,19 +20,15 @@ public class User
     [Column("phone_number")]
     public string? PhoneNumber { get; set; }
 
+    [Required]
     [MaxLength(500)]
-    [Column("profile_image")]
-    public string? ProfileImage { get; set; }
+    [Column("password_hash")]
+    public string PasswordHash { get; set; } = string.Empty;
 
     [Required]
     [MaxLength(32)]
     [Column("role")]
     public string Role { get; set; } = string.Empty;
-
-    [Required]
-    [MaxLength(500)]
-    [Column("password_hash")]
-    public string PasswordHash { get; set; } = string.Empty;
 
     [MaxLength(500)]
     [Column("password_reset_token_hash")]

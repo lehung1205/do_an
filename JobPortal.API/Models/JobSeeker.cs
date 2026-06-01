@@ -15,16 +15,8 @@ public class JobSeeker
     [MaxLength(255)]
     public string Name { get; set; } = null!;
 
-    [Column("email")]
-    [MaxLength(255)]
-    public string Email { get; set; } = null!;
-
     [Column("email_verified_at")]
     public DateTime? EmailVerifiedAt { get; set; }
-
-    [Column("password_hash")]
-    [MaxLength(500)]
-    public string PasswordHash { get; set; } = null!;
 
     [Column("phone")]
     [MaxLength(20)]
@@ -75,14 +67,10 @@ public class JobSeeker
     [MaxLength(32)]
     public string Status { get; set; } = null!;
 
-    [Column("role")]
-    [MaxLength(32)]
-    public string Role { get; set; } = "JOB_SEEKER";
-
     [Column("user_id")]
     public long UserId { get; set; }
 
-    public User? User { get; set; }
+    public User User { get; set; } = null!;
 
     [Column("created_at")]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

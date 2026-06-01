@@ -1,4 +1,5 @@
 using JobPortal.API.Data;
+using JobPortal.API.Helpers;
 using JobPortal.API.DTOs;
 using JobPortal.API.DTOs.Common;
 using JobPortal.API.Exceptions;
@@ -219,6 +220,11 @@ public class ChatService : IChatService
         var query = _context.ChatMessages
             .AsNoTracking()
             .Include(m => m.Sender)
+                .ThenInclude(u => u!.JobSeekerProfile)
+            .Include(m => m.Sender)
+                .ThenInclude(u => u!.EmployerProfile)
+            .Include(m => m.Sender)
+                .ThenInclude(u => u!.AdminProfile)
             .Where(m => appIds.Contains(m.ApplicationId))
             .OrderByDescending(m => m.SentAt);
 
@@ -284,7 +290,13 @@ public class ChatService : IChatService
         _context.ChatMessages.Add(entity);
         await _context.SaveChangesAsync(cancellationToken);
 
-        await _context.Entry(entity).Reference(m => m.Sender).LoadAsync(cancellationToken);
+        await _context.Entry(entity)
+            .Reference(m => m.Sender)
+            .Query()
+            .Include(u => u.JobSeekerProfile)
+            .Include(u => u.EmployerProfile)
+            .Include(u => u.AdminProfile)
+            .LoadAsync(cancellationToken);
 
         return MapMessage(entity, userId);
     }
@@ -549,7 +561,7 @@ public class ChatService : IChatService
         Id = message.Id,
         ApplicationId = message.ApplicationId,
         SenderUserId = message.SenderUserId,
-        SenderName = message.Sender.Name,
+        SenderName = message.Sender.GetDisplayName(),
         Content = message.Content,
         SentAt = message.SentAt,
         ReadAt = message.ReadAt,

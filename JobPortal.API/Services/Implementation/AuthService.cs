@@ -2,6 +2,7 @@ using System.Security.Cryptography;
 using System.Text;
 using JobPortal.API.Configurations;
 using JobPortal.API.Data;
+using JobPortal.API.Helpers;
 using JobPortal.API.DTOs.Auth;
 using JobPortal.API.Exceptions;
 using JobPortal.API.Models;
@@ -352,14 +353,14 @@ public sealed class AuthService : IAuthService
         }
 
         var now = DateTime.UtcNow;
-        user.Name = request.Name.Trim();
+        var name = request.Name.Trim();
         user.PhoneNumber = phone;
         user.UpdatedAt = now;
 
         if (user.JobSeekerProfile != null)
         {
             var j = user.JobSeekerProfile;
-            j.Name = user.Name;
+            j.Name = name;
             j.Phone = phone;
             j.DateOfBirth = request.DateOfBirth;
             j.Gender = request.Gender;
@@ -376,7 +377,7 @@ public sealed class AuthService : IAuthService
         else if (user.EmployerProfile != null)
         {
             var e = user.EmployerProfile;
-            e.Name = user.Name;
+            e.Name = name;
             e.Phone = phone;
             e.DateOfBirth = request.DateOfBirth;
             e.Gender = request.Gender;
@@ -387,7 +388,7 @@ public sealed class AuthService : IAuthService
         else if (user.AdminProfile != null)
         {
             var a = user.AdminProfile;
-            a.Name = user.Name;
+            a.Name = name;
             a.Phone = phone;
             a.BankName = TrimOrNull(request.BankName);
             a.AccountNumber = TrimOrNull(request.BankAccountNumber);
@@ -402,7 +403,6 @@ public sealed class AuthService : IAuthService
                 throw new BadRequestException("Profile image URL is too long.");
             }
 
-            user.ProfileImage = imageUrl;
             if (user.JobSeekerProfile != null)
             {
                 user.JobSeekerProfile.ProfileImage = imageUrl;
@@ -478,16 +478,14 @@ public sealed class AuthService : IAuthService
         var profile = new ProfileResponse
         {
             Id = user.Id,
-            Name = user.Name,
+            Name = user.GetDisplayName(),
             Email = user.Email,
             PhoneNumber = user.PhoneNumber,
             Role = user.Role,
             JobSeekerId = user.JobSeekerProfile?.Id,
             EmployerId = user.EmployerProfile?.Id,
             AdminId = user.AdminProfile?.Id,
-            ProfileImage = user.ProfileImage
-                ?? user.JobSeekerProfile?.ProfileImage
-                ?? user.EmployerProfile?.Image,
+            ProfileImage = user.GetProfileImageUrl(),
             CreatedAt = user.CreatedAt,
             UpdatedAt = user.UpdatedAt
         };
@@ -575,7 +573,6 @@ public sealed class AuthService : IAuthService
 
         var authUser = new User
         {
-            Name = pending.Name,
             Email = pending.Email,
             PhoneNumber = pending.PhoneNumber,
             PasswordHash = pending.PasswordHash,
@@ -592,12 +589,9 @@ public sealed class AuthService : IAuthService
         {
             await _authRepository.AddEmployerAsync(new Employer
             {
-                Name = authUser.Name,
-                Email = authUser.Email,
-                Phone = authUser.PhoneNumber,
-                PasswordHash = authUser.PasswordHash,
+                Name = pending.Name,
+                Phone = pending.PhoneNumber,
                 Status = "ACTIVE",
-                Role = pending.Role,
                 PostingLimit = 1,
                 UserId = authUser.Id,
                 EmailVerifiedAt = verifiedAt,
@@ -609,12 +603,9 @@ public sealed class AuthService : IAuthService
         {
             await _authRepository.AddJobSeekerAsync(new JobSeeker
             {
-                Name = authUser.Name,
-                Email = authUser.Email,
-                Phone = authUser.PhoneNumber,
-                PasswordHash = authUser.PasswordHash,
+                Name = pending.Name,
+                Phone = pending.PhoneNumber,
                 Status = "ACTIVE",
-                Role = pending.Role,
                 UserId = authUser.Id,
                 EmailVerifiedAt = verifiedAt,
                 CreatedAt = now,

@@ -444,7 +444,7 @@ public class EmployerDashboardService : IEmployerDashboardService
 
         var application = await _context.Applications
             .AsNoTracking()
-            .Include(a => a.JobSeeker)
+            .Include(a => a.JobSeeker).ThenInclude(js => js.User)
             .Include(a => a.Job)
             .Include(a => a.Resume)
             .FirstOrDefaultAsync(
@@ -484,7 +484,7 @@ public class EmployerDashboardService : IEmployerDashboardService
             ApplicationId = application.Id,
             Name = seeker.Name,
             ProfileImage = seeker.ProfileImage,
-            Email = seeker.Email,
+            Email = seeker.User.Email,
             Phone = seeker.Phone,
             DateOfBirth = seeker.DateOfBirth,
             Gender = seeker.Gender,
@@ -521,7 +521,7 @@ public class EmployerDashboardService : IEmployerDashboardService
         }
 
         var application = await _context.Applications
-            .Include(a => a.JobSeeker)
+            .Include(a => a.JobSeeker).ThenInclude(js => js.User)
             .Include(a => a.Job).ThenInclude(j => j.Employer)
             .Include(a => a.Job).ThenInclude(j => j.Category)
             .Include(a => a.Job).ThenInclude(j => j.Images)
@@ -739,7 +739,7 @@ public class EmployerDashboardService : IEmployerDashboardService
             JobId = application.JobId,
             ApplicantName = application.JobSeeker.Name,
             ApplicantProfileImage = application.JobSeeker.ProfileImage,
-            ApplicantEmail = application.JobSeeker.Email,
+            ApplicantEmail = application.JobSeeker.User.Email,
             ApplicantPhone = application.JobSeeker.Phone,
             JobTitle = application.Job.Title,
             AppliedAt = application.AppliedAt,
@@ -843,7 +843,7 @@ public class EmployerDashboardService : IEmployerDashboardService
         var application = await _context.Applications
             .AsNoTracking()
             .Include(a => a.Job)
-            .Include(a => a.JobSeeker)
+            .Include(a => a.JobSeeker).ThenInclude(js => js.User)
             .FirstOrDefaultAsync(
                 a => a.Id == applicationId && a.Job.EmployerId == employerId,
                 cancellationToken);
@@ -883,7 +883,7 @@ public class EmployerDashboardService : IEmployerDashboardService
             AppliedAt = application.AppliedAt,
             Status = application.Status,
             ApplicantName = application.JobSeeker.Name,
-            ApplicantEmail = application.JobSeeker.Email,
+            ApplicantEmail = application.JobSeeker.User.Email,
             ApplicantPhone = application.JobSeeker.Phone,
             ApplicantProfileImage = application.JobSeeker.ProfileImage,
             JobTitle = job.Title,
@@ -1074,7 +1074,7 @@ public class EmployerDashboardService : IEmployerDashboardService
                 AppliedAt = a.AppliedAt,
                 Status = a.Status,
                 ApplicantName = a.JobSeeker.Name,
-                ApplicantEmail = a.JobSeeker.Email,
+                ApplicantEmail = a.JobSeeker.User.Email,
                 ApplicantPhone = a.JobSeeker.Phone,
                 ApplicantProfileImage = a.JobSeeker.ProfileImage,
                 JobTitle = a.Job.Title,

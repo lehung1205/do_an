@@ -18,13 +18,16 @@ public class AdminRepository : IAdminRepository
     {
         return await _context.Admins
             .AsNoTracking()
+            .Include(a => a.User)
             .OrderByDescending(a => a.Id)
             .ToListAsync(cancellationToken);
     }
 
     public async Task<Admin?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
     {
-        return await _context.Admins.FindAsync([id], cancellationToken);
+        return await _context.Admins
+            .Include(a => a.User)
+            .FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
     }
 
     public async Task<Admin?> GetByIdWithUserAsync(long id, CancellationToken cancellationToken = default)

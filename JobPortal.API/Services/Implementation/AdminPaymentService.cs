@@ -133,7 +133,7 @@ public class AdminPaymentService : IAdminPaymentService
             query = query.Where(p =>
                 p.OrderId.Contains(term) ||
                 p.Employer.Name.Contains(term) ||
-                p.Employer.Email.Contains(term) ||
+                p.Employer.User.Email.Contains(term) ||
                 (p.PackageNameSnapshot != null && p.PackageNameSnapshot.Contains(term)) ||
                 (p.ProviderTransactionId != null && p.ProviderTransactionId.Contains(term)) ||
                 (p.TransactionCode != null && p.TransactionCode.Contains(term)));
@@ -163,7 +163,7 @@ public class AdminPaymentService : IAdminPaymentService
                 Id = p.Id,
                 EmployerId = p.EmployerId,
                 EmployerName = p.Employer.Name,
-                EmployerEmail = p.Employer.Email,
+                EmployerEmail = p.Employer.User.Email,
                 PackageName = p.PackageNameSnapshot ?? p.PostingPackage.Name,
                 Amount = p.Amount,
                 Currency = p.Currency,
@@ -263,7 +263,7 @@ public class AdminPaymentService : IAdminPaymentService
 
                         Row("Mã đơn hàng", payment.OrderId);
                         Row("Nhà tuyển dụng", payment.Employer.Name);
-                        Row("Email", payment.Employer.Email);
+                        Row("Email", payment.Employer.User.Email);
                         Row("Gói dịch vụ", packageName);
                         Row("Số lượt đăng", postingLimit.ToString(CultureInfo.InvariantCulture));
                         Row("Nhà cung cấp", payment.PaymentProvider ?? "VNPay");
@@ -324,7 +324,7 @@ public class AdminPaymentService : IAdminPaymentService
             {
                 p.OrderId,
                 EmployerName = p.Employer.Name,
-                EmployerEmail = p.Employer.Email,
+                EmployerEmail = p.Employer.User.Email,
                 PackageName = p.PackageNameSnapshot ?? p.PostingPackage.Name,
                 p.Amount,
                 p.Currency,

@@ -54,7 +54,6 @@ public class JobSeekerService : IJobSeekerService
 
         var user = new User
         {
-            Name = dto.Name.Trim(),
             Email = normalizedEmail,
             PhoneNumber = dto.Phone?.Trim(),
             PasswordHash = passwordHash,
@@ -66,10 +65,8 @@ public class JobSeekerService : IJobSeekerService
 
         var jobSeeker = new JobSeeker
         {
-            Name = user.Name,
-            Email = user.Email,
-            Phone = user.PhoneNumber,
-            PasswordHash = passwordHash,
+            Name = dto.Name.Trim(),
+            Phone = dto.Phone?.Trim(),
             DateOfBirth = dto.DateOfBirth,
             Gender = dto.Gender,
             Description = dto.Description?.Trim(),
@@ -82,7 +79,6 @@ public class JobSeekerService : IJobSeekerService
             AccountNumber = dto.AccountNumber?.Trim(),
             BankName = dto.BankName?.Trim(),
             Status = status,
-            Role = "JOB_SEEKER",
             CreatedAt = now,
             UpdatedAt = now
         };
@@ -102,8 +98,13 @@ public class JobSeekerService : IJobSeekerService
         var user = jobSeeker.User ?? throw new NotFoundException($"User linked to job seeker {id} was not found.");
 
         if (!string.IsNullOrWhiteSpace(dto.Name)) jobSeeker.Name = dto.Name.Trim();
-        if (!string.IsNullOrWhiteSpace(dto.Email)) jobSeeker.Email = dto.Email.Trim().ToLowerInvariant();
-        if (dto.Phone != null) jobSeeker.Phone = string.IsNullOrWhiteSpace(dto.Phone) ? null : dto.Phone.Trim();
+        if (!string.IsNullOrWhiteSpace(dto.Email)) user.Email = dto.Email.Trim().ToLowerInvariant();
+        if (dto.Phone != null)
+        {
+            jobSeeker.Phone = string.IsNullOrWhiteSpace(dto.Phone) ? null : dto.Phone.Trim();
+            user.PhoneNumber = jobSeeker.Phone;
+        }
+
         if (dto.EmailVerifiedAt.HasValue) jobSeeker.EmailVerifiedAt = dto.EmailVerifiedAt;
         if (dto.DateOfBirth.HasValue) jobSeeker.DateOfBirth = dto.DateOfBirth;
         if (dto.Gender.HasValue) jobSeeker.Gender = dto.Gender;
@@ -117,14 +118,9 @@ public class JobSeekerService : IJobSeekerService
         if (dto.AccountNumber != null) jobSeeker.AccountNumber = string.IsNullOrWhiteSpace(dto.AccountNumber) ? null : dto.AccountNumber.Trim();
         if (dto.BankName != null) jobSeeker.BankName = string.IsNullOrWhiteSpace(dto.BankName) ? null : dto.BankName.Trim();
         if (!string.IsNullOrWhiteSpace(dto.Status)) jobSeeker.Status = dto.Status.Trim().ToUpperInvariant();
-        if (!string.IsNullOrWhiteSpace(dto.Role)) jobSeeker.Role = dto.Role.Trim().ToUpperInvariant();
+        if (!string.IsNullOrWhiteSpace(dto.Role)) user.Role = dto.Role.Trim().ToUpperInvariant();
 
         jobSeeker.UpdatedAt = DateTime.UtcNow;
-
-        user.Name = jobSeeker.Name;
-        user.Email = jobSeeker.Email;
-        user.PhoneNumber = jobSeeker.Phone;
-        user.Role = jobSeeker.Role;
         user.IsActive = jobSeeker.Status == "ACTIVE";
         user.UpdatedAt = jobSeeker.UpdatedAt;
 

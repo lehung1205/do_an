@@ -39,6 +39,10 @@ public class PostJobModel : PageModel
 
     public string? SuccessMessage { get; set; }
 
+    public string ExpiryDateMin => DateTime.UtcNow.ToString("yyyy-MM-dd");
+
+    public string ExpiryDateMax => DateTime.UtcNow.AddMonths(JobExpiryRules.MaxExpiryMonths).ToString("yyyy-MM-dd");
+
     public async Task<IActionResult> OnGetAsync()
     {
         var redirect = RequireEmployerLogin();
@@ -49,6 +53,7 @@ public class PostJobModel : PageModel
 
         Categories = CategoryDisplayOrder.SortOtherLast(
             await _api.GetApiDataAsync<List<CategoryDto>>("/api/categories") ?? new());
+        Input.ExpiryDate = JobExpiryRules.DefaultExpiryDateForForm();
         SuccessMessage = TempData["PostJobSuccessMessage"] as string;
         return Page();
     }
@@ -85,7 +90,6 @@ public class PostJobModel : PageModel
             return Page();
         }
 
-        var now = DateTime.UtcNow;
         var request = new CreateJobRequest
         {
             EmployerId = employerId,
@@ -96,7 +100,7 @@ public class PostJobModel : PageModel
             Location = Input.Location.Trim(),
             PostingStatus = "pending",
             WorkingHours = string.IsNullOrWhiteSpace(Input.WorkingHours) ? null : Input.WorkingHours.Trim(),
-            ExpiryDate = now.AddMonths(2)
+            ExpiryDate = JobExpiryRules.NormalizeExpiryDateUtc(Input.ExpiryDate)
         };
 
         var response = await _api.PostApiResponseAsync<CreateJobRequest, JobDto>("/api/jobs", request);
@@ -259,6 +263,12 @@ public class PostJobModel : PageModel
             return "Thời gian làm việc không quá 50 ký tự.";
         }
 
+        var expiryError = JobExpiryRules.ValidateExpiryDate(input.ExpiryDate);
+        if (expiryError != null)
+        {
+            return expiryError;
+        }
+
         return null;
     }
 
@@ -300,5 +310,8 @@ public class PostJobModel : PageModel
         public string Location { get; set; } = string.Empty;
 
         public string? WorkingHours { get; set; }
+
+        [System.ComponentModel.DataAnnotations.DataType(System.ComponentModel.DataAnnotations.DataType.Date)]
+        public DateTime ExpiryDate { get; set; }
     }
 }

@@ -2,6 +2,7 @@ using JobPortal.API.Data;
 using JobPortal.API.DTOs;
 using JobPortal.API.DTOs.Common;
 using JobPortal.API.Exceptions;
+using JobPortal.API.Helpers;
 using JobPortal.API.Services.Interface;
 using System.Globalization;
 using System.Text;
@@ -194,6 +195,7 @@ public class AdminPaymentService : IAdminPaymentService
         var payment = await _context.PaymentHistories
             .AsNoTracking()
             .Include(p => p.Employer)
+                .ThenInclude(e => e.User)
             .Include(p => p.PostingPackage)
             .FirstOrDefaultAsync(p => p.Id == paymentId, cancellationToken);
 
@@ -205,8 +207,13 @@ public class AdminPaymentService : IAdminPaymentService
         QuestPDF.Settings.License = LicenseType.Community;
 
         var paidAt = payment.PaymentDate ?? payment.CreatedAt;
-        var packageName = payment.PackageNameSnapshot ?? payment.PostingPackage.Name;
-        var postingLimit = payment.PostingLimitSnapshot ?? payment.PostingPackage.PostingLimit;
+        var packageName = payment.PackageNameSnapshot
+            ?? payment.PostingPackage?.Name
+            ?? "Gói dịch vụ";
+        var postingLimit = payment.PostingLimitSnapshot
+            ?? payment.PostingPackage?.PostingLimit
+            ?? 0;
+        var employerEmail = payment.Employer.GetEmail();
         var amountText = payment.Amount.ToString("N0", CultureInfo.GetCultureInfo("vi-VN"));
         var transactionRef = payment.ProviderTransactionId ?? payment.TransactionCode ?? "N/A";
         var invoiceCode = $"INV-{payment.Id:000000}";
@@ -263,7 +270,7 @@ public class AdminPaymentService : IAdminPaymentService
 
                         Row("Mã đơn hàng", payment.OrderId);
                         Row("Nhà tuyển dụng", payment.Employer.Name);
-                        Row("Email", payment.Employer.User.Email);
+                        Row("Email", string.IsNullOrWhiteSpace(employerEmail) ? "—" : employerEmail);
                         Row("Gói dịch vụ", packageName);
                         Row("Số lượt đăng", postingLimit.ToString(CultureInfo.InvariantCulture));
                         Row("Nhà cung cấp", payment.PaymentProvider ?? "VNPay");
@@ -302,6 +309,7 @@ public class AdminPaymentService : IAdminPaymentService
         var query = _context.PaymentHistories
             .AsNoTracking()
             .Include(p => p.Employer)
+                .ThenInclude(e => e.User)
             .Include(p => p.PostingPackage)
             .Where(p => p.Status.ToLower() == "paid");
 
@@ -324,8 +332,8 @@ public class AdminPaymentService : IAdminPaymentService
             {
                 p.OrderId,
                 EmployerName = p.Employer.Name,
-                EmployerEmail = p.Employer.User.Email,
-                PackageName = p.PackageNameSnapshot ?? p.PostingPackage.Name,
+                EmployerEmail = p.Employer.User != null ? p.Employer.User.Email : string.Empty,
+                PackageName = p.PackageNameSnapshot ?? (p.PostingPackage != null ? p.PostingPackage.Name : "Gói dịch vụ"),
                 p.Amount,
                 p.Currency,
                 PaidAt = p.PaymentDate ?? p.CreatedAt,

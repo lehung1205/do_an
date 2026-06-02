@@ -243,7 +243,10 @@ public class JobService : IJobService
         employer.PostingLimit--;
         employer.UpdatedAt = DateTime.UtcNow;
 
+        JobExpiryRules.ValidateExpiryDateUtc(request.ExpiryDate);
+
         var entity = _mapper.Map<Job>(request);
+        entity.ExpiryDate = JobExpiryRules.NormalizeExpiryDateUtc(request.ExpiryDate);
         entity.PostingStatus = JobPostingCatalog.Pending;
         entity.CreatedAt = DateTime.UtcNow;
         await _repository.AddAsync(entity, cancellationToken);

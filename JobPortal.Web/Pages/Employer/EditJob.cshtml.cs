@@ -1,15 +1,13 @@
 using JobPortal.Web.Dtos;
-using JobPortal.Web.Dtos.Auth;
 using JobPortal.Web.Helpers;
 using JobPortal.Web.Services;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace JobPortal.Web.Pages.Employer;
 
-public class PostJobModel : PageModel
+public class EditJobModel : PageModel
 {
     private const int MaxImageFiles = 8;
     private const long MaxImageBytes = 5 * 1024 * 1024;
@@ -21,11 +19,14 @@ public class PostJobModel : PageModel
     private readonly ApiService _api;
     private readonly IWebHostEnvironment _env;
 
-    public PostJobModel(ApiService api, IWebHostEnvironment env)
+    public EditJobModel(ApiService api, IWebHostEnvironment env)
     {
         _api = api;
         _env = env;
     }
+
+    [BindProperty(SupportsGet = true)]
+    public long Id { get; set; }
 
     [BindProperty]
     public JobPostInput Input { get; set; } = new();
@@ -34,6 +35,12 @@ public class PostJobModel : PageModel
     public List<IFormFile> JobImages { get; set; } = new();
 
     public List<CategoryDto> Categories { get; set; } = new();
+
+    public IReadOnlyList<ImageDto> ExistingImages { get; set; } = Array.Empty<ImageDto>();
+
+    public string PostingStatus { get; set; } = string.Empty;
+
+    public bool CanEdit { get; set; } = true;
 
     public string? ErrorMessage { get; set; }
 
@@ -51,11 +58,7 @@ public class PostJobModel : PageModel
             return redirect;
         }
 
-        Categories = CategoryDisplayOrder.SortOtherLast(
-            await _api.GetApiDataAsync<List<CategoryDto>>("/api/categories") ?? new());
-        Input.ExpiryDate = JobExpiryRules.DefaultExpiryDateForForm();
-        SuccessMessage = TempData["PostJobSuccessMessage"] as string;
-        return Page();
+        return await LoadPageAsync();
     }
 
     public async Task<IActionResult> OnPostAsync()
@@ -66,13 +69,17 @@ public class PostJobModel : PageModel
             return redirect;
         }
 
+        if (!await TryLoadJobMetadataAsync(populateInput: false))
+        {
+            return RedirectToPage("/Employer/Jobs");
+        }
+
         Categories = CategoryDisplayOrder.SortOtherLast(
             await _api.GetApiDataAsync<List<CategoryDto>>("/api/categories") ?? new());
 
-        var profile = await _api.GetApiDataAsync<ProfileResponse>("/api/auth/me");
-        if (profile?.EmployerId is not long employerId)
+        if (!CanEdit)
         {
-            ErrorMessage = "Không tìm thấy thông tin nhà tuyển dụng. Vui lòng đăng nhập lại.";
+            ErrorMessage = "Tin đã đóng hoặc hết hạn, không thể chỉnh sửa.";
             return Page();
         }
 
@@ -83,43 +90,89 @@ public class PostJobModel : PageModel
             return Page();
         }
 
-        var imageInputError = ValidateJobImages(JobImages);
+        var imageInputError = ValidateJobImages(JobImages, ExistingImages.Count);
         if (imageInputError != null)
         {
             ErrorMessage = imageInputError;
             return Page();
         }
 
-        var request = new CreateJobRequest
+        var request = new UpdateEmployerJobRequest
         {
-            EmployerId = employerId,
             CategoryId = Input.CategoryId,
             Title = Input.Title.Trim(),
             Description = Input.Description.Trim(),
             Salary = Input.Salary.Trim(),
             Location = Input.Location.Trim(),
-            PostingStatus = "pending",
             WorkingHours = string.IsNullOrWhiteSpace(Input.WorkingHours) ? null : Input.WorkingHours.Trim(),
             ExpiryDate = JobExpiryRules.NormalizeExpiryDateUtc(Input.ExpiryDate)
         };
 
-        var response = await _api.PostApiResponseAsync<CreateJobRequest, JobDto>("/api/jobs", request);
-        if (response is not { Success: true, Data: not null })
+        var response = await _api.PutApiResponseAsync<UpdateEmployerJobRequest, EmployerJobEditDto>(
+            $"/api/employers/me/jobs/{Id}",
+            request);
+
+        if (response is not { Success: true })
         {
             ErrorMessage = response?.Message
                 ?? response?.Errors.FirstOrDefault()?.Message
-                ?? "Đăng tin thất bại.";
+                ?? "Cập nhật tin thất bại.";
             return Page();
         }
 
-        var newJobId = response.Data.Id;
-        var imageNotes = await SaveJobImagesAndRegisterAsync(newJobId);
+        var imageNotes = await SaveJobImagesAndRegisterAsync(Id);
+        var wasRejected = string.Equals(PostingStatus, "rejected", StringComparison.OrdinalIgnoreCase);
 
-        TempData["PostJobSuccessMessage"] = string.IsNullOrEmpty(imageNotes)
-            ? "Đã gửi tin tuyển dụng. Tin chờ admin duyệt (tối đa 24 giờ, sau đó tự hiển thị)."
-            : $"Đã gửi tin (chờ duyệt, tối đa 24 giờ). {imageNotes}";
+        TempData["EditJobSuccessMessage"] = string.IsNullOrEmpty(imageNotes)
+            ? wasRejected
+                ? "Đã lưu tin. Tin chờ admin duyệt lại."
+                : "Đã lưu thay đổi."
+            : $"Đã lưu thay đổi. {imageNotes}";
 
-        return RedirectToPage();
+        return RedirectToPage(new { id = Id });
+    }
+
+    private async Task<IActionResult> LoadPageAsync()
+    {
+        Categories = CategoryDisplayOrder.SortOtherLast(
+            await _api.GetApiDataAsync<List<CategoryDto>>("/api/categories") ?? new());
+
+        if (!await TryLoadJobMetadataAsync(populateInput: true))
+        {
+            return RedirectToPage("/Employer/Jobs");
+        }
+
+        SuccessMessage = TempData["EditJobSuccessMessage"] as string;
+        return Page();
+    }
+
+    private async Task<bool> TryLoadJobMetadataAsync(bool populateInput)
+    {
+        var job = await _api.GetApiDataAsync<EmployerJobEditDto>($"/api/employers/me/jobs/{Id}");
+        if (job == null)
+        {
+            return false;
+        }
+
+        CanEdit = job.CanEdit;
+        PostingStatus = job.PostingStatus;
+        ExistingImages = job.Images;
+
+        if (populateInput)
+        {
+            Input = new JobPostInput
+            {
+                Title = job.Title,
+                Description = job.Description,
+                CategoryId = job.CategoryId,
+                Salary = job.Salary,
+                Location = job.Location,
+                WorkingHours = job.WorkingHours,
+                ExpiryDate = job.ExpiryDate.Date
+            };
+        }
+
+        return true;
     }
 
     private async Task<string> SaveJobImagesAndRegisterAsync(long jobId)
@@ -272,12 +325,12 @@ public class PostJobModel : PageModel
         return null;
     }
 
-    private static string? ValidateJobImages(IReadOnlyList<IFormFile> files)
+    private static string? ValidateJobImages(IReadOnlyList<IFormFile> files, int existingImageCount)
     {
         var nonEmpty = files.Where(f => f.Length > 0).ToList();
-        if (nonEmpty.Count > MaxImageFiles)
+        if (existingImageCount + nonEmpty.Count > MaxImageFiles)
         {
-            return $"Tối đa {MaxImageFiles} ảnh đính kèm.";
+            return $"Tối đa {MaxImageFiles} ảnh cho mỗi tin (đã có {existingImageCount} ảnh).";
         }
 
         foreach (var file in nonEmpty)

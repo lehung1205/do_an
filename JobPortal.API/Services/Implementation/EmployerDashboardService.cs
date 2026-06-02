@@ -364,6 +364,170 @@ public class EmployerDashboardService : IEmployerDashboardService
         return MapJobDto(ToJobRow(job), employerRating);
     }
 
+    public async Task<EmployerJobEditDto> GetJobForEditForUserAsync(
+        long userId,
+        long jobId,
+        CancellationToken cancellationToken = default)
+    {
+        await _jobExpiryService.CloseExpiredJobsAsync(cancellationToken);
+
+        var employer = await _context.Employers
+            .AsNoTracking()
+            .FirstOrDefaultAsync(e => e.UserId == userId, cancellationToken);
+
+        if (employer == null)
+        {
+            throw new NotFoundException("Employer profile not found for this user.");
+        }
+
+        var job = await _context.Jobs
+            .AsNoTracking()
+            .Include(j => j.Images)
+            .FirstOrDefaultAsync(j => j.Id == jobId && j.EmployerId == employer.Id, cancellationToken);
+
+        if (job == null)
+        {
+            throw new NotFoundException($"Job with id {jobId} was not found.");
+        }
+
+        return MapJobEditDto(job);
+    }
+
+    public async Task<EmployerJobEditDto> UpdateJobForUserAsync(
+        long userId,
+        long jobId,
+        UpdateEmployerJobRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        ValidateUpdateJobRequest(request);
+
+        var employer = await _context.Employers
+            .FirstOrDefaultAsync(e => e.UserId == userId, cancellationToken);
+
+        if (employer == null)
+        {
+            throw new NotFoundException("Employer profile not found for this user.");
+        }
+
+        var job = await _context.Jobs
+            .Include(j => j.Images)
+            .FirstOrDefaultAsync(j => j.Id == jobId && j.EmployerId == employer.Id, cancellationToken);
+
+        if (job == null)
+        {
+            throw new NotFoundException($"Job with id {jobId} was not found.");
+        }
+
+        if (string.Equals(job.PostingStatus, JobPostingCatalog.Closed, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new BadRequestException("Không thể sửa tin đã đóng hoặc hết hạn.");
+        }
+
+        var categoryExists = await _context.Categories
+            .AnyAsync(c => c.Id == request.CategoryId, cancellationToken);
+
+        if (!categoryExists)
+        {
+            throw new BadRequestException("Danh mục không hợp lệ.");
+        }
+
+        JobExpiryRules.ValidateExpiryDateUtc(request.ExpiryDate);
+
+        job.CategoryId = request.CategoryId;
+        job.Title = request.Title.Trim();
+        job.Description = request.Description.Trim();
+        job.Salary = request.Salary.Trim();
+        job.Location = request.Location.Trim();
+        job.WorkingHours = string.IsNullOrWhiteSpace(request.WorkingHours) ? null : request.WorkingHours.Trim();
+        job.ExpiryDate = JobExpiryRules.NormalizeExpiryDateUtc(request.ExpiryDate);
+
+        if (string.Equals(job.PostingStatus, JobPostingCatalog.Rejected, StringComparison.OrdinalIgnoreCase))
+        {
+            job.PostingStatus = JobPostingCatalog.Pending;
+        }
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        return MapJobEditDto(job);
+    }
+
+    private static void ValidateUpdateJobRequest(UpdateEmployerJobRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.Title))
+        {
+            throw new BadRequestException("Vui lòng nhập tiêu đề tin.");
+        }
+
+        if (request.Title.Trim().Length > 500)
+        {
+            throw new BadRequestException("Tiêu đề không quá 500 ký tự.");
+        }
+
+        if (string.IsNullOrWhiteSpace(request.Description))
+        {
+            throw new BadRequestException("Vui lòng nhập mô tả công việc.");
+        }
+
+        if (request.CategoryId <= 0)
+        {
+            throw new BadRequestException("Vui lòng chọn ngành / danh mục.");
+        }
+
+        if (string.IsNullOrWhiteSpace(request.Salary))
+        {
+            throw new BadRequestException("Vui lòng nhập mức lương.");
+        }
+
+        if (request.Salary.Trim().Length > 255)
+        {
+            throw new BadRequestException("Mức lương không quá 255 ký tự.");
+        }
+
+        if (string.IsNullOrWhiteSpace(request.Location))
+        {
+            throw new BadRequestException("Vui lòng nhập địa điểm.");
+        }
+
+        if (request.Location.Trim().Length > 255)
+        {
+            throw new BadRequestException("Địa điểm quá dài.");
+        }
+
+        if (request.WorkingHours?.Length > 50)
+        {
+            throw new BadRequestException("Thời gian làm việc không quá 50 ký tự.");
+        }
+    }
+
+    private static EmployerJobEditDto MapJobEditDto(Job job)
+    {
+        var canEdit = !string.Equals(job.PostingStatus, JobPostingCatalog.Closed, StringComparison.OrdinalIgnoreCase);
+
+        return new EmployerJobEditDto
+        {
+            Id = job.Id,
+            CategoryId = job.CategoryId,
+            Title = job.Title,
+            Description = job.Description,
+            Salary = job.Salary,
+            Location = job.Location,
+            WorkingHours = job.WorkingHours,
+            ExpiryDate = job.ExpiryDate,
+            PostingStatus = job.PostingStatus,
+            CanEdit = canEdit,
+            Images = job.Images
+                .OrderBy(i => i.Id)
+                .Select(i => new ImageDto
+                {
+                    Id = i.Id,
+                    JobId = i.JobId,
+                    Url = i.Url,
+                    Name = i.Name
+                })
+                .ToList()
+        };
+    }
+
     private static JobRow ToJobRow(Job job) => new()
     {
         Id = job.Id,

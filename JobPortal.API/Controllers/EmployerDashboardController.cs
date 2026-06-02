@@ -91,6 +91,25 @@ public class EmployerDashboardController : ControllerBase
             "Job closed successfully."));
     }
 
+    [HttpGet("jobs/{id:long}")]
+    public async Task<IActionResult> GetJob(long id, CancellationToken cancellationToken)
+    {
+        var userId = GetCurrentUserId();
+        var job = await _dashboardService.GetJobForEditForUserAsync(userId, id, cancellationToken);
+        return Ok(ApiResponse<EmployerJobEditDto>.SuccessResponse(job, "Job retrieved successfully."));
+    }
+
+    [HttpPut("jobs/{id:long}")]
+    public async Task<IActionResult> UpdateJob(
+        long id,
+        [FromBody] UpdateEmployerJobRequest request,
+        CancellationToken cancellationToken)
+    {
+        var userId = GetCurrentUserId();
+        var updated = await _dashboardService.UpdateJobForUserAsync(userId, id, request, cancellationToken);
+        return Ok(ApiResponse<EmployerJobEditDto>.SuccessResponse(updated, "Job updated successfully."));
+    }
+
     [HttpGet("applications/{id:long}/applicant-profile")]
     public async Task<IActionResult> GetApplicantProfile(long id, CancellationToken cancellationToken)
     {

@@ -89,6 +89,10 @@
         @if (Model.ShowEmployerActions)
         {
             <div class="job-grid-card__actions d-flex flex-wrap gap-2 mt-3">
+                @if (!isClosed)
+                {
+                    <a asp-page="/Employer/EditJob" asp-route-id="@Model.Id" class="btn btn-sm employer-jobs-btn employer-jobs-btn--primary">Sửa tin</a>
+                }
                 @if (isRecruiting || isClosed)
                 {
                     <a asp-page="/Employer/Applicants" class="btn btn-sm employer-jobs-btn employer-jobs-btn--info">Xem CV</a>
@@ -115,11 +119,11 @@
                 }
                 else if (isRejected)
                 {
-                    <a asp-page="/Employer/PostJob" class="btn btn-sm employer-jobs-btn employer-jobs-btn--primary">Đăng tin mới</a>
+                    <a asp-page="/Employer/EditJob" asp-route-id="@Model.Id" class="btn btn-sm employer-jobs-btn employer-jobs-btn--primary">Sửa & gửi lại</a>
                 }
                 else
                 {
-                    <a asp-page="/Employer/PostJob" class="btn btn-sm employer-jobs-btn employer-jobs-btn--info">Tiếp tục chỉnh sửa</a>
+                    <a asp-page="/Employer/EditJob" asp-route-id="@Model.Id" class="btn btn-sm employer-jobs-btn employer-jobs-btn--info">Sửa tin</a>
                 }
             </div>
         }

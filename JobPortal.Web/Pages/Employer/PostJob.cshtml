@@ -85,10 +85,21 @@
                                        placeholder="VD: 123 Nguyễn Trãi, Q1, TP.HCM" />
                             </div>
                         </div>
-                        <div class="mb-0">
-                            <label asp-for="Input.WorkingHours" class="form-label">Thời gian làm việc</label>
-                            <input asp-for="Input.WorkingHours" class="form-control" maxlength="50" placeholder="VD: 8h-17h, 14h-16h" />
-                            <div class="form-text">Mô tả khung giờ làm việc (tuỳ chọn).</div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label asp-for="Input.WorkingHours" class="form-label">Thời gian làm việc</label>
+                                <input asp-for="Input.WorkingHours" class="form-control" maxlength="50" placeholder="VD: 8h-17h, 14h-16h" />
+                                <div class="form-text">Mô tả khung giờ làm việc (tuỳ chọn).</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Input.ExpiryDate" class="form-label">Ngày hết hạn tin</label>
+                                <input asp-for="Input.ExpiryDate" class="form-control" type="date" required
+                                       min="@Model.ExpiryDateMin"
+                                       max="@Model.ExpiryDateMax" />
+                                <div class="form-text">
+                                    Tin đang tuyển sẽ tự đóng sau ngày này (mặc định +2 tháng, tối đa 12 tháng kể từ hôm nay).
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -122,6 +133,7 @@
                         <li>Mô tả nhiệm vụ chính và yêu cầu tối thiểu</li>
                         <li>Nêu mức lương và hình thức trả lương</li>
                         <li>Thêm ảnh thực tế để tăng độ tin cậy</li>
+                        <li>Chọn ngày hết hạn phù hợp thời gian tuyển</li>
                     </ul>
                 </div>
                 <div class="post-job-side__card">

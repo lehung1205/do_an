@@ -1,0 +1,173 @@
+@page "{id:long}"
+@model JobPortal.Web.Pages.Employer.EditJobModel
+@using JobPortal.Web.Models
+@{
+    ViewData["Title"] = "Sửa tin tuyển dụng";
+    ViewData["EmployerNavActive"] = EmployerPortalNavKeys.Jobs;
+    var isRejected = string.Equals(Model.PostingStatus, "rejected", StringComparison.OrdinalIgnoreCase);
+    var isPending = string.Equals(Model.PostingStatus, "pending", StringComparison.OrdinalIgnoreCase);
+    var isRecruiting = string.Equals(Model.PostingStatus, "recruiting", StringComparison.OrdinalIgnoreCase);
+}
+
+<partial name="Shared/_EmployerPageHeader" model='new EmployerPageHeaderModel {
+    Title = "Sửa tin tuyển dụng",
+    Subtitle = isRejected
+        ? "Tin bị từ chối — chỉnh sửa và lưu để gửi duyệt lại."
+        : isPending
+            ? "Tin đang chờ duyệt — bạn có thể cập nhật nội dung trước khi được duyệt."
+            : "Cập nhật nội dung tin đang tuyển. Tin đã đóng không thể chỉnh sửa.",
+    BreadcrumbLabel = "Chỉnh sửa tin"
+}' />
+
+<div class="employer-dash__section post-job-page">
+    <nav class="page-back-nav mb-3" aria-label="Điều hướng">
+        <a asp-page="/Jobs/Detail" asp-route-id="@Model.Id" class="page-back page-back--employer">
+            <span class="page-back__icon" aria-hidden="true"><i class="bi bi-arrow-left"></i></span>
+            <span class="page-back__label">Quay lại chi tiết tin</span>
+        </a>
+    </nav>
+
+    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+    {
+        <div class="alert alert-success">@Model.SuccessMessage</div>
+    }
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger">@Model.ErrorMessage</div>
+    }
+    @if (!Model.CanEdit)
+    {
+        <div class="alert alert-secondary">
+            Tin đã đóng hoặc hết hạn. Bạn chỉ xem được nội dung, không thể lưu thay đổi.
+        </div>
+    }
+
+    <div class="row g-4">
+        <div class="col-xl-8">
+            <form method="post" enctype="multipart/form-data" class="post-job-form card border-0 shadow-sm">
+                @Html.AntiForgeryToken()
+                <div class="card-body p-4 p-lg-5">
+                    <div class="post-job-section mb-4">
+                        <h3 class="post-job-section__title"><i class="bi bi-megaphone me-2"></i>Thông tin tin tuyển dụng</h3>
+                        <div class="mb-3">
+                            <label asp-for="Input.Title" class="form-label">Tiêu đề</label>
+                            <input asp-for="Input.Title" class="form-control" maxlength="255" required
+                                   disabled="@(!Model.CanEdit)" placeholder="VD: Tuyển nhân viên phục vụ ca tối" />
+                        </div>
+                        <div class="mb-0">
+                            <label asp-for="Input.CategoryId" class="form-label">Danh mục</label>
+                            <select asp-for="Input.CategoryId" class="form-select" required disabled="@(!Model.CanEdit)">
+                                <option value="0">— Chọn danh mục —</option>
+                                @foreach (var c in Model.Categories)
+                                {
+                                    <option value="@c.Id">@c.Name</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="post-job-section mb-4">
+                        <h3 class="post-job-section__title"><i class="bi bi-card-text me-2"></i>Mô tả công việc</h3>
+                        <div class="mb-0">
+                            <label asp-for="Input.Description" class="form-label">Nội dung mô tả</label>
+                            <textarea asp-for="Input.Description" class="form-control" rows="8" required
+                                      disabled="@(!Model.CanEdit)"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="post-job-section mb-4">
+                        <h3 class="post-job-section__title"><i class="bi bi-geo-alt me-2"></i>Lương, địa điểm, thời gian</h3>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="Input.Salary" class="form-label">Mức lương</label>
+                                <input asp-for="Input.Salary" class="form-control" maxlength="255" required disabled="@(!Model.CanEdit)" />
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Input.Location" class="form-label">Địa điểm</label>
+                                <input asp-for="Input.Location" class="form-control" maxlength="255" required disabled="@(!Model.CanEdit)" />
+                            </div>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label asp-for="Input.WorkingHours" class="form-label">Thời gian làm việc</label>
+                                <input asp-for="Input.WorkingHours" class="form-control" maxlength="50" disabled="@(!Model.CanEdit)" />
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Input.ExpiryDate" class="form-label">Ngày hết hạn tin</label>
+                                <input asp-for="Input.ExpiryDate" class="form-control" type="date" required
+                                       min="@Model.ExpiryDateMin" max="@Model.ExpiryDateMax" disabled="@(!Model.CanEdit)" />
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (Model.ExistingImages.Count > 0)
+                    {
+                        <div class="post-job-section mb-4">
+                            <h3 class="post-job-section__title"><i class="bi bi-images me-2"></i>Ảnh hiện có</h3>
+                            <div class="row g-2">
+                                @foreach (var img in Model.ExistingImages)
+                                {
+                                    <div class="col-6 col-md-4">
+                                        <img src="@img.Url" alt="@(img.Name ?? "Ảnh tin")" class="img-fluid rounded border" loading="lazy" />
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    @if (Model.CanEdit)
+                    {
+                        <div class="post-job-section mb-4">
+                            <h3 class="post-job-section__title"><i class="bi bi-image me-2"></i>Thêm ảnh mới</h3>
+                            <div class="mb-0">
+                                <label class="form-label">Tải thêm ảnh (tuỳ chọn)</label>
+                                <input type="file" name="JobImages" class="form-control" accept="image/jpeg,image/png,image/gif,image/webp" multiple />
+                                <div class="form-text">
+                                    Tối đa 8 ảnh/tin — hiện có @Model.ExistingImages.Count ảnh.
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <div class="post-job-form__actions d-flex flex-wrap gap-2">
+                        @if (Model.CanEdit)
+                        {
+                            <button type="submit" class="btn post-job-btn post-job-btn--primary">
+                                <i class="bi bi-check2 me-1"></i> Lưu thay đổi
+                            </button>
+                        }
+                        <a asp-page="/Jobs/Detail" asp-route-id="@Model.Id" class="btn post-job-btn post-job-btn--muted">
+                            <i class="bi bi-eye me-1"></i> Xem chi tiết
+                        </a>
+                        <a asp-page="/Employer/Jobs" class="btn post-job-btn post-job-btn--muted">
+                            <i class="bi bi-list-ul me-1"></i> Danh sách tin
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="col-xl-4">
+            <aside class="post-job-side d-flex flex-column gap-3">
+                @if (isRejected)
+                {
+                    <div class="post-job-side__card post-job-side__card--tip">
+                        <h4><i class="bi bi-arrow-repeat me-2"></i>Gửi duyệt lại</h4>
+                        <p class="mb-0">Sau khi lưu, tin chuyển về trạng thái chờ duyệt để admin xem lại.</p>
+                    </div>
+                }
+                else if (isRecruiting)
+                {
+                    <div class="post-job-side__card post-job-side__card--tip">
+                        <h4><i class="bi bi-info-circle me-2"></i>Đang tuyển</h4>
+                        <p class="mb-0">Thay đổi được áp dụng ngay trên tin đang hiển thị với ứng viên.</p>
+                    </div>
+                }
+            </aside>
+        </div>
+    </div>
+</div>
+
+@section EmployerStyles {
+    <link rel="stylesheet" href="~/css/post-job.css" asp-append-version="true" />
+}

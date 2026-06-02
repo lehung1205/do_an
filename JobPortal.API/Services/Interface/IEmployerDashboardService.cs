@@ -34,6 +34,17 @@ public interface IEmployerDashboardService
         long jobId,
         CancellationToken cancellationToken = default);
 
+    Task<EmployerJobEditDto> GetJobForEditForUserAsync(
+        long userId,
+        long jobId,
+        CancellationToken cancellationToken = default);
+
+    Task<EmployerJobEditDto> UpdateJobForUserAsync(
+        long userId,
+        long jobId,
+        UpdateEmployerJobRequest request,
+        CancellationToken cancellationToken = default);
+
     Task<EmployerDashboardApplicationDto> UpdateApplicationStatusAsync(
         long userId,
         long applicationId,

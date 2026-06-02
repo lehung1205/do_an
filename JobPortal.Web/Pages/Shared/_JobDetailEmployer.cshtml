@@ -88,6 +88,12 @@
         </div>
 
         <div class="employer-job-detail__actions">
+            @if (!isClosed)
+            {
+                <a asp-page="/Employer/EditJob" asp-route-id="@job.Id" class="btn employer-jobs-btn employer-jobs-btn--primary">
+                    <i class="bi bi-pencil me-1"></i> Sửa tin
+                </a>
+            }
             @if (isRecruiting || isClosed)
             {
                 <a asp-page="/Employer/Applicants"
@@ -117,8 +123,8 @@
             }
             else if (isRejected)
             {
-                <a asp-page="/Employer/PostJob" class="btn employer-jobs-btn employer-jobs-btn--primary">
-                    <i class="bi bi-plus-lg me-1"></i> Đăng tin mới
+                <a asp-page="/Employer/EditJob" asp-route-id="@job.Id" class="btn employer-jobs-btn employer-jobs-btn--primary">
+                    <i class="bi bi-pencil me-1"></i> Sửa & gửi duyệt lại
                 </a>
             }
         </div>
@@ -139,7 +145,7 @@
     else if (isRejected)
     {
         <div class="alert alert-danger employer-job-detail__alert">
-            Tin đã bị từ chối. Vui lòng đăng tin mới hoặc liên hệ quản trị nếu cần hỗ trợ.
+            Tin đã bị từ chối. Chỉnh sửa nội dung và lưu để gửi duyệt lại, hoặc liên hệ quản trị nếu cần hỗ trợ.
         </div>
     }
 

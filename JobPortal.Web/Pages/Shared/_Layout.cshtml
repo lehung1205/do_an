@@ -30,6 +30,10 @@
     {
         <link rel="stylesheet" href="~/css/notification-dropdown.css" asp-append-version="true" />
     }
+    @if (isLoggedIn)
+    {
+        <link rel="stylesheet" href="~/css/account-modal.css" asp-append-version="true" />
+    }
     <link rel="stylesheet" href="~/JobPortal.Web.styles.css" asp-append-version="true" />
     @if (isAdminPortalChrome)
     {

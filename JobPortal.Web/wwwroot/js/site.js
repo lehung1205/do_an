@@ -19,13 +19,13 @@
   }
 
   function openAccountPanel(tabName) {
-    const offcanvasEl = document.getElementById("accountOffcanvas");
-    if (!offcanvasEl) {
+    const modalEl = document.getElementById("accountOffcanvas");
+    if (!modalEl) {
       return;
     }
 
     showAccountTab(tabName);
-    bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl).show();
+    bootstrap.Modal.getOrCreateInstance(modalEl).show();
   }
 
   document.querySelectorAll("[data-account-open]").forEach((trigger) => {
@@ -60,9 +60,9 @@
     window.history.replaceState({}, "", cleanUrl);
   }
 
-  const offcanvasEl = document.getElementById("accountOffcanvas");
-  if (offcanvasEl) {
-    const defaultTab = offcanvasEl.getAttribute("data-active-tab");
+  const accountModalEl = document.getElementById("accountOffcanvas");
+  if (accountModalEl) {
+    const defaultTab = accountModalEl.getAttribute("data-active-tab");
     if (defaultTab && defaultTab !== "view") {
       showAccountTab(defaultTab);
     }

@@ -187,10 +187,6 @@ main {
   margin-bottom: 0;
 }
 
-.account-offcanvas {
-  width: min(100%, 420px);
-}
-
 .nav-account .dropdown-toggle::after {
   display: none;
 }

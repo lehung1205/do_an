@@ -1,25 +1,30 @@
 @model JobPortal.Web.Models.AccountPanelViewModel
 
-<div class="offcanvas offcanvas-end account-offcanvas" tabindex="-1" id="accountOffcanvas"
-     aria-labelledby="accountOffcanvasLabel" data-active-tab="@Model.ActiveTab">
-    <div class="offcanvas-header border-bottom">
-        <div>
-            <h5 class="offcanvas-title mb-0" id="accountOffcanvasLabel">Tài khoản của tôi</h5>
-            <p class="text-muted small mb-0">@Model.Profile.Name</p>
-        </div>
-        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Đóng"></button>
-    </div>
-    <div class="offcanvas-body p-0 d-flex flex-column">
+<div class="modal fade account-modal" tabindex="-1" id="accountOffcanvas"
+     aria-labelledby="accountOffcanvasLabel" aria-hidden="true" data-active-tab="@Model.ActiveTab">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable account-modal__dialog">
+        <div class="modal-content account-modal__content">
+            <div class="modal-header account-modal__header">
+                <div>
+                    <h5 class="modal-title account-modal__title mb-0" id="accountOffcanvasLabel">Tài khoản của tôi</h5>
+                    <p class="account-modal__subtitle mb-0 mt-1">@Model.Profile.Name</p>
+                </div>
+                <button type="button" class="account-modal__close" data-bs-dismiss="modal" aria-label="Đóng">
+                    <i class="bi bi-x-lg" aria-hidden="true"></i>
+                </button>
+            </div>
+            <div class="modal-body account-modal__body p-0 d-flex flex-column">
         @if (!string.IsNullOrEmpty(Model.SuccessMessage))
         {
-            <div class="alert alert-success py-2 mx-3 mt-3 mb-0 small">@Model.SuccessMessage</div>
+            <div class="alert alert-success py-2 mt-3 mb-0 small account-modal__alerts">@Model.SuccessMessage</div>
         }
         @if (!string.IsNullOrEmpty(Model.ErrorMessage))
         {
-            <div class="alert alert-danger py-2 mx-3 mt-3 mb-0 small">@Model.ErrorMessage</div>
+            <div class="alert alert-danger py-2 mt-3 mb-0 small account-modal__alerts">@Model.ErrorMessage</div>
         }
 
-        <ul class="nav nav-tabs account-tabs border-0 px-3 pt-3" role="tablist">
+        <div class="account-modal__tabs-wrap pt-3">
+        <ul class="nav nav-tabs account-tabs border-0" role="tablist">
             <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="account-tab-view-btn" data-bs-toggle="tab"
                         data-bs-target="#account-tab-view" type="button" role="tab">
@@ -57,88 +62,131 @@
                 </li>
             }
         </ul>
+        </div>
 
-        <div class="tab-content flex-grow-1 p-3 overflow-auto">
+        <div class="tab-content flex-grow-1 overflow-auto account-modal__tab-content">
             <div class="tab-pane fade show active" id="account-tab-view" role="tabpanel">
-                <div class="d-flex align-items-center gap-3 mb-3">
-                    @if (!string.IsNullOrWhiteSpace(Model.Profile.ProfileImage))
-                    {
-                        <img src="@Model.Profile.ProfileImage" alt="" class="rounded-circle border" width="72" height="72" style="object-fit:cover;" />
-                    }
-                    else
-                    {
-                        <span class="rounded-circle bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center border border-primary-subtle fw-semibold" style="width:72px;height:72px;font-size:1.5rem;">
-                            @AccountPanelViewModel.GetInitials(Model.Profile.Name)
-                        </span>
-                    }
-                    <div class="small text-muted">Ảnh đại diện có thể đổi trong tab Chỉnh sửa.</div>
+                <div class="account-profile-card">
+                    <div class="account-profile-card__avatar">
+                        @if (!string.IsNullOrWhiteSpace(Model.Profile.ProfileImage))
+                        {
+                            <img src="@Model.Profile.ProfileImage" alt="" />
+                        }
+                        else
+                        {
+                            <span class="account-profile-card__initials">
+                                @AccountPanelViewModel.GetInitials(Model.Profile.Name)
+                            </span>
+                        }
+                    </div>
+                    <p class="account-profile-card__hint mb-0">
+                        Ảnh đại diện có thể đổi trong tab <strong>Chỉnh sửa</strong>.
+                    </p>
                 </div>
-                <dl class="row mb-0 account-info">
-                    <dt class="col-5 text-muted">Họ và tên</dt>
-                    <dd class="col-7 fw-semibold mb-2">@Model.Profile.Name</dd>
-                    <dt class="col-5 text-muted">Email</dt>
-                    <dd class="col-7 mb-2">@Model.Profile.Email</dd>
-                    <dt class="col-5 text-muted">Số điện thoại</dt>
-                    <dd class="col-7 mb-2">
-                        @(string.IsNullOrWhiteSpace(Model.Profile.PhoneNumber) ? "—" : Model.Profile.PhoneNumber)
-                    </dd>
-                    <dt class="col-5 text-muted">Loại TK</dt>
-                    <dd class="col-7 mb-2">
-                        <span class="badge text-bg-primary-subtle text-primary border border-primary-subtle">
-                            @AccountPanelViewModel.FormatRole(Model.Profile.Role)
+                <div class="account-info-grid">
+                    <div class="account-info-row">
+                        <span class="account-info-row__label">Họ và tên</span>
+                        <span class="account-info-row__value account-info-row__value--strong">@Model.Profile.Name</span>
+                    </div>
+                    <div class="account-info-row">
+                        <span class="account-info-row__label">Email</span>
+                        <span class="account-info-row__value">@Model.Profile.Email</span>
+                    </div>
+                    <div class="account-info-row">
+                        <span class="account-info-row__label">Số điện thoại</span>
+                        <span class="account-info-row__value">@(string.IsNullOrWhiteSpace(Model.Profile.PhoneNumber) ? "—" : Model.Profile.PhoneNumber)</span>
+                    </div>
+                    <div class="account-info-row">
+                        <span class="account-info-row__label">Loại tài khoản</span>
+                        <span class="account-info-row__value">
+                            <span class="account-info-row__badge">@AccountPanelViewModel.FormatRole(Model.Profile.Role)</span>
                         </span>
-                    </dd>
-                    <dt class="col-5 text-muted">Ngày tham gia</dt>
-                    <dd class="col-7 mb-2">@AccountPanelViewModel.FormatDateTime(Model.Profile.CreatedAt)</dd>
-                    <dt class="col-5 text-muted">Cập nhật lần cuối</dt>
-                    <dd class="col-7 mb-2">@AccountPanelViewModel.FormatDateTimeNullable(Model.Profile.UpdatedAt)</dd>
-                    <dt class="col-5 text-muted">Trạng thái tài khoản</dt>
-                    <dd class="col-7 mb-2">@AccountPanelViewModel.FormatAccountStatus(Model.Profile.AccountStatus)</dd>
+                    </div>
+                    <div class="account-info-row">
+                        <span class="account-info-row__label">Ngày tham gia</span>
+                        <span class="account-info-row__value">@AccountPanelViewModel.FormatDateTime(Model.Profile.CreatedAt)</span>
+                    </div>
+                    <div class="account-info-row">
+                        <span class="account-info-row__label">Cập nhật lần cuối</span>
+                        <span class="account-info-row__value">@AccountPanelViewModel.FormatDateTimeNullable(Model.Profile.UpdatedAt)</span>
+                    </div>
+                    <div class="account-info-row">
+                        <span class="account-info-row__label">Trạng thái tài khoản</span>
+                        <span class="account-info-row__value">@AccountPanelViewModel.FormatAccountStatus(Model.Profile.AccountStatus)</span>
+                    </div>
                     @if (!Model.IsAdmin)
                     {
-                        <dt class="col-5 text-muted">Ngày sinh</dt>
-                        <dd class="col-7 mb-2">@AccountPanelViewModel.FormatDateOnly(Model.Profile.DateOfBirth)</dd>
-                        <dt class="col-5 text-muted">Giới tính</dt>
-                        <dd class="col-7 mb-2">@AccountPanelViewModel.FormatGender(Model.Profile.Gender)</dd>
+                        <div class="account-info-row">
+                            <span class="account-info-row__label">Ngày sinh</span>
+                            <span class="account-info-row__value">@AccountPanelViewModel.FormatDateOnly(Model.Profile.DateOfBirth)</span>
+                        </div>
+                        <div class="account-info-row">
+                            <span class="account-info-row__label">Giới tính</span>
+                            <span class="account-info-row__value">@AccountPanelViewModel.FormatGender(Model.Profile.Gender)</span>
+                        </div>
                     }
                     @if (!string.IsNullOrWhiteSpace(Model.Profile.Description))
                     {
-                        <dt class="col-5 text-muted align-top pt-1">Giới thiệu</dt>
-                        <dd class="col-7 mb-2"><div class="small" style="white-space:pre-wrap;">@Model.Profile.Description</div></dd>
+                        <div class="account-info-row">
+                            <span class="account-info-row__label">Giới thiệu</span>
+                            <span class="account-info-row__value" style="white-space:pre-wrap;">@Model.Profile.Description</span>
+                        </div>
                     }
                     @if (Model.IsJobSeeker)
                     {
-                        <dt class="col-5 text-muted">Địa chỉ thường trú</dt>
-                        <dd class="col-7 mb-2">@AccountPanelViewModel.DashIfEmpty(Model.Profile.PermanentAddress)</dd>
-                        <dt class="col-5 text-muted">Địa chỉ tạm trú</dt>
-                        <dd class="col-7 mb-2">@AccountPanelViewModel.DashIfEmpty(Model.Profile.TemporaryAddress)</dd>
-                        <dt class="col-5 text-muted">CMND/CCCD</dt>
-                        <dd class="col-7 mb-2">@AccountPanelViewModel.DashIfEmpty(Model.Profile.IdCard)</dd>
-                        <dt class="col-5 text-muted">Ngày cấp</dt>
-                        <dd class="col-7 mb-2">@AccountPanelViewModel.DashIfEmpty(Model.Profile.IdCardIssueDate)</dd>
-                        <dt class="col-5 text-muted">Nơi cấp</dt>
-                        <dd class="col-7 mb-2">@AccountPanelViewModel.DashIfEmpty(Model.Profile.IdCardIssuePlace)</dd>
-                        <dt class="col-5 text-muted">Ngân hàng</dt>
-                        <dd class="col-7 mb-2">@AccountPanelViewModel.DashIfEmpty(Model.Profile.BankName)</dd>
-                        <dt class="col-5 text-muted">Số tài khoản</dt>
-                        <dd class="col-7 mb-2">@AccountPanelViewModel.DashIfEmpty(Model.Profile.BankAccountNumber)</dd>
+                        <div class="account-info-row">
+                            <span class="account-info-row__label">Địa chỉ thường trú</span>
+                            <span class="account-info-row__value">@AccountPanelViewModel.DashIfEmpty(Model.Profile.PermanentAddress)</span>
+                        </div>
+                        <div class="account-info-row">
+                            <span class="account-info-row__label">Địa chỉ tạm trú</span>
+                            <span class="account-info-row__value">@AccountPanelViewModel.DashIfEmpty(Model.Profile.TemporaryAddress)</span>
+                        </div>
+                        <div class="account-info-row">
+                            <span class="account-info-row__label">CMND/CCCD</span>
+                            <span class="account-info-row__value">@AccountPanelViewModel.DashIfEmpty(Model.Profile.IdCard)</span>
+                        </div>
+                        <div class="account-info-row">
+                            <span class="account-info-row__label">Ngày cấp</span>
+                            <span class="account-info-row__value">@AccountPanelViewModel.DashIfEmpty(Model.Profile.IdCardIssueDate)</span>
+                        </div>
+                        <div class="account-info-row">
+                            <span class="account-info-row__label">Nơi cấp</span>
+                            <span class="account-info-row__value">@AccountPanelViewModel.DashIfEmpty(Model.Profile.IdCardIssuePlace)</span>
+                        </div>
+                        <div class="account-info-row">
+                            <span class="account-info-row__label">Ngân hàng</span>
+                            <span class="account-info-row__value">@AccountPanelViewModel.DashIfEmpty(Model.Profile.BankName)</span>
+                        </div>
+                        <div class="account-info-row">
+                            <span class="account-info-row__label">Số tài khoản</span>
+                            <span class="account-info-row__value">@AccountPanelViewModel.DashIfEmpty(Model.Profile.BankAccountNumber)</span>
+                        </div>
                     }
                     @if (string.Equals(Model.Profile.Role, "EMPLOYER", StringComparison.Ordinal))
                     {
-                        <dt class="col-5 text-muted">CMND/CCCD</dt>
-                        <dd class="col-7 mb-2">@AccountPanelViewModel.DashIfEmpty(Model.Profile.IdCard)</dd>
-                        <dt class="col-5 text-muted">Số lượt đăng bài</dt>
-                        <dd class="col-7 mb-2">@(Model.Profile.PostingLimit is int pl ? pl.ToString() : "—")</dd>
+                        <div class="account-info-row">
+                            <span class="account-info-row__label">CMND/CCCD</span>
+                            <span class="account-info-row__value">@AccountPanelViewModel.DashIfEmpty(Model.Profile.IdCard)</span>
+                        </div>
+                        <div class="account-info-row">
+                            <span class="account-info-row__label">Số lượt đăng bài</span>
+                            <span class="account-info-row__value">@(Model.Profile.PostingLimit is int pl ? pl.ToString() : "—")</span>
+                        </div>
                     }
                     @if (Model.IsAdmin)
                     {
-                        <dt class="col-5 text-muted">Ngân hàng</dt>
-                        <dd class="col-7 mb-2">@AccountPanelViewModel.DashIfEmpty(Model.Profile.BankName)</dd>
-                        <dt class="col-5 text-muted">Số tài khoản</dt>
-                        <dd class="col-7 mb-0">@AccountPanelViewModel.DashIfEmpty(Model.Profile.BankAccountNumber)</dd>
+                        <div class="account-info-row">
+                            <span class="account-info-row__label">Ngân hàng</span>
+                            <span class="account-info-row__value">@AccountPanelViewModel.DashIfEmpty(Model.Profile.BankName)</span>
+                        </div>
+                        <div class="account-info-row">
+                            <span class="account-info-row__label">Số tài khoản</span>
+                            <span class="account-info-row__value">@AccountPanelViewModel.DashIfEmpty(Model.Profile.BankAccountNumber)</span>
+                        </div>
                     }
-                </dl>
-                <button type="button" class="btn btn-primary btn-sm mt-3" data-account-switch-tab="edit">
+                </div>
+                <button type="button" class="btn btn-primary w-100 mt-3" data-account-switch-tab="edit">
                     <i class="bi bi-pencil me-1"></i> Chỉnh sửa thông tin
                 </button>
             </div>
@@ -350,10 +398,12 @@
             }
         </div>
 
-        <div class="border-top p-3">
-            <a asp-page="/Auth/Logout" class="btn btn-outline-secondary btn-sm w-100">
+        <div class="account-modal__footer">
+            <a asp-page="/Auth/Logout" class="btn btn-outline-secondary w-100 account-modal__logout">
                 <i class="bi bi-box-arrow-right me-1"></i> Đăng xuất
             </a>
+        </div>
+            </div>
         </div>
     </div>
 </div>

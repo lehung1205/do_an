@@ -2,111 +2,231 @@
 @model JobPortal.Web.Pages.Auth.RegisterModel
 @{
     ViewData["Title"] = "Đăng ký";
+    ViewData["AuthFocusLayout"] = true;
 }
 
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6 col-lg-5">
-            <div class="card auth-card jg-card">
-                <div class="card-body p-4">
-                    <h1 class="h4 mb-1 text-center">Đăng ký tài khoản</h1>
-                    <p class="text-muted small text-center mb-4">Chọn vai trò và tạo tài khoản miễn phí</p>
-
-                    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
-                    {
-                        <div class="alert alert-danger py-2 small">@Model.ErrorMessage</div>
-                    }
-
-                    <form method="post">
-                        <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
-
-                        <div class="mb-4">
-                            <label class="form-label d-block">@Html.DisplayNameFor(m => m.Input.Role)</label>
-                            <div class="row g-2">
-                                <div class="col-6">
-                                    <input asp-for="Input.Role" type="radio" class="btn-check" value="JOB_SEEKER" id="roleSeeker" />
-                                    <label class="btn btn-outline-primary w-100 py-3" for="roleSeeker">
-                                        <i class="bi bi-person-badge d-block fs-4 mb-1"></i>
-                                        <span class="small fw-semibold">Ứng viên</span>
-                                    </label>
-                                </div>
-                                <div class="col-6">
-                                    <input asp-for="Input.Role" type="radio" class="btn-check" value="EMPLOYER" id="roleEmployer" />
-                                    <label class="btn btn-outline-primary w-100 py-3" for="roleEmployer">
-                                        <i class="bi bi-building d-block fs-4 mb-1"></i>
-                                        <span class="small fw-semibold">Nhà tuyển dụng</span>
-                                    </label>
-                                </div>
-                            </div>
-                            <span asp-validation-for="Input.Role" class="text-danger small"></span>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="registerNameInput" class="form-label" id="registerNameLabel">Họ và tên</label>
-                            <input asp-for="Input.Name" class="form-control" id="registerNameInput"
-                                   placeholder="Nguyễn Văn A"
-                                   data-placeholder-seeker="Nguyễn Văn A"
-                                   data-placeholder-employer="Công ty TNHH ABC" />
-                            <span asp-validation-for="Input.Name" class="text-danger small"></span>
-                        </div>
-
-                        <div class="mb-3">
-                            <label asp-for="Input.Email" class="form-label"></label>
-                            <input asp-for="Input.Email" class="form-control" />
-                            <span asp-validation-for="Input.Email" class="text-danger small"></span>
-                        </div>
-
-                        <div class="mb-3">
-                            <label asp-for="Input.PhoneNumber" class="form-label"></label>
-                            <input asp-for="Input.PhoneNumber" class="form-control" />
-                            <span asp-validation-for="Input.PhoneNumber" class="text-danger small"></span>
-                        </div>
-
-                        <div class="mb-3">
-                            <label asp-for="Input.Password" class="form-label"></label>
-                            <input asp-for="Input.Password" class="form-control" />
-                            <span asp-validation-for="Input.Password" class="text-danger small"></span>
-                        </div>
-
-                        <div class="mb-4">
-                            <label asp-for="Input.ConfirmPassword" class="form-label"></label>
-                            <input asp-for="Input.ConfirmPassword" class="form-control" />
-                            <span asp-validation-for="Input.ConfirmPassword" class="text-danger small"></span>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary w-100">Tiếp tục — gửi mã OTP</button>
-                    </form>
-
-                    <p class="text-center text-muted small mt-4 mb-0">
-                        Đã có tài khoản?
-                        <a asp-page="/Auth/Login">Đăng nhập</a>
-                    </p>
-                </div>
-            </div>
+<div class="auth-login">
+    <section class="auth-login__hero" aria-labelledby="auth-register-hero-title">
+        <div class="auth-login__hero-bg" aria-hidden="true"></div>
+        <div class="auth-login__hero-content">
+            <p class="auth-login__eyebrow">Miễn phí — chỉ vài phút</p>
+            <h2 id="auth-register-hero-title" class="auth-login__hero-title">
+                Tạo tài khoản<br />và bắt đầu ngay
+            </h2>
+            <p class="auth-login__hero-lead">
+                Đăng ký một lần để ứng tuyển việc làm, đăng tin tuyển dụng hoặc quản lý hồ sơ trên cùng một nền tảng.
+            </p>
+            <ul class="auth-login__highlights">
+                <li>
+                    <span class="auth-login__highlight-icon"><i class="bi bi-person-plus-fill"></i></span>
+                    <span class="auth-login__highlight-text">
+                        <strong>Ứng viên</strong>
+                        <small>Tìm việc part-time, theo dõi đơn và tiến độ công việc</small>
+                    </span>
+                </li>
+                <li>
+                    <span class="auth-login__highlight-icon"><i class="bi bi-building-fill"></i></span>
+                    <span class="auth-login__highlight-text">
+                        <strong>Nhà tuyển dụng</strong>
+                        <small>Đăng tin, duyệt CV và cập nhật tiến độ cho ứng viên</small>
+                    </span>
+                </li>
+                <li>
+                    <span class="auth-login__highlight-icon"><i class="bi bi-shield-check"></i></span>
+                    <span class="auth-login__highlight-text">
+                        <strong>Xác minh email</strong>
+                        <small>Bảo mật tài khoản qua mã OTP sau khi đăng ký</small>
+                    </span>
+                </li>
+            </ul>
         </div>
-    </div>
+        <a asp-page="/Auth/Login" class="auth-login__hero-cta">
+            Đã có tài khoản? Đăng nhập <i class="bi bi-arrow-right" aria-hidden="true"></i>
+        </a>
+    </section>
+
+    <section class="auth-login__form-panel auth-login__form-panel--register" aria-labelledby="auth-register-form-title">
+        <div class="auth-login__form-wrap auth-login__form-wrap--register">
+            <header class="auth-login__form-header">
+                <h1 id="auth-register-form-title" class="auth-login__form-title">Đăng ký</h1>
+                <p class="auth-login__form-subtitle">Chọn vai trò và điền thông tin để nhận mã OTP qua email.</p>
+            </header>
+
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <div class="alert alert-danger auth-login__alert" role="alert">
+                    <i class="bi bi-exclamation-circle-fill" aria-hidden="true"></i>
+                    <span>@Model.ErrorMessage</span>
+                </div>
+            }
+
+            <form method="post" class="auth-login__form" novalidate>
+                <div asp-validation-summary="ModelOnly" class="auth-login__validation text-danger"></div>
+
+                <div class="auth-login__field">
+                    <span class="auth-login__label" id="registerRoleLabel">@Html.DisplayNameFor(m => m.Input.Role)</span>
+                    <div class="auth-login__role-picker" role="group" aria-labelledby="registerRoleLabel">
+                        <div class="auth-login__role-option">
+                            <input asp-for="Input.Role" type="radio" class="auth-login__role-input" value="JOB_SEEKER" id="roleSeeker" />
+                            <label class="auth-login__role-label" for="roleSeeker">
+                                <i class="bi bi-person-badge" aria-hidden="true"></i>
+                                <span>Ứng viên</span>
+                            </label>
+                        </div>
+                        <div class="auth-login__role-option">
+                            <input asp-for="Input.Role" type="radio" class="auth-login__role-input" value="EMPLOYER" id="roleEmployer" />
+                            <label class="auth-login__role-label" for="roleEmployer">
+                                <i class="bi bi-building" aria-hidden="true"></i>
+                                <span>Nhà tuyển dụng</span>
+                            </label>
+                        </div>
+                    </div>
+                    <span asp-validation-for="Input.Role" class="auth-login__field-error text-danger"></span>
+                </div>
+
+                <div class="auth-login__field">
+                    <label for="registerNameInput" class="auth-login__label" id="registerNameLabel">Họ và tên</label>
+                    <div class="auth-login__input-group">
+                        <span class="auth-login__input-prefix" aria-hidden="true"><i class="bi bi-person-vcard"></i></span>
+                        <input asp-for="Input.Name"
+                               class="form-control auth-login__input"
+                               id="registerNameInput"
+                               placeholder="Nguyễn Văn A"
+                               data-placeholder-seeker="Nguyễn Văn A"
+                               data-placeholder-employer="Công ty TNHH ABC" />
+                    </div>
+                    <span asp-validation-for="Input.Name" class="auth-login__field-error text-danger"></span>
+                </div>
+
+                <div class="auth-login__field">
+                    <label asp-for="Input.Email" class="auth-login__label"></label>
+                    <div class="auth-login__input-group">
+                        <span class="auth-login__input-prefix" aria-hidden="true"><i class="bi bi-envelope"></i></span>
+                        <input asp-for="Input.Email"
+                               class="form-control auth-login__input"
+                               placeholder="email@example.com"
+                               autocomplete="email" />
+                    </div>
+                    <span asp-validation-for="Input.Email" class="auth-login__field-error text-danger"></span>
+                </div>
+
+                <div class="auth-login__field">
+                    <label asp-for="Input.PhoneNumber" class="auth-login__label"></label>
+                    <div class="auth-login__input-group">
+                        <span class="auth-login__input-prefix" aria-hidden="true"><i class="bi bi-telephone"></i></span>
+                        <input asp-for="Input.PhoneNumber"
+                               class="form-control auth-login__input"
+                               placeholder="09xxxxxxxx (tuỳ chọn)"
+                               autocomplete="tel" />
+                    </div>
+                    <span asp-validation-for="Input.PhoneNumber" class="auth-login__field-error text-danger"></span>
+                </div>
+
+                <div class="auth-login__field">
+                    <label asp-for="Input.Password" class="auth-login__label"></label>
+                    <div class="auth-login__input-group">
+                        <span class="auth-login__input-prefix" aria-hidden="true"><i class="bi bi-lock"></i></span>
+                        <input asp-for="Input.Password"
+                               class="form-control auth-login__input auth-login__input--password"
+                               id="registerPassword"
+                               placeholder="Tối thiểu 8 ký tự"
+                               autocomplete="new-password" />
+                        <button type="button"
+                                class="auth-login__toggle-pw"
+                                id="registerTogglePassword"
+                                aria-label="Hiện mật khẩu"
+                                tabindex="-1">
+                            <i class="bi bi-eye" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    <span asp-validation-for="Input.Password" class="auth-login__field-error text-danger"></span>
+                </div>
+
+                <div class="auth-login__field">
+                    <label asp-for="Input.ConfirmPassword" class="auth-login__label"></label>
+                    <div class="auth-login__input-group">
+                        <span class="auth-login__input-prefix" aria-hidden="true"><i class="bi bi-lock-fill"></i></span>
+                        <input asp-for="Input.ConfirmPassword"
+                               class="form-control auth-login__input auth-login__input--password"
+                               id="registerConfirmPassword"
+                               placeholder="Nhập lại mật khẩu"
+                               autocomplete="new-password" />
+                        <button type="button"
+                                class="auth-login__toggle-pw"
+                                id="registerToggleConfirmPassword"
+                                aria-label="Hiện mật khẩu xác nhận"
+                                tabindex="-1">
+                            <i class="bi bi-eye" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    <span asp-validation-for="Input.ConfirmPassword" class="auth-login__field-error text-danger"></span>
+                </div>
+
+                <button type="submit" class="btn auth-login__submit w-100">
+                    Tiếp tục — gửi mã OTP
+                    <i class="bi bi-arrow-right-short" aria-hidden="true"></i>
+                </button>
+            </form>
+
+            <div class="auth-login__register">
+                <span>Đã có tài khoản?</span>
+                <a asp-page="/Auth/Login" class="auth-login__register-link">Đăng nhập</a>
+            </div>
+
+            <p class="auth-login__browse">
+                <a asp-page="/Jobs/Index">
+                    <i class="bi bi-search" aria-hidden="true"></i>
+                    Xem việc làm không cần đăng ký
+                </a>
+            </p>
+        </div>
+    </section>
 </div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/auth-login.css" asp-append-version="true" />
+}
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
         (function () {
-            const roleSeeker = document.getElementById('roleSeeker');
-            const roleEmployer = document.getElementById('roleEmployer');
-            const nameLabel = document.getElementById('registerNameLabel');
-            const nameInput = document.getElementById('registerNameInput');
+            var roleSeeker = document.getElementById('roleSeeker');
+            var roleEmployer = document.getElementById('roleEmployer');
+            var nameLabel = document.getElementById('registerNameLabel');
+            var nameInput = document.getElementById('registerNameInput');
 
             function updateNameField() {
-                const isEmployer = roleEmployer?.checked;
+                if (!nameLabel || !nameInput) return;
+                var isEmployer = roleEmployer && roleEmployer.checked;
                 nameLabel.textContent = isEmployer ? 'Tên công ty' : 'Họ và tên';
                 nameInput.placeholder = isEmployer
-                    ? nameInput.dataset.placeholderEmployer
-                    : nameInput.dataset.placeholderSeeker;
+                    ? (nameInput.dataset.placeholderEmployer || '')
+                    : (nameInput.dataset.placeholderSeeker || '');
             }
 
-            roleSeeker?.addEventListener('change', updateNameField);
-            roleEmployer?.addEventListener('change', updateNameField);
+            roleSeeker && roleSeeker.addEventListener('change', updateNameField);
+            roleEmployer && roleEmployer.addEventListener('change', updateNameField);
             updateNameField();
+
+            function bindToggle(inputId, btnId, showLabel, hideLabel) {
+                var input = document.getElementById(inputId);
+                var btn = document.getElementById(btnId);
+                if (!input || !btn) return;
+                btn.addEventListener('click', function () {
+                    var show = input.type === 'password';
+                    input.type = show ? 'text' : 'password';
+                    btn.setAttribute('aria-label', show ? hideLabel : showLabel);
+                    var icon = btn.querySelector('i');
+                    if (icon) {
+                        icon.classList.toggle('bi-eye', !show);
+                        icon.classList.toggle('bi-eye-slash', show);
+                    }
+                });
+            }
+
+            bindToggle('registerPassword', 'registerTogglePassword', 'Hiện mật khẩu', 'Ẩn mật khẩu');
+            bindToggle('registerConfirmPassword', 'registerToggleConfirmPassword', 'Hiện mật khẩu xác nhận', 'Ẩn mật khẩu xác nhận');
         })();
     </script>
 }

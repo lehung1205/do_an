@@ -17,7 +17,13 @@ public class RegisterModel : PageModel
 
     public string? ErrorMessage { get; set; }
 
-    public void OnGet() { }
+    public void OnGet(string? role)
+    {
+        if (string.Equals(role, InputModel.RoleEmployer, StringComparison.OrdinalIgnoreCase))
+            Input.Role = InputModel.RoleEmployer;
+        else if (string.Equals(role, InputModel.RoleJobSeeker, StringComparison.OrdinalIgnoreCase))
+            Input.Role = InputModel.RoleJobSeeker;
+    }
 
     public async Task<IActionResult> OnPostAsync()
     {

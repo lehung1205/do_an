@@ -11,10 +11,12 @@ namespace JobPortal.API.Services.Implementation;
 public class ApplicationReviewService : IApplicationReviewService
 {
     private readonly AppDbContext _context;
+    private readonly INotificationService _notificationService;
 
-    public ApplicationReviewService(AppDbContext context)
+    public ApplicationReviewService(AppDbContext context, INotificationService notificationService)
     {
         _context = context;
+        _notificationService = notificationService;
     }
 
     public async Task<ApplicationReviewContextDto> GetEmployerReviewContextAsync(
@@ -72,6 +74,14 @@ public class ApplicationReviewService : IApplicationReviewService
 
         _context.Reviews.Add(entity);
         await _context.SaveChangesAsync(cancellationToken);
+
+        await _notificationService.NotifyReviewReceivedAsync(
+            application.JobSeeker.UserId,
+            applicationId,
+            employer.Name,
+            application.Job.Title,
+            request.Rating,
+            cancellationToken);
 
         return new ApplicationReviewViewDto
         {
@@ -138,6 +148,14 @@ public class ApplicationReviewService : IApplicationReviewService
 
         _context.Reviews.Add(entity);
         await _context.SaveChangesAsync(cancellationToken);
+
+        await _notificationService.NotifyReviewReceivedAsync(
+            application.Job.Employer.UserId,
+            applicationId,
+            jobSeeker.Name,
+            application.Job.Title,
+            request.Rating,
+            cancellationToken);
 
         return new ApplicationReviewViewDto
         {

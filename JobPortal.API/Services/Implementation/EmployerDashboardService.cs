@@ -922,7 +922,7 @@ public class EmployerDashboardService : IEmployerDashboardService
     {
         await _jobExpiryService.CloseExpiredJobsAsync(cancellationToken);
 
-        await GetAcceptedApplicationForEmployerAsync(userId, applicationId, cancellationToken);
+        var application = await GetAcceptedApplicationForEmployerAsync(userId, applicationId, cancellationToken);
 
         var latestStep = await _context.Processes
             .AsNoTracking()
@@ -956,6 +956,15 @@ public class EmployerDashboardService : IEmployerDashboardService
 
         _context.Processes.Add(entity);
         await _context.SaveChangesAsync(cancellationToken);
+
+        await _notificationService.NotifyWorkProgressUpdatedAsync(
+            application.JobSeeker.UserId,
+            applicationId,
+            application.Job.Title,
+            application.Job.Employer.Name,
+            entity.Title,
+            entity.Notes,
+            cancellationToken);
 
         return MapWorkProgressStep(entity);
     }
@@ -1006,7 +1015,7 @@ public class EmployerDashboardService : IEmployerDashboardService
 
         var application = await _context.Applications
             .AsNoTracking()
-            .Include(a => a.Job)
+            .Include(a => a.Job).ThenInclude(j => j.Employer)
             .Include(a => a.JobSeeker).ThenInclude(js => js.User)
             .FirstOrDefaultAsync(
                 a => a.Id == applicationId && a.Job.EmployerId == employerId,

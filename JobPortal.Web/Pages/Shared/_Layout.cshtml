@@ -9,6 +9,12 @@
         && (ViewData["AdminPortalChrome"] as bool? == true
             || layoutCurrentPage.StartsWith("/Admin/", StringComparison.OrdinalIgnoreCase));
     var showN8nChatbot = JobPortal.Web.Pages.Chatbot.WebhookModel.IsChatbotAllowed(isLoggedIn, layoutUserRole);
+    var showNotificationDropdownAssets = isLoggedIn
+        && !isAdminPortalChrome
+        && (string.Equals(layoutUserRole, "JOB_SEEKER", StringComparison.Ordinal) && !isEmployerPortalChrome
+            || layoutIsEmployer && isEmployerPortalChrome);
+    var authFocusLayout = ViewData["AuthFocusLayout"] as bool? == true;
+    var isAuthRegisterPage = string.Equals(layoutCurrentPage, "/Auth/Register", StringComparison.OrdinalIgnoreCase);
 }
 <!DOCTYPE html>
 <html lang="vi">
@@ -20,6 +26,14 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/jobsgo-theme.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    @if (showNotificationDropdownAssets)
+    {
+        <link rel="stylesheet" href="~/css/notification-dropdown.css" asp-append-version="true" />
+    }
+    @if (isLoggedIn)
+    {
+        <link rel="stylesheet" href="~/css/account-modal.css" asp-append-version="true" />
+    }
     <link rel="stylesheet" href="~/JobPortal.Web.styles.css" asp-append-version="true" />
     @if (isAdminPortalChrome)
     {
@@ -28,8 +42,33 @@
     @await RenderSectionAsync("Styles", required: false)
     @await RenderSectionAsync("EmployerStyles", required: false)
 </head>
-<body class="site-body@(isEmployerPortalChrome ? " employer-portal-mode" : "")@(isAdminPortalChrome ? " admin-portal-mode" : "")">
+<body class="site-body@(isEmployerPortalChrome ? " employer-portal-mode" : "")@(isAdminPortalChrome ? " admin-portal-mode" : "")@(authFocusLayout ? " auth-focus-layout" : "")">
     @if (!isEmployerPortalChrome && !isAdminPortalChrome)
+    {
+    @if (authFocusLayout)
+    {
+    <header class="auth-focus-header">
+        <div class="auth-focus-header__inner">
+            <a class="auth-focus-header__brand" asp-page="/Index">
+                <i class="bi bi-briefcase-fill" aria-hidden="true"></i>
+                <span>JobPortal</span>
+            </a>
+            <nav class="auth-focus-header__nav" aria-label="Điều hướng">
+                <a class="auth-focus-header__link" asp-page="/Jobs/Index">Việc làm</a>
+                <a class="auth-focus-header__link" asp-page="/Privacy">Chính sách</a>
+                @if (isAuthRegisterPage)
+                {
+                    <a class="btn btn-outline-primary btn-sm auth-focus-header__cta" asp-page="/Auth/Login">Đăng nhập</a>
+                }
+                else
+                {
+                    <a class="btn btn-primary btn-sm auth-focus-header__cta" asp-page="/Auth/Register">Đăng ký</a>
+                }
+            </nav>
+        </div>
+    </header>
+    }
+    else
     {
     <header class="site-header">
         <nav class="navbar navbar-expand-lg navbar-light">
@@ -115,13 +154,7 @@
                             @if (isJobSeeker)
                             {
                                 <li class="nav-item nav-quick-actions">
-                                    <a asp-page="/Notifications/Index"
-                                       class="site-nav-icon-btn @(isSeekerNotificationsPage ? "is-active" : "")"
-                                       title="Thông báo"
-                                       aria-label="Thông báo">
-                                        <i class="bi bi-bell"></i>
-                                        @await Component.InvokeAsync("NotificationNavBadge")
-                                    </a>
+                                    @await Component.InvokeAsync("NotificationDropdown", new { variant = "seeker", isActive = isSeekerNotificationsPage })
                                     <a asp-page="/Messages/Index"
                                        class="site-nav-icon-btn @(isSeekerMessagesPage ? "is-active" : "")"
                                        title="Tin nhắn"
@@ -207,12 +240,16 @@
         </nav>
     </header>
     }
+    }
 
-    <main role="main" class="@(isEmployerPortalChrome ? "employer-portal-main" : "")@(isAdminPortalChrome ? " admin-portal-main" : "")">
+    <main role="main" class="@(isEmployerPortalChrome ? "employer-portal-main" : "")@(isAdminPortalChrome ? " admin-portal-main" : "")@(authFocusLayout ? " auth-focus-main" : "")">
         @RenderBody()
     </main>
 
-    <partial name="_SiteFooter" />
+    @if (!authFocusLayout)
+    {
+        <partial name="_SiteFooter" />
+    }
 
     @if (isLoggedIn)
     {
@@ -228,6 +265,10 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    @if (showNotificationDropdownAssets)
+    {
+        <script src="~/js/notification-dropdown.js" asp-append-version="true"></script>
+    }
     @await RenderSectionAsync("Scripts", required: false)
     @await RenderSectionAsync("EmployerScripts", required: false)
 </body>

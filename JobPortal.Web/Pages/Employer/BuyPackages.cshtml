@@ -170,7 +170,9 @@
         </div>
 
         <p class="buy-packages-note">
-            Sau khi VNPay xác nhận thành công, hạn mức đăng tin được cộng tự động. Bạn có thể kiểm tra số lượt còn lại ở góc trên menu.
+            Sau khi VNPay xác nhận thành công, hạn mức đăng tin được cộng tự động.
+            <a asp-page="/Employer/PaymentHistory/Index" class="buy-packages-note__link">Xem lịch sử thanh toán</a>
+            hoặc kiểm tra số lượt còn lại ở góc trên menu.
         </p>
     }
     else if (string.IsNullOrEmpty(Model.ErrorMessage))

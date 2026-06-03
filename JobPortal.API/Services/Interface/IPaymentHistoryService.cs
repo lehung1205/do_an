@@ -18,4 +18,12 @@ public interface IPaymentHistoryService
         CancellationToken cancellationToken = default);
     Task UpdatePaymentHistoryAsync(long id, PaymentHistoryDto dto, CancellationToken cancellationToken = default);
     Task DeletePaymentHistoryAsync(long id, CancellationToken cancellationToken = default);
+
+    Task<EmployerPaymentHistoryResultDto> GetEmployerPaymentHistoryForUserAsync(
+        long userId,
+        int page = 1,
+        int pageSize = 10,
+        string? status = null,
+        string? search = null,
+        CancellationToken cancellationToken = default);
 }

@@ -1,6 +1,7 @@
 using AutoMapper;
 using JobPortal.API.Data;
 using JobPortal.API.DTOs;
+using JobPortal.API.DTOs.Common;
 using JobPortal.API.Exceptions;
 using JobPortal.API.Models;
 using JobPortal.API.Repositories.Interface;
@@ -191,6 +192,115 @@ public class PaymentHistoryService : IPaymentHistoryService
         {
             throw new NotFoundException($"Payment history with id {id} was not found.");
         }
+    }
+
+    public async Task<EmployerPaymentHistoryResultDto> GetEmployerPaymentHistoryForUserAsync(
+        long userId,
+        int page = 1,
+        int pageSize = 10,
+        string? status = null,
+        string? search = null,
+        CancellationToken cancellationToken = default)
+    {
+        if (page < 1)
+        {
+            page = 1;
+        }
+
+        if (pageSize < 1)
+        {
+            pageSize = 10;
+        }
+
+        pageSize = Math.Min(pageSize, 50);
+
+        var employer = await _context.Employers
+            .AsNoTracking()
+            .FirstOrDefaultAsync(e => e.UserId == userId, cancellationToken);
+
+        if (employer == null)
+        {
+            throw new NotFoundException("Employer profile was not found for the current user.");
+        }
+
+        var allForEmployer = await _context.PaymentHistories
+            .AsNoTracking()
+            .Where(p => p.EmployerId == employer.Id)
+            .Select(p => new { p.Amount, p.Status })
+            .ToListAsync(cancellationToken);
+
+        static bool IsPaid(string s) => string.Equals(s, "paid", StringComparison.OrdinalIgnoreCase);
+        static bool IsPending(string s) => string.Equals(s, "pending", StringComparison.OrdinalIgnoreCase);
+        static bool IsFailed(string s) => string.Equals(s, "failed", StringComparison.OrdinalIgnoreCase);
+
+        var summary = new EmployerPaymentSummaryDto
+        {
+            TotalPaidAmount = allForEmployer.Where(p => IsPaid(p.Status)).Sum(p => (long)p.Amount),
+            PaidCount = allForEmployer.Count(p => IsPaid(p.Status)),
+            PendingCount = allForEmployer.Count(p => IsPending(p.Status)),
+            FailedCount = allForEmployer.Count(p => IsFailed(p.Status)),
+            TotalCount = allForEmployer.Count,
+            CurrentPostingLimit = employer.PostingLimit
+        };
+
+        var query = _context.PaymentHistories
+            .AsNoTracking()
+            .Include(p => p.PostingPackage)
+            .Where(p => p.EmployerId == employer.Id);
+
+        if (!string.IsNullOrWhiteSpace(status) && !string.Equals(status, "all", StringComparison.OrdinalIgnoreCase))
+        {
+            var st = status.Trim().ToLowerInvariant();
+            query = query.Where(p => p.Status.ToLower() == st);
+        }
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var term = search.Trim();
+            query = query.Where(p =>
+                p.OrderId.Contains(term) ||
+                (p.PackageNameSnapshot != null && p.PackageNameSnapshot.Contains(term)) ||
+                (p.ProviderTransactionId != null && p.ProviderTransactionId.Contains(term)) ||
+                (p.TransactionCode != null && p.TransactionCode.Contains(term)));
+        }
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var items = await query
+            .OrderByDescending(p => p.CreatedAt)
+            .ThenByDescending(p => p.Id)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(p => new EmployerPaymentListItemDto
+            {
+                Id = p.Id,
+                PackageName = p.PackageNameSnapshot ?? p.PostingPackage.Name,
+                PostingLimitSnapshot = p.PostingLimitSnapshot,
+                Amount = p.Amount,
+                Currency = p.Currency,
+                OrderId = p.OrderId,
+                Status = p.Status,
+                PaymentProvider = p.PaymentProvider,
+                PaymentBank = p.PaymentBank,
+                ProviderTransactionId = p.ProviderTransactionId,
+                TransactionCode = p.TransactionCode,
+                PaymentDate = p.PaymentDate,
+                CreatedAt = p.CreatedAt
+            })
+            .ToListAsync(cancellationToken);
+
+        return new EmployerPaymentHistoryResultDto
+        {
+            Summary = summary,
+            Payments = new PagedResult<EmployerPaymentListItemDto>
+            {
+                Items = items,
+                Page = page,
+                PageSize = pageSize,
+                TotalCount = totalCount,
+                TotalPages = totalCount == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)pageSize)
+            }
+        };
     }
 
     private static string Truncate(string value, int maxLength)

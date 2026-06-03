@@ -165,7 +165,53 @@
   display: grid;
   grid-template-columns: minmax(10rem, 14rem) 1fr auto;
   gap: 0.75rem;
-  align-items: end;
+  align-items: start;
+}
+
+.emp-apps-filter__field {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.emp-apps-filter .form-label {
+  margin-bottom: 0.35rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #334155;
+  line-height: 1.25;
+}
+
+.emp-apps-filter__label-spacer {
+  visibility: hidden;
+  user-select: none;
+}
+
+.emp-apps-filter .form-select,
+.emp-apps-filter .input-group,
+.emp-apps-filter .input-group .form-control,
+.emp-apps-filter .input-group-text {
+  min-height: 42px;
+}
+
+.emp-apps-filter .input-group-text {
+  display: flex;
+  align-items: center;
+}
+
+.emp-apps-filter .form-select,
+.emp-apps-filter .form-control {
+  border-radius: 10px;
+}
+
+.emp-apps-filter .input-group .form-control {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.emp-apps-filter .input-group-text {
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
 }
 
 @media (max-width: 767px) {
@@ -174,11 +220,21 @@
   }
 }
 
+.emp-apps-filter__field--actions {
+  min-width: 7.5rem;
+}
+
 .emp-apps-filter__actions {
   display: flex;
   flex-direction: column;
   gap: 0.45rem;
-  min-width: 7.5rem;
+  width: 100%;
+}
+
+.emp-apps-filter__actions .emp-apps-btn--filter {
+  min-height: 42px;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
 }
 
 .emp-apps-toolbar {

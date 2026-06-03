@@ -1,0 +1,18 @@
+@model JobPortal.Web.Helpers.NotificationDisplayHelper.NotificationItemModel
+
+<div class="notif-dropdown__icon" aria-hidden="true">
+    <span class="notif-dropdown__icon-circle">
+        <i class="bi @Model.IconClass"></i>
+    </span>
+</div>
+<div class="notif-dropdown__content">
+    <p class="notif-dropdown__text">
+        <strong>@Model.Title</strong>
+        <span>@Model.Message</span>
+    </p>
+    <time class="notif-dropdown__time">@Model.TimeLabel</time>
+</div>
+@if (!Model.IsRead)
+{
+    <span class="notif-dropdown__dot" aria-label="Chưa đọc"></span>
+}

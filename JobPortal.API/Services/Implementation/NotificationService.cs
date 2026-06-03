@@ -80,6 +80,60 @@ public class NotificationService : INotificationService
             applicationId,
             cancellationToken);
 
+    public Task NotifyWorkProgressUpdatedAsync(
+        long seekerUserId,
+        long applicationId,
+        string jobTitle,
+        string employerName,
+        string progressTitle,
+        string? notes,
+        CancellationToken cancellationToken = default)
+    {
+        var message = string.IsNullOrWhiteSpace(notes)
+            ? $"{employerName} cập nhật tiến độ công việc \"{jobTitle}\" sang: {progressTitle}."
+            : $"{employerName} cập nhật tiến độ \"{jobTitle}\" sang: {progressTitle}. Ghi chú: {notes.Trim()}";
+
+        return CreateAsync(
+            seekerUserId,
+            NotificationCatalog.WorkProgressUpdated,
+            "Tiến độ công việc được cập nhật",
+            message,
+            NotificationCatalog.ReferenceApplication,
+            applicationId,
+            cancellationToken);
+    }
+
+    public Task NotifyNewApplicationAsync(
+        long employerUserId,
+        long applicationId,
+        string applicantName,
+        string jobTitle,
+        CancellationToken cancellationToken = default) =>
+        CreateAsync(
+            employerUserId,
+            NotificationCatalog.NewApplication,
+            applicantName.Trim(),
+            $"Vừa nộp CV cho vị trí \"{jobTitle}\".",
+            NotificationCatalog.ReferenceApplication,
+            applicationId,
+            cancellationToken);
+
+    public Task NotifyReviewReceivedAsync(
+        long recipientUserId,
+        long applicationId,
+        string reviewerName,
+        string jobTitle,
+        int rating,
+        CancellationToken cancellationToken = default) =>
+        CreateAsync(
+            recipientUserId,
+            NotificationCatalog.ReviewReceived,
+            "Bạn nhận được đánh giá mới",
+            $"{reviewerName.Trim()} đánh giá bạn {rating}/5 sao cho công việc \"{jobTitle}\".",
+            NotificationCatalog.ReferenceApplication,
+            applicationId,
+            cancellationToken);
+
     public async Task<int> GetUnreadCountAsync(long userId, CancellationToken cancellationToken = default) =>
         await _context.UserNotifications
             .AsNoTracking()

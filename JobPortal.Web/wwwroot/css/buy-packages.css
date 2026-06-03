@@ -393,10 +393,19 @@
 }
 
 .buy-packages-note {
-  font-size: 0.8125rem;
+  margin-top: 1.5rem;
+  font-size: 0.875rem;
   color: #64748b;
-  text-align: center;
-  margin: 0;
+}
+
+.buy-packages-note__link {
+  font-weight: 600;
+  color: var(--jp-primary, #0000ee);
+  text-decoration: none;
+}
+
+.buy-packages-note__link:hover {
+  text-decoration: underline;
 }
 
 .buy-packages-empty {

@@ -1,0 +1,122 @@
+@model JobPortal.Web.Models.NotificationDropdownModel
+@{
+    var totalCount = Model.Groups.Sum(g => g.Items.Count);
+    var panelId = Model.RootId + "Panel";
+    var triggerId = Model.RootId + "Trigger";
+}
+
+<div class="notif-dropdown notif-dropdown--@Model.Variant"
+     id="@Model.RootId"
+     data-notif-dropdown
+     data-mark-read-url="@Model.MarkReadUrl"
+     data-mark-all-url="@Model.MarkAllReadUrl"
+     data-csrf-name="@Model.AntiForgeryFieldName"
+     data-csrf-token="@Model.AntiForgeryRequestToken">
+    <button type="button"
+            class="@Model.TriggerClass @(Model.IsActive ? "is-active" : "")"
+            id="@triggerId"
+            aria-label="Thông báo"
+            aria-expanded="false"
+            aria-controls="@panelId"
+            title="Thông báo"
+            data-notif-trigger>
+        <i class="bi bi-bell"></i>
+        <span class="@Model.BadgeClass @(Model.UnreadCount > 0 ? "" : "d-none")"
+              data-notif-badge
+              aria-hidden="@(Model.UnreadCount == 0)">@(Model.UnreadCount > 99 ? "99+" : Model.UnreadCount.ToString())</span>
+    </button>
+
+    <div class="notif-dropdown__panel"
+         id="@panelId"
+         role="dialog"
+         aria-label="Thông báo"
+         hidden
+         data-notif-panel>
+        <header class="notif-dropdown__header">
+            <h2 class="notif-dropdown__title">Thông báo</h2>
+            @if (Model.UnreadCount > 0)
+            {
+                <button type="button"
+                        class="notif-dropdown__mark-all"
+                        data-notif-mark-all
+                        title="Đánh dấu tất cả đã đọc">
+                    <i class="bi bi-check2-all"></i>
+                </button>
+            }
+        </header>
+
+        <div class="notif-dropdown__tabs" role="tablist" aria-label="Lọc thông báo">
+            <button type="button"
+                    class="notif-dropdown__tab is-active"
+                    role="tab"
+                    aria-selected="true"
+                    data-notif-filter="all">
+                Tất cả
+            </button>
+            <button type="button"
+                    class="notif-dropdown__tab"
+                    role="tab"
+                    aria-selected="false"
+                    data-notif-filter="unread">
+                Chưa đọc
+            </button>
+        </div>
+
+        <div class="notif-dropdown__body" data-notif-list>
+            @if (totalCount == 0)
+            {
+                <div class="notif-dropdown__empty" data-notif-empty>
+                    <i class="bi bi-bell-slash" aria-hidden="true"></i>
+                    <p>Chưa có thông báo nào.</p>
+                </div>
+            }
+            else
+            {
+                @foreach (var group in Model.Groups)
+                {
+                    <section class="notif-dropdown__section" data-notif-section>
+                        <div class="notif-dropdown__section-head">
+                            <h3 class="notif-dropdown__section-title">@group.Label</h3>
+                        </div>
+                        <ul class="notif-dropdown__items">
+                            @foreach (var item in group.Items)
+                            {
+                                <li class="notif-dropdown__item @(item.IsRead ? "is-read" : "is-unread")"
+                                    data-notif-item
+                                    data-notif-id="@item.Id"
+                                    data-notif-read="@(item.IsRead ? "true" : "false")">
+                                    @if (!string.IsNullOrEmpty(item.ActionUrl))
+                                    {
+                                        <a href="@item.ActionUrl"
+                                           class="notif-dropdown__link"
+                                           data-notif-link>
+                                            @await Html.PartialAsync("~/Pages/Shared/_NotificationItemContent.cshtml", item)
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <div class="notif-dropdown__link notif-dropdown__link--static"
+                                             data-notif-link>
+                                            @await Html.PartialAsync("~/Pages/Shared/_NotificationItemContent.cshtml", item)
+                                        </div>
+                                    }
+                                </li>
+                            }
+                        </ul>
+                    </section>
+                }
+
+                <div class="notif-dropdown__empty notif-dropdown__empty--filter d-none" data-notif-empty-unread>
+                    <i class="bi bi-check2-circle" aria-hidden="true"></i>
+                    <p>Không còn thông báo chưa đọc.</p>
+                </div>
+            }
+        </div>
+
+        <footer class="notif-dropdown__footer">
+            <a href="@Model.ViewAllUrl" class="notif-dropdown__view-all">
+                Xem tất cả thông báo
+            </a>
+        </footer>
+    </div>
+</div>

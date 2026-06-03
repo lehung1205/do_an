@@ -21,6 +21,7 @@ public class ApplicationService : IApplicationService
     private readonly IJobExpiryService _jobExpiryService;
     private readonly AppDbContext _context;
     private readonly IMapper _mapper;
+    private readonly INotificationService _notificationService;
 
     public ApplicationService(
         IApplicationRepository repository,
@@ -29,7 +30,8 @@ public class ApplicationService : IApplicationService
         IResumeRepository resumeRepository,
         IJobExpiryService jobExpiryService,
         AppDbContext context,
-        IMapper mapper)
+        IMapper mapper,
+        INotificationService notificationService)
     {
         _repository = repository;
         _jobSeekerRepository = jobSeekerRepository;
@@ -38,6 +40,7 @@ public class ApplicationService : IApplicationService
         _jobExpiryService = jobExpiryService;
         _context = context;
         _mapper = mapper;
+        _notificationService = notificationService;
     }
 
     public async Task<IReadOnlyList<ApplicationDto>> GetAllApplicationsAsync(CancellationToken cancellationToken = default)
@@ -144,6 +147,13 @@ public class ApplicationService : IApplicationService
         };
 
         await _repository.AddAsync(entity, cancellationToken);
+
+        await _notificationService.NotifyNewApplicationAsync(
+            job.Employer.UserId,
+            entity.Id,
+            jobSeeker.Name,
+            job.Title,
+            cancellationToken);
 
         return MapToMyApplicationDto(entity, job, resume);
     }

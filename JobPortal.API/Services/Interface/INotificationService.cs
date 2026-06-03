@@ -31,6 +31,22 @@ public interface INotificationService
         string employerName,
         CancellationToken cancellationToken = default);
 
+    Task NotifyWorkProgressUpdatedAsync(
+        long seekerUserId,
+        long applicationId,
+        string jobTitle,
+        string employerName,
+        string progressTitle,
+        string? notes,
+        CancellationToken cancellationToken = default);
+
+    Task NotifyNewApplicationAsync(
+        long employerUserId,
+        long applicationId,
+        string applicantName,
+        string jobTitle,
+        CancellationToken cancellationToken = default);
+
     Task<int> GetUnreadCountAsync(long userId, CancellationToken cancellationToken = default);
 
     Task<IReadOnlyList<UserNotificationDto>> GetNotificationsAsync(

@@ -12,6 +12,8 @@ public static class NotificationDisplayHelper
     {
         "job_approved" or "application_accepted" => "bi-check-circle-fill text-success",
         "job_rejected" or "application_rejected" => "bi-x-circle-fill text-danger",
+        "work_progress_updated" => "bi-graph-up-arrow text-primary",
+        "new_application" => "bi-person-plus-fill text-primary",
         _ => "bi-bell-fill text-primary"
     };
 
@@ -101,6 +103,11 @@ public static class NotificationDisplayHelper
             return null;
         }
 
+        if (string.Equals(notification.Type, "work_progress_updated", StringComparison.OrdinalIgnoreCase))
+        {
+            return urlPage("/Applications/WorkProgress/Detail", new { applicationId = notification.ReferenceId });
+        }
+
         var status = string.Equals(notification.Type, "application_accepted", StringComparison.OrdinalIgnoreCase)
             ? "accepted"
             : "rejected";
@@ -115,12 +122,18 @@ public static class NotificationDisplayHelper
             return null;
         }
 
-        if (!string.Equals(notification.ReferenceType, "job", StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(notification.ReferenceType, "job", StringComparison.OrdinalIgnoreCase))
         {
-            return null;
+            return urlPage("/Jobs/Detail", new { id = notification.ReferenceId.Value });
         }
 
-        return urlPage("/Jobs/Detail", new { id = notification.ReferenceId.Value });
+        if (string.Equals(notification.ReferenceType, "application", StringComparison.OrdinalIgnoreCase)
+            && string.Equals(notification.Type, "new_application", StringComparison.OrdinalIgnoreCase))
+        {
+            return urlPage("/Employer/Applicants", new { q = notification.Title });
+        }
+
+        return null;
     }
 
     public static IReadOnlyList<NotificationGroupModel> GroupNotifications(

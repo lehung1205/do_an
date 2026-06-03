@@ -83,6 +83,28 @@ public class PaymentsController : ControllerBase
         return Ok(ApiResponse<VnPayPaymentResponse>.SuccessResponse(response, "VNPay payment URL created successfully."));
     }
 
+    [HttpGet("me/history")]
+    [Authorize(Roles = "EMPLOYER")]
+    public async Task<IActionResult> GetMyPaymentHistory(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string? status = null,
+        [FromQuery] string? q = null,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _paymentHistoryService.GetEmployerPaymentHistoryForUserAsync(
+            GetCurrentUserId(),
+            page,
+            pageSize,
+            status,
+            q,
+            cancellationToken);
+
+        return Ok(ApiResponse<EmployerPaymentHistoryResultDto>.SuccessResponse(
+            result,
+            "Employer payment history retrieved successfully."));
+    }
+
     [HttpGet("vnpay-return")]
     [AllowAnonymous]
     public async Task<IActionResult> VnPayReturn(CancellationToken cancellationToken)

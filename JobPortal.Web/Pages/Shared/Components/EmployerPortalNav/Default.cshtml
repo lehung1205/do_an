@@ -48,6 +48,9 @@
         <a asp-page="/Employer/BuyPackages" class="employer-dash__nav-link @(Model.IsActive(EmployerPortalNavKeys.Packages) ? "is-active" : "")">
             <span><i class="bi bi-bag-heart"></i> Mua gói dịch vụ</span>
         </a>
+        <a asp-page="/Employer/PaymentHistory/Index" class="employer-dash__nav-link @(Model.IsActive(EmployerPortalNavKeys.PaymentHistory) ? "is-active" : "")">
+            <span><i class="bi bi-receipt"></i> Lịch sử thanh toán</span>
+        </a>
         <a asp-page="/Privacy" class="employer-dash__nav-link">
             <span><i class="bi bi-shield-check"></i> Chính sách</span>
         </a>

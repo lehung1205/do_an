@@ -2,50 +2,153 @@
 @model JobPortal.Web.Pages.Auth.LoginModel
 @{
     ViewData["Title"] = "Đăng nhập";
+    ViewData["AuthFocusLayout"] = true;
 }
 
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-5 col-lg-4">
-            <div class="card auth-card jg-card">
-                <div class="card-body p-4">
-                    <h1 class="h4 mb-1 text-center">Đăng nhập</h1>
-                    <p class="text-muted small text-center mb-4">Chào mừng bạn quay lại JobPortal</p>
-
-                    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
-                    {
-                        <div class="alert alert-danger py-2 small">@Model.ErrorMessage</div>
-                    }
-
-                    <form method="post">
-                        <input type="hidden" asp-for="ReturnUrl" />
-                        <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
-
-                        <div class="mb-3">
-                            <label asp-for="Input.Identifier" class="form-label"></label>
-                            <input asp-for="Input.Identifier" class="form-control" placeholder="email@example.com" />
-                            <span asp-validation-for="Input.Identifier" class="text-danger small"></span>
-                        </div>
-
-                        <div class="mb-4">
-                            <label asp-for="Input.Password" class="form-label"></label>
-                            <input asp-for="Input.Password" class="form-control" />
-                            <span asp-validation-for="Input.Password" class="text-danger small"></span>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary w-100">Đăng nhập</button>
-                    </form>
-
-                    <p class="text-center text-muted small mt-4 mb-0">
-                        Chưa có tài khoản?
-                        <a asp-page="/Auth/Register">Đăng ký ngay</a>
-                    </p>
-                </div>
-            </div>
+<div class="auth-login">
+    <section class="auth-login__hero" aria-labelledby="auth-login-hero-title">
+        <div class="auth-login__hero-bg" aria-hidden="true"></div>
+        <div class="auth-login__hero-content">
+            <p class="auth-login__eyebrow">Nền tảng việc làm part-time</p>
+            <h2 id="auth-login-hero-title" class="auth-login__hero-title">
+                Kết nối ứng viên<br />và nhà tuyển dụng
+            </h2>
+            <p class="auth-login__hero-lead">
+                Tìm việc, ứng tuyển và theo dõi tiến độ trên một hệ thống thống nhất — minh bạch, dễ sử dụng.
+            </p>
+            <ul class="auth-login__highlights">
+                <li>
+                    <span class="auth-login__highlight-icon"><i class="bi bi-lightning-charge-fill"></i></span>
+                    <span class="auth-login__highlight-text">
+                        <strong>Ứng tuyển nhanh</strong>
+                        <small>Gửi hồ sơ chỉ vài bước, theo dõi trạng thái realtime</small>
+                    </span>
+                </li>
+                <li>
+                    <span class="auth-login__highlight-icon"><i class="bi bi-chat-left-text-fill"></i></span>
+                    <span class="auth-login__highlight-text">
+                        <strong>Trao đổi trực tiếp</strong>
+                        <small>Nhắn tin với nhà tuyển dụng ngay trên nền tảng</small>
+                    </span>
+                </li>
+                <li>
+                    <span class="auth-login__highlight-icon"><i class="bi bi-clipboard2-check-fill"></i></span>
+                    <span class="auth-login__highlight-text">
+                        <strong>Tiến độ rõ ràng</strong>
+                        <small>Cập nhật công việc và đánh giá sau khi hoàn thành</small>
+                    </span>
+                </li>
+            </ul>
         </div>
-    </div>
+        <a asp-page="/Jobs/Index" class="auth-login__hero-cta">
+            Khám phá việc làm <i class="bi bi-arrow-right" aria-hidden="true"></i>
+        </a>
+    </section>
+
+    <section class="auth-login__form-panel" aria-labelledby="auth-login-form-title">
+        <div class="auth-login__form-wrap">
+            <header class="auth-login__form-header">
+                <h1 id="auth-login-form-title" class="auth-login__form-title">Đăng nhập</h1>
+                <p class="auth-login__form-subtitle">Nhập email hoặc số điện thoại và mật khẩu để tiếp tục.</p>
+            </header>
+
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <div class="alert alert-danger auth-login__alert" role="alert">
+                    <i class="bi bi-exclamation-circle-fill" aria-hidden="true"></i>
+                    <span>@Model.ErrorMessage</span>
+                </div>
+            }
+
+            <form method="post" class="auth-login__form" novalidate>
+                <input type="hidden" asp-for="ReturnUrl" />
+                <div asp-validation-summary="ModelOnly" class="auth-login__validation text-danger"></div>
+
+                <div class="auth-login__field">
+                    <label asp-for="Input.Identifier" class="auth-login__label"></label>
+                    <div class="auth-login__input-group">
+                        <span class="auth-login__input-prefix" aria-hidden="true"><i class="bi bi-person"></i></span>
+                        <input asp-for="Input.Identifier"
+                               class="form-control auth-login__input"
+                               placeholder="email@example.com hoặc 09xxxxxxxx"
+                               autocomplete="username" />
+                    </div>
+                    <span asp-validation-for="Input.Identifier" class="auth-login__field-error text-danger"></span>
+                </div>
+
+                <div class="auth-login__field">
+                    <label asp-for="Input.Password" class="auth-login__label"></label>
+                    <div class="auth-login__input-group">
+                        <span class="auth-login__input-prefix" aria-hidden="true"><i class="bi bi-lock"></i></span>
+                        <input asp-for="Input.Password"
+                               class="form-control auth-login__input auth-login__input--password"
+                               id="loginPassword"
+                               placeholder="Mật khẩu của bạn"
+                               autocomplete="current-password" />
+                        <button type="button"
+                                class="auth-login__toggle-pw"
+                                id="loginTogglePassword"
+                                aria-label="Hiện mật khẩu"
+                                tabindex="-1">
+                            <i class="bi bi-eye" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    <span asp-validation-for="Input.Password" class="auth-login__field-error text-danger"></span>
+                </div>
+
+                <button type="submit" class="btn auth-login__submit w-100">
+                    Đăng nhập
+                    <i class="bi bi-arrow-right-short" aria-hidden="true"></i>
+                </button>
+            </form>
+
+            <div class="auth-login__register">
+                <span>Chưa có tài khoản?</span>
+                <a asp-page="/Auth/Register" class="auth-login__register-link">Đăng ký miễn phí</a>
+            </div>
+
+            <div class="auth-login__roles" role="group" aria-label="Đăng ký theo vai trò">
+                <a asp-page="/Auth/Register" asp-route-role="JOB_SEEKER" class="auth-login__role-card">
+                    <i class="bi bi-person-badge" aria-hidden="true"></i>
+                    <span>Ứng viên</span>
+                </a>
+                <a asp-page="/Auth/Register" asp-route-role="EMPLOYER" class="auth-login__role-card">
+                    <i class="bi bi-building" aria-hidden="true"></i>
+                    <span>Nhà tuyển dụng</span>
+                </a>
+            </div>
+
+            <p class="auth-login__browse">
+                <a asp-page="/Jobs/Index">
+                    <i class="bi bi-search" aria-hidden="true"></i>
+                    Xem việc làm không cần đăng nhập
+                </a>
+            </p>
+        </div>
+    </section>
 </div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/auth-login.css" asp-append-version="true" />
+}
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            var input = document.getElementById('loginPassword');
+            var btn = document.getElementById('loginTogglePassword');
+            if (!input || !btn) return;
+            btn.addEventListener('click', function () {
+                var show = input.type === 'password';
+                input.type = show ? 'text' : 'password';
+                btn.setAttribute('aria-label', show ? 'Ẩn mật khẩu' : 'Hiện mật khẩu');
+                var icon = btn.querySelector('i');
+                if (icon) {
+                    icon.classList.toggle('bi-eye', !show);
+                    icon.classList.toggle('bi-eye-slash', show);
+                }
+            });
+        })();
+    </script>
 }

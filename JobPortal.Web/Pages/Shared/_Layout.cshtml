@@ -13,6 +13,8 @@
         && !isAdminPortalChrome
         && (string.Equals(layoutUserRole, "JOB_SEEKER", StringComparison.Ordinal) && !isEmployerPortalChrome
             || layoutIsEmployer && isEmployerPortalChrome);
+    var authFocusLayout = ViewData["AuthFocusLayout"] as bool? == true;
+    var isAuthRegisterPage = string.Equals(layoutCurrentPage, "/Auth/Register", StringComparison.OrdinalIgnoreCase);
 }
 <!DOCTYPE html>
 <html lang="vi">
@@ -36,8 +38,33 @@
     @await RenderSectionAsync("Styles", required: false)
     @await RenderSectionAsync("EmployerStyles", required: false)
 </head>
-<body class="site-body@(isEmployerPortalChrome ? " employer-portal-mode" : "")@(isAdminPortalChrome ? " admin-portal-mode" : "")">
+<body class="site-body@(isEmployerPortalChrome ? " employer-portal-mode" : "")@(isAdminPortalChrome ? " admin-portal-mode" : "")@(authFocusLayout ? " auth-focus-layout" : "")">
     @if (!isEmployerPortalChrome && !isAdminPortalChrome)
+    {
+    @if (authFocusLayout)
+    {
+    <header class="auth-focus-header">
+        <div class="auth-focus-header__inner">
+            <a class="auth-focus-header__brand" asp-page="/Index">
+                <i class="bi bi-briefcase-fill" aria-hidden="true"></i>
+                <span>JobPortal</span>
+            </a>
+            <nav class="auth-focus-header__nav" aria-label="Điều hướng">
+                <a class="auth-focus-header__link" asp-page="/Jobs/Index">Việc làm</a>
+                <a class="auth-focus-header__link" asp-page="/Privacy">Chính sách</a>
+                @if (isAuthRegisterPage)
+                {
+                    <a class="btn btn-outline-primary btn-sm auth-focus-header__cta" asp-page="/Auth/Login">Đăng nhập</a>
+                }
+                else
+                {
+                    <a class="btn btn-primary btn-sm auth-focus-header__cta" asp-page="/Auth/Register">Đăng ký</a>
+                }
+            </nav>
+        </div>
+    </header>
+    }
+    else
     {
     <header class="site-header">
         <nav class="navbar navbar-expand-lg navbar-light">
@@ -209,12 +236,16 @@
         </nav>
     </header>
     }
+    }
 
-    <main role="main" class="@(isEmployerPortalChrome ? "employer-portal-main" : "")@(isAdminPortalChrome ? " admin-portal-main" : "")">
+    <main role="main" class="@(isEmployerPortalChrome ? "employer-portal-main" : "")@(isAdminPortalChrome ? " admin-portal-main" : "")@(authFocusLayout ? " auth-focus-main" : "")">
         @RenderBody()
     </main>
 
-    <partial name="_SiteFooter" />
+    @if (!authFocusLayout)
+    {
+        <partial name="_SiteFooter" />
+    }
 
     @if (isLoggedIn)
     {

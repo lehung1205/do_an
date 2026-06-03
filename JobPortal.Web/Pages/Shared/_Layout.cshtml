@@ -9,6 +9,10 @@
         && (ViewData["AdminPortalChrome"] as bool? == true
             || layoutCurrentPage.StartsWith("/Admin/", StringComparison.OrdinalIgnoreCase));
     var showN8nChatbot = JobPortal.Web.Pages.Chatbot.WebhookModel.IsChatbotAllowed(isLoggedIn, layoutUserRole);
+    var showNotificationDropdownAssets = isLoggedIn
+        && !isAdminPortalChrome
+        && (string.Equals(layoutUserRole, "JOB_SEEKER", StringComparison.Ordinal) && !isEmployerPortalChrome
+            || layoutIsEmployer && isEmployerPortalChrome);
 }
 <!DOCTYPE html>
 <html lang="vi">
@@ -20,6 +24,10 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/jobsgo-theme.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    @if (showNotificationDropdownAssets)
+    {
+        <link rel="stylesheet" href="~/css/notification-dropdown.css" asp-append-version="true" />
+    }
     <link rel="stylesheet" href="~/JobPortal.Web.styles.css" asp-append-version="true" />
     @if (isAdminPortalChrome)
     {
@@ -115,13 +123,7 @@
                             @if (isJobSeeker)
                             {
                                 <li class="nav-item nav-quick-actions">
-                                    <a asp-page="/Notifications/Index"
-                                       class="site-nav-icon-btn @(isSeekerNotificationsPage ? "is-active" : "")"
-                                       title="Thông báo"
-                                       aria-label="Thông báo">
-                                        <i class="bi bi-bell"></i>
-                                        @await Component.InvokeAsync("NotificationNavBadge")
-                                    </a>
+                                    @await Component.InvokeAsync("NotificationDropdown", new { variant = "seeker", isActive = isSeekerNotificationsPage })
                                     <a asp-page="/Messages/Index"
                                        class="site-nav-icon-btn @(isSeekerMessagesPage ? "is-active" : "")"
                                        title="Tin nhắn"
@@ -228,6 +230,10 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    @if (showNotificationDropdownAssets)
+    {
+        <script src="~/js/notification-dropdown.js" asp-append-version="true"></script>
+    }
     @await RenderSectionAsync("Scripts", required: false)
     @await RenderSectionAsync("EmployerScripts", required: false)
 </body>

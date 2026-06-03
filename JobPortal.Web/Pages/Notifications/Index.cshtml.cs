@@ -1,4 +1,5 @@
 using JobPortal.Web.Dtos;
+using JobPortal.Web.Helpers;
 using JobPortal.Web.Models;
 using JobPortal.Web.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -84,61 +85,13 @@ public class IndexModel : PageModel
         return null;
     }
 
-    public static string FormatRelativeTime(DateTime createdAtUtc)
-    {
-        var created = createdAtUtc.ToLocalTime();
-        var diff = DateTime.Now - created;
+    public static string FormatRelativeTime(DateTime createdAtUtc) =>
+        NotificationDisplayHelper.FormatRelativeTime(createdAtUtc);
 
-        if (diff.TotalMinutes < 1)
-        {
-            return "Vừa xong";
-        }
+    public string? GetActionUrl(UserNotificationDto notification) =>
+        IsEmployer
+            ? NotificationDisplayHelper.GetEmployerActionUrl(notification, (page, route) => Url.Page(page, route))
+            : NotificationDisplayHelper.GetSeekerActionUrl(notification, (page, route) => Url.Page(page, route));
 
-        if (diff.TotalHours < 1)
-        {
-            return $"{(int)diff.TotalMinutes} phút trước";
-        }
-
-        if (diff.TotalDays < 1)
-        {
-            return $"{(int)diff.TotalHours} giờ trước";
-        }
-
-        if (diff.TotalDays < 7)
-        {
-            return $"{(int)diff.TotalDays} ngày trước";
-        }
-
-        return created.ToString("dd/MM/yyyy HH:mm");
-    }
-
-    public string? GetActionUrl(UserNotificationDto notification)
-    {
-        if (notification.ReferenceId == null || string.IsNullOrWhiteSpace(notification.ReferenceType))
-        {
-            return null;
-        }
-
-        if (IsEmployer && string.Equals(notification.ReferenceType, "job", StringComparison.OrdinalIgnoreCase))
-        {
-            return Url.Page("/Employer/Jobs");
-        }
-
-        if (!IsEmployer && string.Equals(notification.ReferenceType, "application", StringComparison.OrdinalIgnoreCase))
-        {
-            var status = string.Equals(notification.Type, "application_accepted", StringComparison.OrdinalIgnoreCase)
-                ? "accepted"
-                : "rejected";
-            return Url.Page("/Applications/Index", new { status });
-        }
-
-        return null;
-    }
-
-    public static string IconClass(string type) => type switch
-    {
-        "job_approved" or "application_accepted" => "bi-check-circle-fill text-success",
-        "job_rejected" or "application_rejected" => "bi-x-circle-fill text-danger",
-        _ => "bi-bell-fill text-primary"
-    };
+    public static string IconClass(string type) => NotificationDisplayHelper.IconClass(type);
 }

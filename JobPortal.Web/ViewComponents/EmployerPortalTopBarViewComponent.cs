@@ -26,6 +26,8 @@ public class EmployerPortalTopBarViewComponent : ViewComponent
 
         var userName = HttpContext.Session.GetString("UserName") ?? "Tài khoản";
         var avatarUrl = HttpContext.Session.GetString("UserAvatarUrl");
+        var currentPage = ViewContext.RouteData.Values["page"]?.ToString() ?? "";
+        var isNotificationsPage = string.Equals(currentPage, "/Notifications/Index", StringComparison.OrdinalIgnoreCase);
 
         return View(new EmployerPortalTopBarViewModel
         {
@@ -33,7 +35,8 @@ public class EmployerPortalTopBarViewComponent : ViewComponent
             Support = _support,
             UserName = userName,
             UserAvatarUrl = avatarUrl,
-            UserInitials = AccountPanelViewModel.GetInitials(userName)
+            UserInitials = AccountPanelViewModel.GetInitials(userName),
+            IsNotificationsPage = isNotificationsPage
         });
     }
 }
@@ -45,4 +48,6 @@ public class EmployerPortalTopBarViewModel
     public string UserName { get; init; } = "";
     public string? UserAvatarUrl { get; init; }
     public string UserInitials { get; init; } = "?";
+
+    public bool IsNotificationsPage { get; init; }
 }

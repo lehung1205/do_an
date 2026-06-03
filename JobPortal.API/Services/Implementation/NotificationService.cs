@@ -118,6 +118,22 @@ public class NotificationService : INotificationService
             applicationId,
             cancellationToken);
 
+    public Task NotifyReviewReceivedAsync(
+        long recipientUserId,
+        long applicationId,
+        string reviewerName,
+        string jobTitle,
+        int rating,
+        CancellationToken cancellationToken = default) =>
+        CreateAsync(
+            recipientUserId,
+            NotificationCatalog.ReviewReceived,
+            "Bạn nhận được đánh giá mới",
+            $"{reviewerName.Trim()} đánh giá bạn {rating}/5 sao cho công việc \"{jobTitle}\".",
+            NotificationCatalog.ReferenceApplication,
+            applicationId,
+            cancellationToken);
+
     public async Task<int> GetUnreadCountAsync(long userId, CancellationToken cancellationToken = default) =>
         await _context.UserNotifications
             .AsNoTracking()

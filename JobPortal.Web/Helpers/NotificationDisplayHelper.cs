@@ -14,6 +14,7 @@ public static class NotificationDisplayHelper
         "job_rejected" or "application_rejected" => "bi-x-circle-fill text-danger",
         "work_progress_updated" => "bi-graph-up-arrow text-primary",
         "new_application" => "bi-person-plus-fill text-primary",
+        "review_received" => "bi-star-fill text-warning",
         _ => "bi-bell-fill text-primary"
     };
 
@@ -103,16 +104,23 @@ public static class NotificationDisplayHelper
             return null;
         }
 
-        if (string.Equals(notification.Type, "work_progress_updated", StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(notification.Type, "work_progress_updated", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(notification.Type, "review_received", StringComparison.OrdinalIgnoreCase))
         {
             return urlPage("/Applications/WorkProgress/Detail", new { applicationId = notification.ReferenceId });
         }
 
-        var status = string.Equals(notification.Type, "application_accepted", StringComparison.OrdinalIgnoreCase)
-            ? "accepted"
-            : "rejected";
+        if (string.Equals(notification.Type, "application_accepted", StringComparison.OrdinalIgnoreCase))
+        {
+            return urlPage("/Applications/Index", new { status = "accepted" });
+        }
 
-        return urlPage("/Applications/Index", new { status });
+        if (string.Equals(notification.Type, "application_rejected", StringComparison.OrdinalIgnoreCase))
+        {
+            return urlPage("/Applications/Index", new { status = "rejected" });
+        }
+
+        return null;
     }
 
     public static string? GetEmployerActionUrl(UserNotificationDto notification, Func<string, object?, string?> urlPage)
@@ -131,6 +139,12 @@ public static class NotificationDisplayHelper
             && string.Equals(notification.Type, "new_application", StringComparison.OrdinalIgnoreCase))
         {
             return urlPage("/Employer/Applicants", new { q = notification.Title });
+        }
+
+        if (string.Equals(notification.ReferenceType, "application", StringComparison.OrdinalIgnoreCase)
+            && string.Equals(notification.Type, "review_received", StringComparison.OrdinalIgnoreCase))
+        {
+            return urlPage("/Employer/WorkProgress/Detail", new { applicationId = notification.ReferenceId });
         }
 
         return null;

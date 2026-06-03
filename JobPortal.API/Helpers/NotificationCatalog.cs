@@ -8,6 +8,7 @@ public static class NotificationCatalog
     public const string ApplicationRejected = "application_rejected";
     public const string WorkProgressUpdated = "work_progress_updated";
     public const string NewApplication = "new_application";
+    public const string ReviewReceived = "review_received";
 
     public const string ReferenceJob = "job";
     public const string ReferenceApplication = "application";

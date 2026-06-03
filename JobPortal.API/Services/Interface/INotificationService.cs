@@ -47,6 +47,14 @@ public interface INotificationService
         string jobTitle,
         CancellationToken cancellationToken = default);
 
+    Task NotifyReviewReceivedAsync(
+        long recipientUserId,
+        long applicationId,
+        string reviewerName,
+        string jobTitle,
+        int rating,
+        CancellationToken cancellationToken = default);
+
     Task<int> GetUnreadCountAsync(long userId, CancellationToken cancellationToken = default);
 
     Task<IReadOnlyList<UserNotificationDto>> GetNotificationsAsync(

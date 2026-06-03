@@ -5,13 +5,12 @@
 }
 
 <div class="container py-4 py-lg-5 policy-page">
+    <partial name="Shared/_PageBackLink" model='new JobPortal.Web.Models.PageBackLinkModel {
+        PagePath = "/Index",
+        Label = "Quay lại trang chủ"
+    }' />
+
     <header class="policy-page__header mb-4 mb-lg-5">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb small mb-2">
-                <li class="breadcrumb-item"><a asp-page="/Index">Trang chủ</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Chính sách</li>
-            </ol>
-        </nav>
         <h1 class="policy-page__title h2 mb-2">Chính sách &amp; điều khoản sử dụng</h1>
         <p class="text-muted mb-0">
             Cập nhật lần cuối: @Model.LastUpdated.ToString("dd/MM/yyyy").

@@ -1,9 +1,10 @@
 @page
 @model JobPortal.Web.Pages.Admin.Payments.IndexModel
 @using System.Text.Json
+@using PaymentsPage = JobPortal.Web.Pages.Admin.Payments.IndexModel
 @{
     ViewData["Title"] = "Doanh thu & lịch sử mua";
-    var routeStatus = Model.StatusFilter ?? IndexModel.StatusAll;
+    var routeStatus = Model.StatusFilter ?? PaymentsPage.StatusAll;
     var revenue = Model.Revenue;
 }
 
@@ -27,7 +28,7 @@
                     <div class="admin-payments__kpi card border-0 h-100">
                         <div class="card-body">
                             <div class="admin-payments__kpi-label">Tổng doanh thu</div>
-                            <div class="admin-payments__kpi-value">@IndexModel.FormatMoney(revenue.TotalRevenue)</div>
+                            <div class="admin-payments__kpi-value">@PaymentsPage.FormatMoney(revenue.TotalRevenue)</div>
                             <div class="admin-payments__kpi-meta text-muted">@revenue.PaidTransactionCount giao dịch thành công</div>
                         </div>
                     </div>
@@ -36,7 +37,7 @@
                     <div class="admin-payments__kpi card border-0 h-100">
                         <div class="card-body">
                             <div class="admin-payments__kpi-label">Doanh thu tháng này</div>
-                            <div class="admin-payments__kpi-value">@IndexModel.FormatMoney(revenue.MonthRevenue)</div>
+                            <div class="admin-payments__kpi-value">@PaymentsPage.FormatMoney(revenue.MonthRevenue)</div>
                             <div class="admin-payments__kpi-meta text-muted">Theo ngày thanh toán</div>
                         </div>
                     </div>
@@ -45,7 +46,7 @@
                     <div class="admin-payments__kpi card border-0 h-100">
                         <div class="card-body">
                             <div class="admin-payments__kpi-label">Doanh thu hôm nay</div>
-                            <div class="admin-payments__kpi-value">@IndexModel.FormatMoney(revenue.TodayRevenue)</div>
+                            <div class="admin-payments__kpi-value">@PaymentsPage.FormatMoney(revenue.TodayRevenue)</div>
                             <div class="admin-payments__kpi-meta text-muted">UTC</div>
                         </div>
                     </div>
@@ -193,14 +194,14 @@
                                             <div class="small text-muted">@p.EmployerEmail</div>
                                         </td>
                                         <td>@p.PackageName</td>
-                                        <td class="text-end fw-semibold">@IndexModel.FormatMoney(p.Amount)</td>
+                                        <td class="text-end fw-semibold">@PaymentsPage.FormatMoney(p.Amount)</td>
                                         <td>
                                             <span class="badge rounded-pill @Model.StatusBadgeClass(p.Status)">
                                                 @Model.StatusLabel(p.Status)
                                             </span>
                                         </td>
-                                        <td class="small">@IndexModel.FormatDateTime(p.PaymentDate)</td>
-                                        <td class="small text-muted">@IndexModel.FormatDateTime(p.CreatedAt)</td>
+                                        <td class="small">@PaymentsPage.FormatDateTime(p.PaymentDate)</td>
+                                        <td class="small text-muted">@PaymentsPage.FormatDateTime(p.CreatedAt)</td>
                                         <td class="text-end">
                                             <a class="btn btn-sm admin-payments__btn admin-payments__btn--invoice"
                                                asp-page="/Admin/Payments/Index"

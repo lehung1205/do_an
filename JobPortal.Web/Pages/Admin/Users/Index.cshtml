@@ -1,6 +1,7 @@
 @page
 @model JobPortal.Web.Pages.Admin.Users.IndexModel
 @using JobPortal.Web.Models
+@using UsersPage = JobPortal.Web.Pages.Admin.Users.IndexModel
 @{
     ViewData["Title"] = "Quản lý tài khoản";
     var routeStatus = Model.StatusFilter ?? "all";
@@ -59,7 +60,7 @@
         <nav class="admin-users-tabs" aria-label="Loại tài khoản">
             <a class="admin-users-tab @(Model.IsEmployersTab ? "is-active" : "")"
                asp-page="/Admin/Users/Index"
-               asp-route-tab="@IndexModel.EmployersTab"
+               asp-route-tab="@UsersPage.EmployersTab"
                asp-route-status="@statusRoute"
                asp-route-q="@Model.Search"
                asp-route-page="1"
@@ -72,7 +73,7 @@
             </a>
             <a class="admin-users-tab @(!Model.IsEmployersTab ? "is-active" : "")"
                asp-page="/Admin/Users/Index"
-               asp-route-tab="@IndexModel.JobSeekersTab"
+               asp-route-tab="@UsersPage.JobSeekersTab"
                asp-route-status="@statusRoute"
                asp-route-q="@Model.Search"
                asp-route-page="1"
@@ -173,7 +174,7 @@
                 <div class="admin-users-empty admin-users-empty--compact">
                     <i class="bi bi-funnel display-6 text-muted mb-2 d-block"></i>
                     <p class="mb-3 text-muted">Không có nhà tuyển dụng phù hợp bộ lọc.</p>
-                    <a asp-page="/Admin/Users/Index" asp-route-tab="@IndexModel.EmployersTab"
+                    <a asp-page="/Admin/Users/Index" asp-route-tab="@UsersPage.EmployersTab"
                        class="btn btn-sm admin-payments__btn admin-payments__btn--filter">Xem tất cả</a>
                 </div>
             }
@@ -182,9 +183,9 @@
                 <div class="admin-users-list">
                     @foreach (var e in Model.Employers)
                     {
-                        var isActive = IndexModel.IsActiveStatus(e.Status);
+                        var isActive = UsersPage.IsActiveStatus(e.Status);
                         var slotsUsed = Math.Min(e.JobCount, e.PostingLimit);
-                        <article class="admin-user-card @IndexModel.StatusCardModifier(e.Status)">
+                        <article class="admin-user-card @UsersPage.StatusCardModifier(e.Status)">
                             <div class="admin-user-card__avatar-wrap">
                                 <span class="admin-user-card__avatar" aria-hidden="true">
                                     @if (!string.IsNullOrWhiteSpace(e.Image))
@@ -207,8 +208,8 @@
                                         <p class="admin-user-card__email"><i class="bi bi-envelope me-1"></i>@e.Email</p>
                                     </div>
                                     <div class="admin-user-card__badges">
-                                        <span class="admin-users-badge @IndexModel.StatusBadgeClass(e.Status)">
-                                            @IndexModel.FormatStatus(e.Status)
+                                        <span class="admin-users-badge @UsersPage.StatusBadgeClass(e.Status)">
+                                            @UsersPage.FormatStatus(e.Status)
                                         </span>
                                         @if (e.EmailVerified)
                                         {
@@ -249,8 +250,8 @@
                                     {
                                         <span><i class="bi bi-telephone"></i>@e.Phone</span>
                                     }
-                                    <span><i class="bi bi-calendar-plus"></i>Tạo @IndexModel.FormatDate(e.CreatedAt)</span>
-                                    <span><i class="bi bi-clock-history"></i>Cập nhật @IndexModel.FormatRelativeUpdated(e.UpdatedAt, e.CreatedAt)</span>
+                                    <span><i class="bi bi-calendar-plus"></i>Tạo @UsersPage.FormatDate(e.CreatedAt)</span>
+                                    <span><i class="bi bi-clock-history"></i>Cập nhật @UsersPage.FormatRelativeUpdated(e.UpdatedAt, e.CreatedAt)</span>
                                     <span><i class="bi bi-hash"></i>ID @e.Id · User #@e.UserId</span>
                                 </div>
                             </div>
@@ -308,7 +309,7 @@
                 <div class="admin-users-empty admin-users-empty--compact">
                     <i class="bi bi-funnel display-6 text-muted mb-2 d-block"></i>
                     <p class="mb-3 text-muted">Không có ứng viên phù hợp bộ lọc.</p>
-                    <a asp-page="/Admin/Users/Index" asp-route-tab="@IndexModel.JobSeekersTab"
+                    <a asp-page="/Admin/Users/Index" asp-route-tab="@UsersPage.JobSeekersTab"
                        class="btn btn-sm admin-payments__btn admin-payments__btn--filter">Xem tất cả</a>
                 </div>
             }
@@ -317,8 +318,8 @@
                 <div class="admin-users-list">
                     @foreach (var s in Model.JobSeekers)
                     {
-                        var isActive = IndexModel.IsActiveStatus(s.Status);
-                        <article class="admin-user-card @IndexModel.StatusCardModifier(s.Status)">
+                        var isActive = UsersPage.IsActiveStatus(s.Status);
+                        <article class="admin-user-card @UsersPage.StatusCardModifier(s.Status)">
                             <div class="admin-user-card__avatar-wrap">
                                 <span class="admin-user-card__avatar" aria-hidden="true">
                                     @if (!string.IsNullOrWhiteSpace(s.ProfileImage))
@@ -341,8 +342,8 @@
                                         <p class="admin-user-card__email"><i class="bi bi-envelope me-1"></i>@s.Email</p>
                                     </div>
                                     <div class="admin-user-card__badges">
-                                        <span class="admin-users-badge @IndexModel.StatusBadgeClass(s.Status)">
-                                            @IndexModel.FormatStatus(s.Status)
+                                        <span class="admin-users-badge @UsersPage.StatusBadgeClass(s.Status)">
+                                            @UsersPage.FormatStatus(s.Status)
                                         </span>
                                         @if (s.EmailVerified)
                                         {
@@ -383,8 +384,8 @@
                                     {
                                         <span><i class="bi bi-telephone"></i>@s.Phone</span>
                                     }
-                                    <span><i class="bi bi-calendar-plus"></i>Tạo @IndexModel.FormatDate(s.CreatedAt)</span>
-                                    <span><i class="bi bi-clock-history"></i>Cập nhật @IndexModel.FormatRelativeUpdated(s.UpdatedAt, s.CreatedAt)</span>
+                                    <span><i class="bi bi-calendar-plus"></i>Tạo @UsersPage.FormatDate(s.CreatedAt)</span>
+                                    <span><i class="bi bi-clock-history"></i>Cập nhật @UsersPage.FormatRelativeUpdated(s.UpdatedAt, s.CreatedAt)</span>
                                     <span><i class="bi bi-hash"></i>ID @s.Id · User #@s.UserId</span>
                                 </div>
                             </div>

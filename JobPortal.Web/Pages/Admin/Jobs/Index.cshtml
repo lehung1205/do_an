@@ -1,6 +1,7 @@
 @page
 @model JobPortal.Web.Pages.Admin.Jobs.IndexModel
 @using JobPortal.Web.Models
+@using JobsPage = JobPortal.Web.Pages.Admin.Jobs.IndexModel
 @{
     ViewData["Title"] = "Duyệt tin tuyển dụng";
 }
@@ -59,38 +60,38 @@
         {
             <nav class="admin-jobs-stats" aria-label="Lọc theo trạng thái tin">
                 <a asp-page="/Admin/Jobs/Index"
-                   asp-route-status="@IndexModel.StatusPending"
+                   asp-route-status="@JobsPage.StatusPending"
                    asp-route-q="@Model.Search"
                    asp-route-pageNumber="1"
                    asp-route-pageSize="@Model.PageSize"
-                   class="admin-jobs-stat admin-jobs-stat--pending @(Model.StatusFilter == IndexModel.StatusPending ? "is-active" : "")">
+                   class="admin-jobs-stat admin-jobs-stat--pending @(Model.StatusFilter == JobsPage.StatusPending ? "is-active" : "")">
                     <span class="admin-jobs-stat__label">Chờ duyệt</span>
                     <span class="admin-jobs-stat__value">@(Model.Summary?.PendingCount ?? 0)</span>
                 </a>
                 <a asp-page="/Admin/Jobs/Index"
-                   asp-route-status="@IndexModel.StatusApproved"
+                   asp-route-status="@JobsPage.StatusApproved"
                    asp-route-q="@Model.Search"
                    asp-route-pageNumber="1"
                    asp-route-pageSize="@Model.PageSize"
-                   class="admin-jobs-stat admin-jobs-stat--approved @(Model.StatusFilter == IndexModel.StatusApproved ? "is-active" : "")">
+                   class="admin-jobs-stat admin-jobs-stat--approved @(Model.StatusFilter == JobsPage.StatusApproved ? "is-active" : "")">
                     <span class="admin-jobs-stat__label">Đã duyệt</span>
                     <span class="admin-jobs-stat__value">@(Model.Summary?.RecruitingCount ?? 0)</span>
                 </a>
                 <a asp-page="/Admin/Jobs/Index"
-                   asp-route-status="@IndexModel.StatusRejected"
+                   asp-route-status="@JobsPage.StatusRejected"
                    asp-route-q="@Model.Search"
                    asp-route-pageNumber="1"
                    asp-route-pageSize="@Model.PageSize"
-                   class="admin-jobs-stat admin-jobs-stat--rejected @(Model.StatusFilter == IndexModel.StatusRejected ? "is-active" : "")">
+                   class="admin-jobs-stat admin-jobs-stat--rejected @(Model.StatusFilter == JobsPage.StatusRejected ? "is-active" : "")">
                     <span class="admin-jobs-stat__label">Từ chối</span>
                     <span class="admin-jobs-stat__value">@(Model.Summary?.RejectedCount ?? 0)</span>
                 </a>
                 <a asp-page="/Admin/Jobs/Index"
-                   asp-route-status="@IndexModel.StatusAll"
+                   asp-route-status="@JobsPage.StatusAll"
                    asp-route-q="@Model.Search"
                    asp-route-pageNumber="1"
                    asp-route-pageSize="@Model.PageSize"
-                   class="admin-jobs-stat @(Model.StatusFilter == IndexModel.StatusAll ? "is-active" : "")">
+                   class="admin-jobs-stat @(Model.StatusFilter == JobsPage.StatusAll ? "is-active" : "")">
                     <span class="admin-jobs-stat__label">Tất cả</span>
                     <span class="admin-jobs-stat__value">@Model.AllTabCount</span>
                 </a>
@@ -177,12 +178,12 @@
                 @foreach (var job in Model.Jobs)
                 {
                     var statusKey = job.PostingStatus.Trim().ToLowerInvariant();
-                    var showModerationActions = string.Equals(statusKey, IndexModel.StatusPending, StringComparison.Ordinal);
-                    var hint = IndexModel.StatusHint(job.PostingStatus, job.CreatedAt);
-                    var daysLeft = IndexModel.DaysUntilExpiry(job.ExpiryDate);
+                    var showModerationActions = string.Equals(statusKey, JobsPage.StatusPending, StringComparison.Ordinal);
+                    var hint = JobsPage.StatusHint(job.PostingStatus, job.CreatedAt);
+                    var daysLeft = JobsPage.DaysUntilExpiry(job.ExpiryDate);
                     var desc = string.IsNullOrWhiteSpace(job.DescriptionPreview) ? job.Description : job.DescriptionPreview;
 
-                    <article class="admin-job-card @IndexModel.StatusCardModifier(job.PostingStatus)">
+                    <article class="admin-job-card @JobsPage.StatusCardModifier(job.PostingStatus)">
                         <div class="admin-job-card__media">
                             @if (!string.IsNullOrWhiteSpace(job.ThumbnailUrl))
                             {
@@ -208,8 +209,8 @@
                                         <a asp-page="/Jobs/Detail" asp-route-id="@job.Id" target="_blank" rel="noopener noreferrer">@job.Title</a>
                                     }
                                 </h2>
-                                <span class="admin-jobs-badge @IndexModel.StatusBadgeClass(job.PostingStatus)">
-                                    @IndexModel.FormatStatus(job.PostingStatus)
+                                <span class="admin-jobs-badge @JobsPage.StatusBadgeClass(job.PostingStatus)">
+                                    @JobsPage.FormatStatus(job.PostingStatus)
                                 </span>
                             </div>
 
@@ -249,7 +250,7 @@
 
                             @if (!string.IsNullOrEmpty(hint))
                             {
-                                <p class="admin-job-card__hint @(showModerationActions && IndexModel.IsEligibleForAutoApprove(job.CreatedAt) ? "" : "admin-job-card__hint--info")">
+                                <p class="admin-job-card__hint @(showModerationActions && JobsPage.IsEligibleForAutoApprove(job.CreatedAt) ? "" : "admin-job-card__hint--info")">
                                     <i class="bi bi-lightbulb"></i> @hint
                                 </p>
                             }
@@ -263,11 +264,11 @@
                                 }
                                 <li>
                                     <i class="bi bi-calendar-plus"></i>
-                                    <span>Đăng @IndexModel.FormatDateTime(job.CreatedAt) (@IndexModel.FormatRelativeCreated(job.CreatedAt))</span>
+                                    <span>Đăng @JobsPage.FormatDateTime(job.CreatedAt) (@JobsPage.FormatRelativeCreated(job.CreatedAt))</span>
                                 </li>
                                 <li>
                                     <i class="bi bi-calendar-event"></i>
-                                    <span>Hết hạn @IndexModel.FormatDate(job.ExpiryDate) · còn @daysLeft ngày</span>
+                                    <span>Hết hạn @JobsPage.FormatDate(job.ExpiryDate) · còn @daysLeft ngày</span>
                                 </li>
                             </ul>
 
@@ -284,7 +285,7 @@
                                         <i class="bi bi-images"></i> @job.ImageCount ảnh
                                     </span>
                                 }
-                                @if (showModerationActions && IndexModel.IsEligibleForAutoApprove(job.CreatedAt))
+                                @if (showModerationActions && JobsPage.IsEligibleForAutoApprove(job.CreatedAt))
                                 {
                                     <span class="admin-jobs-chip admin-jobs-chip--auto">
                                         <i class="bi bi-lightning"></i> Đủ điều kiện tự duyệt

@@ -1,6 +1,7 @@
 @page
 @model JobPortal.Web.Pages.Admin.Dashboard.IndexModel
 @using System.Text.Json
+@using DashboardPage = JobPortal.Web.Pages.Admin.Dashboard.IndexModel
 @{
     ViewData["Title"] = "Bảng điều khiển Admin";
     var d = Model.Dashboard;
@@ -207,7 +208,7 @@
                                                         <i class="bi @(i < (int)Math.Round(item.AverageRating) ? "bi-star-fill" : "bi-star")"></i>
                                                     }
                                                 </div>
-                                                <div class="admin-top-item__score">@IndexModel.FormatRating(item.AverageRating)</div>
+                                                <div class="admin-top-item__score">@DashboardPage.FormatRating(item.AverageRating)</div>
                                             </div>
                                         </li>
                                     }
@@ -251,7 +252,7 @@
                                                         <i class="bi @(i < (int)Math.Round(item.AverageRating) ? "bi-star-fill" : "bi-star")"></i>
                                                     }
                                                 </div>
-                                                <div class="admin-top-item__score">@IndexModel.FormatRating(item.AverageRating)</div>
+                                                <div class="admin-top-item__score">@DashboardPage.FormatRating(item.AverageRating)</div>
                                             </div>
                                         </li>
                                     }

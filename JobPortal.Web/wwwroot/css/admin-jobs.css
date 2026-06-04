@@ -502,6 +502,10 @@
   transition: all 0.16s ease;
 }
 
+.admin-jobs-btn .bi {
+  pointer-events: none;
+}
+
 .admin-jobs-btn--approve {
   background: #059669;
   border-color: #059669;
@@ -528,6 +532,83 @@
   background: #eff6ff;
   border-color: #bfdbfe;
   color: #1d4ed8;
+}
+
+/* Moderation confirm modal */
+.admin-job-moderate-modal.modal {
+  z-index: 1065;
+}
+
+.admin-job-moderate-modal .modal-content {
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.admin-job-moderate-modal .modal-header {
+  padding: 1.25rem 1.25rem 0;
+}
+
+.admin-job-moderate-modal .modal-body {
+  padding: 0 1.25rem 0.5rem;
+}
+
+.admin-job-moderate-modal .modal-footer {
+  padding: 0.75rem 1.25rem 1.25rem;
+}
+
+.admin-job-moderate-modal__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.admin-job-moderate-modal--approve .admin-job-moderate-modal__icon {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  box-shadow: 0 6px 18px rgba(5, 150, 105, 0.35);
+}
+
+.admin-job-moderate-modal--reject .admin-job-moderate-modal__icon {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  box-shadow: 0 6px 18px rgba(239, 68, 68, 0.3);
+}
+
+.admin-job-moderate-modal__title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #111827;
+  margin-bottom: 0.35rem;
+}
+
+.admin-job-moderate-modal__lead {
+  font-size: 0.9rem;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+.admin-job-moderate-modal__job {
+  margin-top: 0.75rem;
+  padding: 0.75rem 0.9rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1f2937;
+  line-height: 1.45;
+  word-break: break-word;
+  min-height: 0;
+}
+
+.admin-job-moderate-modal__job:empty,
+.admin-job-moderate-modal__job[hidden] {
+  display: none;
 }
 
 .admin-jobs-btn--view:hover {

@@ -1,4 +1,5 @@
 using JobPortal.Web.Dtos;
+using JobPortal.Web.Dtos.Auth;
 using JobPortal.Web.Helpers;
 using JobPortal.Web.Models;
 using JobPortal.Web.Services;
@@ -80,32 +81,48 @@ public class DetailModel : PageModel
 
     public async Task<IActionResult> OnGetAsync(long id)
     {
-        var job = await _api.GetApiDataAsync<JobDto>($"/api/jobs/{id}");
+        var role = HttpContext.Session.GetString("UserRole");
+        IsLoggedIn = !string.IsNullOrEmpty(HttpContext.Session.GetString("JwtToken"));
+        IsJobSeeker = string.Equals(role, "JOB_SEEKER", StringComparison.Ordinal);
+        IsEmployerViewer = string.Equals(role, "EMPLOYER", StringComparison.Ordinal) && IsLoggedIn;
+
+        JobDto? job = null;
+        IReadOnlyList<ImageDto>? employerJobImages = null;
+        if (IsEmployerViewer)
+        {
+            (job, employerJobImages) = await TryLoadEmployerOwnJobAsync(id);
+        }
+
+        job ??= await _api.GetApiDataAsync<JobDto>($"/api/jobs/{id}");
         if (job == null)
         {
             return NotFound();
         }
 
         Job = job;
-        EmployerProfile = await _api.GetApiDataAsync<EmployerPublicProfileDto>(
-            $"/api/employers/{job.EmployerId}/public-profile");
-        JobImages = await _api.GetApiDataAsync<List<ImageDto>>($"/api/images/job/{id}") ?? new List<ImageDto>();
+        JobImages = employerJobImages
+            ?? await _api.GetApiDataAsync<List<ImageDto>>($"/api/images/job/{id}")
+            ?? new List<ImageDto>();
 
-        var related = await _api.GetApiDataAsync<JobRelatedListsDto>($"/api/jobs/{id}/related");
-        if (related != null)
+        if (!IsEmployerViewer && job.EmployerId > 0)
         {
-            SuggestedJobs = related.SuggestedJobs;
-            SameCompanyJobs = related.SameCompanyJobs;
-            SimilarJobs = related.SimilarJobs;
+            EmployerProfile = await _api.GetApiDataAsync<EmployerPublicProfileDto>(
+                $"/api/employers/{job.EmployerId}/public-profile");
         }
 
-        var role = HttpContext.Session.GetString("UserRole");
+        if (IsJobPubliclyVisible(job.PostingStatus))
+        {
+            var related = await _api.GetApiDataAsync<JobRelatedListsDto>($"/api/jobs/{id}/related");
+            if (related != null)
+            {
+                SuggestedJobs = related.SuggestedJobs;
+                SameCompanyJobs = related.SameCompanyJobs;
+                SimilarJobs = related.SimilarJobs;
+            }
+        }
+
         ShowApplyButton = !string.Equals(role, "EMPLOYER", StringComparison.Ordinal)
             && !string.Equals(role, "ADMIN", StringComparison.Ordinal);
-
-        IsLoggedIn = !string.IsNullOrEmpty(HttpContext.Session.GetString("JwtToken"));
-        IsJobSeeker = string.Equals(role, "JOB_SEEKER", StringComparison.Ordinal);
-        IsEmployerViewer = string.Equals(role, "EMPLOYER", StringComparison.Ordinal);
         IsClosed = string.Equals(job.PostingStatus, "closed", StringComparison.OrdinalIgnoreCase);
         IsRecruiting = string.Equals(job.PostingStatus, "recruiting", StringComparison.OrdinalIgnoreCase);
 
@@ -153,6 +170,38 @@ public class DetailModel : PageModel
 
         return Page();
     }
+
+    private async Task<(JobDto? Job, IReadOnlyList<ImageDto>? Images)> TryLoadEmployerOwnJobAsync(long id)
+    {
+        var edit = await _api.GetApiDataAsync<EmployerJobEditDto>($"/api/employers/me/jobs/{id}");
+        if (edit == null)
+        {
+            return (null, null);
+        }
+
+        var profile = await _api.GetApiDataAsync<ProfileResponse>("/api/auth/me");
+        var job = new JobDto
+        {
+            Id = edit.Id,
+            EmployerId = profile?.EmployerId ?? 0,
+            EmployerName = profile?.Name ?? string.Empty,
+            CategoryId = edit.CategoryId,
+            Title = edit.Title,
+            Description = edit.Description,
+            Salary = edit.Salary,
+            Location = edit.Location,
+            PostingStatus = edit.PostingStatus,
+            WorkingHours = edit.WorkingHours,
+            ExpiryDate = edit.ExpiryDate,
+            ThumbnailUrl = edit.Images.FirstOrDefault()?.Url
+        };
+
+        return (job, edit.Images);
+    }
+
+    private static bool IsJobPubliclyVisible(string status) =>
+        string.Equals(status, "recruiting", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(status, "closed", StringComparison.OrdinalIgnoreCase);
 
     public async Task<IActionResult> OnPostCloseJobAsync(long id)
     {

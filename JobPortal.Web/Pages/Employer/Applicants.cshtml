@@ -369,22 +369,38 @@
                                 }
 
                                 <form method="post" asp-page-handler="UpdateStatus" class="d-inline"
-                                      onsubmit="return confirm('Chấp nhận ứng viên @app.ApplicantName cho vị trí @app.JobTitle?');">
+                                      id="emp-moderate-form-accept-@app.Id">
                                     <input type="hidden" name="applicationId" value="@app.Id" />
                                     <input type="hidden" name="status" value="accepted" />
                                     <input type="hidden" name="filter" value="@Model.Filter" />
                                     <input type="hidden" name="q" value="@Model.Search" />
-                                    <button type="submit" class="btn btn-sm emp-apps-btn emp-apps-btn--success">
+                                    <button type="submit" class="d-none" tabindex="-1" aria-hidden="true">Submit</button>
+                                    <button type="button"
+                                            class="btn btn-sm emp-apps-btn emp-apps-btn--success js-emp-app-moderate"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#empAppModerateModal"
+                                            data-moderate-action="accept"
+                                            data-moderate-form="emp-moderate-form-accept-@app.Id"
+                                            data-applicant-name="@app.ApplicantName"
+                                            data-job-title="@app.JobTitle">
                                         <i class="bi bi-check-lg me-1"></i>Chấp nhận
                                     </button>
                                 </form>
                                 <form method="post" asp-page-handler="UpdateStatus" class="d-inline"
-                                      onsubmit="return confirm('Từ chối ứng viên @app.ApplicantName?');">
+                                      id="emp-moderate-form-reject-@app.Id">
                                     <input type="hidden" name="applicationId" value="@app.Id" />
                                     <input type="hidden" name="status" value="rejected" />
                                     <input type="hidden" name="filter" value="@Model.Filter" />
                                     <input type="hidden" name="q" value="@Model.Search" />
-                                    <button type="submit" class="btn btn-sm emp-apps-btn emp-apps-btn--danger">
+                                    <button type="submit" class="d-none" tabindex="-1" aria-hidden="true">Submit</button>
+                                    <button type="button"
+                                            class="btn btn-sm emp-apps-btn emp-apps-btn--danger js-emp-app-moderate"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#empAppModerateModal"
+                                            data-moderate-action="reject"
+                                            data-moderate-form="emp-moderate-form-reject-@app.Id"
+                                            data-applicant-name="@app.ApplicantName"
+                                            data-job-title="@app.JobTitle">
                                         <i class="bi bi-x-lg me-1"></i>Từ chối
                                     </button>
                                 </form>
@@ -400,6 +416,37 @@
             </div>
         }
     }
+</div>
+
+<div class="modal fade emp-app-moderate-modal" id="empAppModerateModal" tabindex="-1"
+     aria-labelledby="empAppModerateModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <div class="emp-app-moderate-modal__icon" id="empAppModerateModalIcon" aria-hidden="true">
+                    <i class="bi bi-check-lg"></i>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body pt-2">
+                <h5 class="modal-title emp-app-moderate-modal__title" id="empAppModerateModalLabel">
+                    Xác nhận chấp nhận ứng viên
+                </h5>
+                <p class="emp-app-moderate-modal__lead mb-2" id="empAppModerateModalLead"></p>
+                <div class="emp-app-moderate-modal__detail" id="empAppModerateModalDetail"></div>
+            </div>
+            <div class="modal-footer border-0 pt-0 gap-2">
+                <button type="button" class="btn emp-apps-btn emp-apps-btn--muted" data-bs-dismiss="modal">Hủy</button>
+                <button type="submit"
+                        class="btn emp-apps-btn emp-apps-btn--success"
+                        id="empAppModerateModalConfirm"
+                        disabled
+                        aria-disabled="true">
+                    <i class="bi bi-check-lg me-1"></i> Xác nhận
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div class="modal fade" id="applicantProfileModal" tabindex="-1" aria-labelledby="applicantProfileModalLabel" aria-hidden="true">
@@ -507,4 +554,102 @@
 
 @section EmployerScripts {
     <script src="~/js/applicant-profile-modal.js" asp-append-version="true"></script>
+    <script>
+        (function () {
+            var modalEl = document.getElementById('empAppModerateModal');
+            if (!modalEl) return;
+
+            var confirmBtn = document.getElementById('empAppModerateModalConfirm');
+            var iconEl = document.getElementById('empAppModerateModalIcon');
+            var titleEl = document.getElementById('empAppModerateModalLabel');
+            var leadEl = document.getElementById('empAppModerateModalLead');
+            var detailEl = document.getElementById('empAppModerateModalDetail');
+
+            var copy = {
+                accept: {
+                    modalClass: 'emp-app-moderate-modal--accept',
+                    iconClass: 'bi-check-lg',
+                    title: 'Xác nhận chấp nhận ứng viên',
+                    lead: 'Ứng viên sẽ được chấp nhận cho vị trí này.',
+                    confirmLabel: 'Chấp nhận',
+                    confirmBtnClass: 'emp-apps-btn--success',
+                    confirmIcon: 'bi-check-lg'
+                },
+                reject: {
+                    modalClass: 'emp-app-moderate-modal--reject',
+                    iconClass: 'bi-x-lg',
+                    title: 'Xác nhận từ chối ứng viên',
+                    lead: 'Ứng viên sẽ được đánh dấu từ chối. Trạng thái không thể đổi ngược.',
+                    confirmLabel: 'Từ chối',
+                    confirmBtnClass: 'emp-apps-btn--danger',
+                    confirmIcon: 'bi-x-lg'
+                }
+            };
+
+            function escapeHtml(text) {
+                var div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            function getTrigger(el) {
+                return el && el.closest ? el.closest('.js-emp-app-moderate') : null;
+            }
+
+            function bindForm(trigger) {
+                var action = trigger.getAttribute('data-moderate-action');
+                var cfg = copy[action];
+                if (!cfg || !confirmBtn) return;
+
+                var formId = trigger.getAttribute('data-moderate-form');
+                var applicantName = trigger.getAttribute('data-applicant-name') || '';
+                var jobTitle = trigger.getAttribute('data-job-title') || '';
+
+                modalEl.classList.remove('emp-app-moderate-modal--accept', 'emp-app-moderate-modal--reject');
+                modalEl.classList.add(cfg.modalClass);
+
+                if (iconEl) iconEl.innerHTML = '<i class="bi ' + cfg.iconClass + '"></i>';
+                if (titleEl) titleEl.textContent = cfg.title;
+                if (leadEl) leadEl.textContent = cfg.lead;
+                if (detailEl) {
+                    detailEl.innerHTML = applicantName
+                        ? '<div><strong>' + escapeHtml(applicantName) + '</strong></div>'
+                          + (jobTitle ? '<div class="text-muted small mt-1">' + escapeHtml(jobTitle) + '</div>' : '')
+                        : '';
+                }
+
+                confirmBtn.className = 'btn emp-apps-btn ' + cfg.confirmBtnClass;
+                confirmBtn.innerHTML = '<i class="bi ' + cfg.confirmIcon + ' me-1"></i> ' + cfg.confirmLabel;
+
+                if (formId && document.getElementById(formId)) {
+                    confirmBtn.setAttribute('form', formId);
+                    confirmBtn.disabled = false;
+                    confirmBtn.removeAttribute('aria-disabled');
+                } else {
+                    confirmBtn.removeAttribute('form');
+                    confirmBtn.disabled = true;
+                    confirmBtn.setAttribute('aria-disabled', 'true');
+                }
+            }
+
+            document.querySelectorAll('.js-emp-app-moderate').forEach(function (btn) {
+                btn.addEventListener('click', function (e) {
+                    var trigger = getTrigger(e.currentTarget);
+                    if (trigger) bindForm(trigger);
+                });
+            });
+
+            modalEl.addEventListener('show.bs.modal', function (e) {
+                var trigger = getTrigger(e.relatedTarget);
+                if (trigger) bindForm(trigger);
+            });
+
+            modalEl.addEventListener('hidden.bs.modal', function () {
+                if (!confirmBtn) return;
+                confirmBtn.removeAttribute('form');
+                confirmBtn.disabled = true;
+                confirmBtn.setAttribute('aria-disabled', 'true');
+            });
+        })();
+    </script>
 }

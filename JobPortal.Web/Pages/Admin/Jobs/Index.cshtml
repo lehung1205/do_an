@@ -299,26 +299,40 @@
                             @if (showModerationActions)
                             {
                                 <form method="post" asp-page-handler="Approve" class="d-inline"
-                                      onsubmit="return confirm('Duyệt tin &quot;@job.Title&quot;? Tin sẽ hiển thị công khai.');">
+                                      id="admin-moderate-form-approve-@job.Id">
                                     @Html.AntiForgeryToken()
                                     <input type="hidden" name="jobId" value="@job.Id" />
                                     <input type="hidden" name="status" value="@Model.StatusFilter" />
                                     <input type="hidden" name="q" value="@Model.Search" />
                                     <input type="hidden" name="pageNumber" value="@Model.CurrentPage" />
                                     <input type="hidden" name="pageSize" value="@Model.PageSize" />
-                                    <button type="submit" class="btn btn-sm admin-jobs-btn admin-jobs-btn--approve">
+                                    <button type="submit" class="d-none" tabindex="-1" aria-hidden="true">Submit</button>
+                                    <button type="button"
+                                            class="btn btn-sm admin-jobs-btn admin-jobs-btn--approve js-admin-job-moderate"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#adminJobModerateModal"
+                                            data-moderate-action="approve"
+                                            data-moderate-form="admin-moderate-form-approve-@job.Id"
+                                            data-job-title="@job.Title">
                                         <i class="bi bi-check-lg me-1"></i>Duyệt tin
                                     </button>
                                 </form>
                                 <form method="post" asp-page-handler="Reject" class="d-inline"
-                                      onsubmit="return confirm('Từ chối tin &quot;@job.Title&quot;? Lượt đăng tin sẽ được hoàn lại cho NTD.');">
+                                      id="admin-moderate-form-reject-@job.Id">
                                     @Html.AntiForgeryToken()
                                     <input type="hidden" name="jobId" value="@job.Id" />
                                     <input type="hidden" name="status" value="@Model.StatusFilter" />
                                     <input type="hidden" name="q" value="@Model.Search" />
                                     <input type="hidden" name="pageNumber" value="@Model.CurrentPage" />
                                     <input type="hidden" name="pageSize" value="@Model.PageSize" />
-                                    <button type="submit" class="btn btn-sm admin-jobs-btn admin-jobs-btn--reject">
+                                    <button type="submit" class="d-none" tabindex="-1" aria-hidden="true">Submit</button>
+                                    <button type="button"
+                                            class="btn btn-sm admin-jobs-btn admin-jobs-btn--reject js-admin-job-moderate"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#adminJobModerateModal"
+                                            data-moderate-action="reject"
+                                            data-moderate-form="admin-moderate-form-reject-@job.Id"
+                                            data-job-title="@job.Title">
                                         <i class="bi bi-x-lg me-1"></i>Từ chối
                                     </button>
                                 </form>
@@ -379,3 +393,130 @@
         }
     </div>
 </div>
+
+<div class="modal fade admin-job-moderate-modal" id="adminJobModerateModal" tabindex="-1"
+     aria-labelledby="adminJobModerateModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <div class="admin-job-moderate-modal__icon" id="adminJobModerateModalIcon" aria-hidden="true">
+                    <i class="bi bi-check-lg"></i>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body pt-2">
+                <h5 class="modal-title admin-job-moderate-modal__title" id="adminJobModerateModalLabel">
+                    Xác nhận duyệt tin
+                </h5>
+                <p class="admin-job-moderate-modal__lead mb-2" id="adminJobModerateModalLead">
+                    Tin sẽ hiển thị công khai cho ứng viên.
+                </p>
+                <div class="admin-job-moderate-modal__job" id="adminJobModerateModalJobTitle"></div>
+            </div>
+            <div class="modal-footer border-0 pt-0 gap-2">
+                <button type="button" class="btn admin-jobs-btn admin-jobs-btn--view" data-bs-dismiss="modal">
+                    Hủy
+                </button>
+                <button type="submit"
+                        class="btn admin-jobs-btn admin-jobs-btn--approve"
+                        id="adminJobModerateModalConfirm"
+                        disabled
+                        aria-disabled="true">
+                    <i class="bi bi-check-lg me-1"></i> Xác nhận
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            var modalEl = document.getElementById('adminJobModerateModal');
+            if (!modalEl) return;
+
+            var confirmBtn = document.getElementById('adminJobModerateModalConfirm');
+            var iconEl = document.getElementById('adminJobModerateModalIcon');
+            var titleEl = document.getElementById('adminJobModerateModalLabel');
+            var leadEl = document.getElementById('adminJobModerateModalLead');
+            var jobTitleEl = document.getElementById('adminJobModerateModalJobTitle');
+
+            var copy = {
+                approve: {
+                    modalClass: 'admin-job-moderate-modal--approve',
+                    iconClass: 'bi-check-lg',
+                    title: 'Xác nhận duyệt tin',
+                    lead: 'Tin sẽ hiển thị công khai cho ứng viên sau khi bạn xác nhận.',
+                    confirmLabel: 'Xác nhận duyệt',
+                    confirmBtnClass: 'admin-jobs-btn--approve',
+                    confirmIcon: 'bi-check-lg'
+                },
+                reject: {
+                    modalClass: 'admin-job-moderate-modal--reject',
+                    iconClass: 'bi-x-lg',
+                    title: 'Xác nhận từ chối tin',
+                    lead: 'Lượt đăng tin sẽ được hoàn lại cho nhà tuyển dụng. Tin sẽ không hiển thị công khai.',
+                    confirmLabel: 'Xác nhận từ chối',
+                    confirmBtnClass: 'admin-jobs-btn--reject',
+                    confirmIcon: 'bi-x-lg'
+                }
+            };
+
+            function getTrigger(el) {
+                return el && el.closest ? el.closest('.js-admin-job-moderate') : null;
+            }
+
+            function bindForm(trigger) {
+                var action = trigger.getAttribute('data-moderate-action');
+                var cfg = copy[action];
+                if (!cfg || !confirmBtn) return;
+
+                var formId = trigger.getAttribute('data-moderate-form');
+                var jobTitle = trigger.getAttribute('data-job-title') || '';
+
+                modalEl.classList.remove('admin-job-moderate-modal--approve', 'admin-job-moderate-modal--reject');
+                modalEl.classList.add(cfg.modalClass);
+
+                if (iconEl) iconEl.innerHTML = '<i class="bi ' + cfg.iconClass + '"></i>';
+                if (titleEl) titleEl.textContent = cfg.title;
+                if (leadEl) leadEl.textContent = cfg.lead;
+                if (jobTitleEl) {
+                    jobTitleEl.textContent = jobTitle;
+                    jobTitleEl.hidden = !jobTitle;
+                }
+
+                confirmBtn.className = 'btn admin-jobs-btn ' + cfg.confirmBtnClass;
+                confirmBtn.innerHTML = '<i class="bi ' + cfg.confirmIcon + ' me-1"></i> ' + cfg.confirmLabel;
+
+                if (formId && document.getElementById(formId)) {
+                    confirmBtn.setAttribute('form', formId);
+                    confirmBtn.disabled = false;
+                    confirmBtn.removeAttribute('aria-disabled');
+                } else {
+                    confirmBtn.removeAttribute('form');
+                    confirmBtn.disabled = true;
+                    confirmBtn.setAttribute('aria-disabled', 'true');
+                }
+            }
+
+            document.querySelectorAll('.js-admin-job-moderate').forEach(function (btn) {
+                btn.addEventListener('click', function (e) {
+                    var trigger = getTrigger(e.currentTarget);
+                    if (trigger) bindForm(trigger);
+                });
+            });
+
+            modalEl.addEventListener('show.bs.modal', function (e) {
+                var trigger = getTrigger(e.relatedTarget);
+                if (trigger) bindForm(trigger);
+            });
+
+            modalEl.addEventListener('hidden.bs.modal', function () {
+                if (!confirmBtn) return;
+                confirmBtn.removeAttribute('form');
+                confirmBtn.disabled = true;
+                confirmBtn.setAttribute('aria-disabled', 'true');
+            });
+        })();
+    </script>
+}

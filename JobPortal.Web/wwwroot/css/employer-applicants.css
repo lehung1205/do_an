@@ -610,6 +610,10 @@
   line-height: 1.25;
 }
 
+.emp-apps-btn .bi {
+  pointer-events: none;
+}
+
 .emp-apps-btn--primary {
   background: #059669;
   border-color: #059669;
@@ -664,4 +668,68 @@
 .emp-apps-btn--muted:hover {
   background: #f1f5f9;
   color: #334155;
+}
+
+/* Confirm chấp nhận / từ chối ứng viên */
+.emp-app-moderate-modal.modal {
+  z-index: 1065;
+}
+
+.emp-app-moderate-modal .modal-content {
+  border-radius: 16px;
+}
+
+.emp-app-moderate-modal .modal-header {
+  padding: 1.25rem 1.25rem 0;
+}
+
+.emp-app-moderate-modal .modal-body {
+  padding: 0 1.25rem 0.5rem;
+}
+
+.emp-app-moderate-modal .modal-footer {
+  padding: 0.75rem 1.25rem 1.25rem;
+}
+
+.emp-app-moderate-modal__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  color: #fff;
+}
+
+.emp-app-moderate-modal--accept .emp-app-moderate-modal__icon {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  box-shadow: 0 6px 18px rgba(5, 150, 105, 0.35);
+}
+
+.emp-app-moderate-modal--reject .emp-app-moderate-modal__icon {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  box-shadow: 0 6px 18px rgba(239, 68, 68, 0.3);
+}
+
+.emp-app-moderate-modal__title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #111827;
+}
+
+.emp-app-moderate-modal__lead {
+  font-size: 0.9rem;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+.emp-app-moderate-modal__detail {
+  margin-top: 0.75rem;
+  padding: 0.75rem 0.9rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  color: #1f2937;
 }

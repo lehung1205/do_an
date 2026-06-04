@@ -1,9 +1,11 @@
 @page
 @model JobPortal.Web.Pages.Employer.PaymentReturnModel
+@using System.Globalization
 @using JobPortal.Web.Models
 @{
     ViewData["Title"] = Model.IsSuccess ? "Thanh toán thành công" : "Thanh toán thất bại";
     ViewData["EmployerNavActive"] = EmployerPortalNavKeys.Packages;
+    var vi = CultureInfo.GetCultureInfo("vi-VN");
 }
 
 <partial name="Shared/_EmployerPageHeader" model='new EmployerPageHeaderModel {
@@ -11,35 +13,90 @@
     BreadcrumbLabel = "Kết quả thanh toán"
 }' />
 
-<div class="employer-dash__section employer-dash__section--narrow">
+<div class="employer-dash__section payment-return-page">
+    <div class="payment-return-card @(Model.IsSuccess ? "payment-return-card--success" : "payment-return-card--fail")">
+        @if (Model.IsSuccess)
+        {
+            <div class="payment-return-card__icon" aria-hidden="true">
+                <i class="bi bi-check-lg"></i>
+            </div>
+            <h2 class="payment-return-card__title">Thanh toán thành công</h2>
+            <p class="payment-return-card__lead">
+                Gói đăng tin đã được ghi nhận. Hạn mức đăng tin đã được cộng vào tài khoản — bạn có thể đăng tin ngay.
+            </p>
+        }
+        else
+        {
+            <div class="payment-return-card__icon" aria-hidden="true">
+                <i class="bi bi-x-lg"></i>
+            </div>
+            <h2 class="payment-return-card__title">Thanh toán chưa thành công</h2>
+            <p class="payment-return-card__lead">@(string.IsNullOrWhiteSpace(Model.Message) ? "Giao dịch chưa hoàn tất hoặc đã bị hủy. Bạn không bị trừ hạn mức." : Model.Message)</p>
+        }
+
+        @if (Model.Result != null)
+        {
+            <div class="payment-return-receipt">
+                <div class="payment-return-receipt__label">Số tiền thanh toán</div>
+                <div class="payment-return-receipt__amount">@Model.Result.Amount.ToString("N0", vi) ₫</div>
+                <ul class="payment-return-receipt__rows">
+                    <li class="payment-return-receipt__row">
+                        <span class="payment-return-receipt__row-label">Mã đơn</span>
+                        <span class="payment-return-receipt__row-value mono">#@Model.Result.PaymentHistoryId</span>
+                    </li>
+                    <li class="payment-return-receipt__row">
+                        <span class="payment-return-receipt__row-label">Mã giao dịch</span>
+                        <span class="payment-return-receipt__row-value mono">@(Model.Result.TransactionId ?? "—")</span>
+                    </li>
+                    <li class="payment-return-receipt__row">
+                        <span class="payment-return-receipt__row-label">Mã phản hồi</span>
+                        <span class="payment-return-receipt__row-value mono">@(Model.Result.ResponseCode ?? "—")</span>
+                    </li>
+                </ul>
+            </div>
+        }
+
+        <div class="payment-return-actions">
             @if (Model.IsSuccess)
             {
-                <div class="text-success display-6 mb-3"><i class="bi bi-check-circle me-2"></i>Thanh toán thành công</div>
-                <p class="lead mb-4">Gói đăng tin đã được ghi nhận và hạn mức đăng tin đã được cộng vào tài khoản.</p>
+                <a asp-page="/Employer/PostJob" class="btn employer-jobs-btn employer-jobs-btn--primary">
+                    <i class="bi bi-plus-circle me-1"></i> Đăng tin ngay
+                </a>
+                <a asp-page="/Index" class="btn employer-jobs-btn employer-jobs-btn--info">
+                    <i class="bi bi-grid me-1"></i> Về bảng thông tin
+                </a>
             }
             else
             {
-                <div class="text-danger display-6 mb-3"><i class="bi bi-x-circle me-2"></i>Thanh toán chưa thành công</div>
-                <p class="lead mb-4">@Model.Message</p>
+                <a asp-page="/Employer/BuyPackages" class="btn employer-jobs-btn employer-jobs-btn--primary">
+                    <i class="bi bi-arrow-repeat me-1"></i> Thử thanh toán lại
+                </a>
+                <a asp-page="/Index" class="btn employer-jobs-btn employer-jobs-btn--muted">
+                    Về bảng thông tin
+                </a>
             }
+        </div>
 
-            @if (Model.Result != null)
+        <div class="payment-return-actions__secondary">
+            <a asp-page="/Employer/BuyPackages" class="payment-return-actions__link">Quay lại gói dịch vụ</a>
+            @if (Model.IsSuccess)
             {
-                <dl class="row mb-4">
-                    <dt class="col-sm-4">Mã đơn</dt>
-                    <dd class="col-sm-8">@Model.Result.PaymentHistoryId</dd>
-                    <dt class="col-sm-4">Số tiền</dt>
-                    <dd class="col-sm-8">@Model.Result.Amount.ToString("N0") VNĐ</dd>
-                    <dt class="col-sm-4">Mã giao dịch</dt>
-                    <dd class="col-sm-8">@(Model.Result.TransactionId ?? "-")</dd>
-                    <dt class="col-sm-4">Mã phản hồi</dt>
-                    <dd class="col-sm-8">@(Model.Result.ResponseCode ?? "-")</dd>
-                </dl>
+                <span class="text-muted" aria-hidden="true">·</span>
+                <a asp-page="/Employer/PaymentHistory/Index" class="payment-return-actions__link">Lịch sử thanh toán</a>
             }
+        </div>
 
-    <div class="d-flex flex-wrap gap-2">
-        <a asp-page="/Employer/BuyPackages" class="btn btn-outline-primary">Quay lại gói dịch vụ</a>
-        <a asp-page="/Index" class="btn btn-primary">Về bảng thông tin</a>
+        @if (Model.IsSuccess)
+        {
+            <p class="payment-return-hint">
+                <i class="bi bi-shield-check"></i>
+                Giao dịch đã được xác nhận qua VNPay
+            </p>
+        }
     </div>
 </div>
 
+@section EmployerStyles {
+    <link rel="stylesheet" href="~/css/employer-jobs.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/employer-payment-return.css" asp-append-version="true" />
+}

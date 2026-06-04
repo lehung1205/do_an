@@ -27,12 +27,12 @@ public class PaymentReturnModel : PageModel
 
             Result = response?.Data;
             IsSuccess = response is { Success: true, Data.Success: true };
-            Message = Result?.Message ?? response?.Message ?? "Khong the xac nhan ket qua thanh toan.";
+            Message = Result?.Message ?? response?.Message ?? "Không thể xác nhận kết quả thanh toán.";
         }
         catch (HttpRequestException)
         {
             IsSuccess = false;
-            Message = "Khong ket noi duoc API de xac nhan thanh toan.";
+            Message = "Không kết nối được API để xác nhận thanh toán.";
         }
     }
 }

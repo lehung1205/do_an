@@ -17,8 +17,6 @@ public class JobSeekerDto
     public string? IdCardIssuePlace { get; set; }
     public string? PermanentAddress { get; set; }
     public string? TemporaryAddress { get; set; }
-    public string? AccountNumber { get; set; }
-    public string? BankName { get; set; }
     public string Status { get; set; } = null!;
     public string Role { get; set; } = null!;
     public DateTime CreatedAt { get; set; }

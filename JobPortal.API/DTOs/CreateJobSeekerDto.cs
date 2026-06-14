@@ -15,7 +15,5 @@ public class CreateJobSeekerDto
     public string? IdCardIssuePlace { get; set; }
     public string? PermanentAddress { get; set; }
     public string? TemporaryAddress { get; set; }
-    public string? AccountNumber { get; set; }
-    public string? BankName { get; set; }
     public string Status { get; set; } = "ACTIVE";
 }

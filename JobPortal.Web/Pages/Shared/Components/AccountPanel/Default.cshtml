@@ -154,14 +154,6 @@
                             <span class="account-info-row__label">Nơi cấp</span>
                             <span class="account-info-row__value">@AccountPanelViewModel.DashIfEmpty(Model.Profile.IdCardIssuePlace)</span>
                         </div>
-                        <div class="account-info-row">
-                            <span class="account-info-row__label">Ngân hàng</span>
-                            <span class="account-info-row__value">@AccountPanelViewModel.DashIfEmpty(Model.Profile.BankName)</span>
-                        </div>
-                        <div class="account-info-row">
-                            <span class="account-info-row__label">Số tài khoản</span>
-                            <span class="account-info-row__value">@AccountPanelViewModel.DashIfEmpty(Model.Profile.BankAccountNumber)</span>
-                        </div>
                     }
                     @if (string.Equals(Model.Profile.Role, "EMPLOYER", StringComparison.Ordinal))
                     {
@@ -268,16 +260,6 @@
                             <label class="form-label" for="EditInput_IdCardIssuePlace">Nơi cấp</label>
                             <input type="text" class="form-control" id="EditInput_IdCardIssuePlace" name="EditInput.IdCardIssuePlace"
                                    value="@Model.EditInput.IdCardIssuePlace" maxlength="255" />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label" for="EditInput_BankName">Ngân hàng</label>
-                            <input type="text" class="form-control" id="EditInput_BankName" name="EditInput.BankName"
-                                   value="@Model.EditInput.BankName" maxlength="255" />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label" for="EditInput_BankAccountNumber">Số tài khoản</label>
-                            <input type="text" class="form-control" id="EditInput_BankAccountNumber" name="EditInput.BankAccountNumber"
-                                   value="@Model.EditInput.BankAccountNumber" maxlength="50" />
                         </div>
                     }
                     @if (Model.IsEmployer)

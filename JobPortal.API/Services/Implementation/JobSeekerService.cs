@@ -75,8 +75,6 @@ public class JobSeekerService : IJobSeekerService
             IdCardIssuePlace = dto.IdCardIssuePlace?.Trim(),
             PermanentAddress = dto.PermanentAddress?.Trim(),
             TemporaryAddress = dto.TemporaryAddress?.Trim(),
-            AccountNumber = dto.AccountNumber?.Trim(),
-            BankName = dto.BankName?.Trim(),
             Status = status,
             CreatedAt = now,
             UpdatedAt = now
@@ -113,8 +111,6 @@ public class JobSeekerService : IJobSeekerService
         if (dto.IdCardIssuePlace != null) jobSeeker.IdCardIssuePlace = string.IsNullOrWhiteSpace(dto.IdCardIssuePlace) ? null : dto.IdCardIssuePlace.Trim();
         if (dto.PermanentAddress != null) jobSeeker.PermanentAddress = string.IsNullOrWhiteSpace(dto.PermanentAddress) ? null : dto.PermanentAddress.Trim();
         if (dto.TemporaryAddress != null) jobSeeker.TemporaryAddress = string.IsNullOrWhiteSpace(dto.TemporaryAddress) ? null : dto.TemporaryAddress.Trim();
-        if (dto.AccountNumber != null) jobSeeker.AccountNumber = string.IsNullOrWhiteSpace(dto.AccountNumber) ? null : dto.AccountNumber.Trim();
-        if (dto.BankName != null) jobSeeker.BankName = string.IsNullOrWhiteSpace(dto.BankName) ? null : dto.BankName.Trim();
         if (!string.IsNullOrWhiteSpace(dto.Status)) jobSeeker.Status = dto.Status.Trim().ToUpperInvariant();
         if (!string.IsNullOrWhiteSpace(dto.Role)) user.Role = dto.Role.Trim().ToUpperInvariant();
 

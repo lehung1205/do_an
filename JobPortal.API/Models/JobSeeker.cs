@@ -51,14 +51,6 @@ public class JobSeeker
     [MaxLength(500)]
     public string? TemporaryAddress { get; set; }
 
-    [Column("account_number")]
-    [MaxLength(50)]
-    public string? AccountNumber { get; set; }
-
-    [Column("bank_name")]
-    [MaxLength(255)]
-    public string? BankName { get; set; }
-
     [Column("status")]
     [MaxLength(32)]
     public string Status { get; set; } = null!;

@@ -297,8 +297,6 @@ public class IndexModel : PageModel
             req.IdCard = edit.IdCard;
             req.IdCardIssueDate = edit.IdCardIssueDate;
             req.IdCardIssuePlace = edit.IdCardIssuePlace;
-            req.BankName = edit.BankName;
-            req.BankAccountNumber = edit.BankAccountNumber;
         }
         else if (string.Equals(current.Role, "EMPLOYER", StringComparison.Ordinal))
         {

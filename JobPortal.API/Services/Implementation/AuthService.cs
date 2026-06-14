@@ -369,8 +369,6 @@ public sealed class AuthService : IAuthService
             j.IdCard = TrimOrNull(request.IdCard);
             j.IdCardIssueDate = TrimOrNull(request.IdCardIssueDate);
             j.IdCardIssuePlace = TrimOrNull(request.IdCardIssuePlace);
-            j.BankName = TrimOrNull(request.BankName);
-            j.AccountNumber = TrimOrNull(request.BankAccountNumber);
             j.UpdatedAt = now;
         }
         else if (user.EmployerProfile != null)
@@ -485,8 +483,6 @@ public sealed class AuthService : IAuthService
             profile.IdCard = j.IdCard;
             profile.IdCardIssueDate = j.IdCardIssueDate;
             profile.IdCardIssuePlace = j.IdCardIssuePlace;
-            profile.BankName = j.BankName;
-            profile.BankAccountNumber = j.AccountNumber;
             profile.PostingLimit = null;
         }
         else if (user.EmployerProfile != null)

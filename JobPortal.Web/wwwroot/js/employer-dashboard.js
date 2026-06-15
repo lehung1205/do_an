@@ -88,7 +88,9 @@
     }
 
     try {
-      const res = await fetch(`${baseUrl}?days=${days}`, { credentials: 'same-origin' });
+      const url = new URL(baseUrl, window.location.href);
+      url.searchParams.set('days', String(days));
+      const res = await fetch(url.toString(), { credentials: 'same-origin' });
       if (!res.ok) {
         return;
       }

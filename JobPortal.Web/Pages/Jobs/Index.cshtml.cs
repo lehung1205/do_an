@@ -28,7 +28,7 @@ public class IndexModel : PageModel
 
     public static readonly string[] PopularKeywords =
     {
-        "Đà Nẵng", "Intern", "TP.HCM", "Hà Nội", "Giao hàng", "Lễ tân", "Bán hàng", "Phục vụ", "Pha chế"
+        "Đà Nẵng", "Intern", "TP.HCM", "Hà Nội", "Giao hàng", "Lễ tân", "Bán hàng", "Phục vụ", "Pha chế", "Gia sư"
     };
 
     public IndexModel(ApiService api) => _api = api;

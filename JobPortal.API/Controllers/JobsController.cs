@@ -22,15 +22,17 @@ public class JobsController : ControllerBase
     public async Task<IActionResult> GetJobs(
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 12,
+        [FromQuery] int? limit = null,
         [FromQuery] string? q = null,
         [FromQuery] string? location = null,
         [FromQuery] long? categoryId = null,
         CancellationToken cancellationToken = default)
     {
+        var effectivePageSize = limit is > 0 ? limit.Value : pageSize;
         var excludeAppliedForUserId = TryGetCurrentJobSeekerUserId();
         var pagedJobs = await _jobService.GetJobsPagedAsync(
             page,
-            pageSize,
+            effectivePageSize,
             q,
             location,
             categoryId,
